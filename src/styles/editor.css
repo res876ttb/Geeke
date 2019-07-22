@@ -1,0 +1,11 @@
+span.md-bold {
+  color: gray;
+}
+
+span.md-bold {
+  display: none;
+}
+
+b.md-focus span.md-bold {
+  display: initial;
+}

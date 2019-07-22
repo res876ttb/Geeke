@@ -1,0 +1,47 @@
+{
+  "name": "LifeNotes",
+  "version": "0.1.0",
+  "description": "A web-based markdown editor",
+  "main": "main.js",
+  "repository": "https://github.com/res876ttb/LifeNotes.git",
+  "author": "res876ttb <someone10851222@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "watch": "webpack -w",
+    "build": "webpack"
+  },
+  "dependencies": {
+    "@material-ui/core": "^3.9.2",
+    "bootstrap": "^4.3.1",
+    "crypto-js": "^3.1.9-1",
+    "jquery": "^3.4.1",
+    "marked": "^0.7.0",
+    "microseconds": "^0.1.0",
+    "react": "^16.8.4",
+    "react-addons-css-transition-group": "^15.6.2",
+    "react-addons-transition-group": "^15.6.2",
+    "react-color": "^2.17.0",
+    "react-dom": "^16.8.4",
+    "react-hot-keys": "^1.2.2",
+    "react-perfect-scrollbar": "^1.4.4",
+    "react-redux": "^5.1.1",
+    "redux": "^4.0.1",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-regenerator": "^7.3.4",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^1.0.1",
+    "style-loader": "^0.22.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.1"
+  }
+}
