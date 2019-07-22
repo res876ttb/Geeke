@@ -95,7 +95,7 @@ function setCaretRangeCore(pos, editorId) {
   let curEle = document.getElementById(editorId);
   for (let i in pos) {
     let idx = pos[i];
-    if (curEle.hasChildNodes()) {
+    if (curEle && curEle.hasChildNodes && curEle.hasChildNodes()) {
       curEle = curEle.childNodes[curEle.childNodes.length - idx];
     } else {
       if (curEle.createTextRange) {
@@ -111,6 +111,7 @@ function setCaretRangeCore(pos, editorId) {
         selection.removeAllRanges();
         selection.addRange(range);
       }
+      break;
     }
   }
 }
