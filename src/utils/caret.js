@@ -49,12 +49,20 @@ function getCurrentRange () {
 
 // Return value: position
 // Data structure: [parent, child, child of child ... ]
-function _getCaretRange(range, editorId, cbf) {
+// Return a list of index, which is start from the root element. 
+// The index value is the number of elements from the end.
+function _getCaretRange(range, dir, editorId, cbf) {
   let found = false;
   // check startContainer
   if (range.startContainer) {
-    _getCaretRange(range.endContainer, editorId, result => {
-      result.push(range.endContainer.length - range.endOffset);
+    let ele;
+    if (dir === 'start') {
+      ele = range.startContainer;
+    } else {
+      ele = range.endContainer;
+    }
+    _getCaretRange(ele, dir, editorId, result => {
+      result.push(ele.length - range.endOffset);
       cbf(result);
     });
   } else {
@@ -70,7 +78,7 @@ function _getCaretRange(range, editorId, cbf) {
       console.assert(found, 'Node under main editor is not found!');
       cbf(result);
     } else {
-      _getCaretRange(range.parentNode, editorId, result => {
+      _getCaretRange(range.parentNode, dir, editorId, result => {
         for (let i = 0; i < range.parentNode.childNodes.length; i++) {
           if (range.parentNode.childNodes[i].isEqualNode(range)) {
             result.push(range.parentNode.childNodes.length - i);
@@ -86,11 +94,14 @@ function _getCaretRange(range, editorId, cbf) {
 }
 
 function getCaretRangeCore(editorId, cbf) {
-  _getCaretRange(getCurrentRange(), editorId, result => {
+  _getCaretRange(getCurrentRange(), 'end', editorId, result => {
     cbf(result);
   });
 }
 
+// Get caret position from the index list.
+// Find node from the root DOM element.
+// If current element does not exist, the element the index specify is removed.
 function setCaretRangeCore(pos, editorId) {
   let curEle = document.getElementById(editorId);
   for (let i in pos) {
@@ -116,6 +127,16 @@ function setCaretRangeCore(pos, editorId) {
   }
 }
 
+// Remove all focus marks
+function clearCaretFocusCore(range, cbf) {
+  
+}
+
+// Specify which DOM element is focused by caret.
+function setCaretFocusCore(range, cbf) {
+  // get list from 
+}
+
 // ===================================================================================
 // public function
 
@@ -127,6 +148,10 @@ export function setCaretRange(pos, editorId) {
   setCaretRangeCore(pos, editorId);
 }
 
-export function setCaretFocus() {
+export function setCaretFocus(cbf) {
+  setCaretFocusCore(getCurrentRange(), cbf);
+}
 
+export function clearCaretFocus(cbf) {
+  clearCaretFocusCore(getCurrentRange(), cbf);
 }
