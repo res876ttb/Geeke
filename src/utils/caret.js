@@ -98,7 +98,7 @@ function setCaretRangeCore(pos, editorId) {
     if (curEle && curEle.hasChildNodes && curEle.hasChildNodes()) {
       curEle = curEle.childNodes[curEle.childNodes.length - idx];
     } else {
-      if (curEle.createTextRange) {
+      if (curEle && curEle.createTextRange) {
         range = curEle.createTextRange();
         range.move('character', curEle.length - idx);
         range.select();
@@ -125,4 +125,8 @@ export function getCaretRange(editorId, cbf) {
 
 export function setCaretRange(pos, editorId) {
   setCaretRangeCore(pos, editorId);
+}
+
+export function setCaretFocus() {
+
 }
