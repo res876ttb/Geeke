@@ -3,7 +3,7 @@ span.md-bold {
 }
 
 span.md-bold {
-  display: none;
+  /* display: none; */
 }
 
 b.md-focus span.md-bold {

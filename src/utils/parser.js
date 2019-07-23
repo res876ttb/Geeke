@@ -1,3 +1,5 @@
+import { isValidElement } from "react";
+
 /**
  * @name parser.js
  * @desc Parser for Markdown string.
@@ -5,6 +7,9 @@
 
 // ============================================
 // import
+import {
+  getNewID
+} from './id.js';
 
 // ============================================
 // private function
@@ -15,8 +20,8 @@ function mddBoldParser(mds) {
   // remove wrong bold html style
   
   // make bold html style
-  mds = mds.replace(/\<b\>\<span class='md-bold'\>\*\*\<\/span\>([^\s][^\*\n]*[^\s]|[^\s])\<span class='md-bold'\>\*\*\<\/span\>\<b\\\>/g, "**$1**");
-  mds = mds.replace(/\*\*([^\s][^\*\n]*[^\s]|[^\s])\*\*/g, "<b><span class='md-bold'>**</span>$1<span class='md-bold'>**</span></b>");
+  mds = mds.replace(/\<b\>\<span class='md-bold' mdid=\'\d+\.\d+\'\>\*\*\<\/span\>([^\s][^\*\n]*[^\s]|[^\s])\<span class='md-bold'\>\*\*\<\/span\>\<b\\\>/g, "**$1**");
+  mds = mds.replace(/\*\*([^\s][^\*\n]*[^\s]|[^\s])\*\*/g, `<b><span class='md-bold' mdid='${getNewID()}'>**</span>$1<span class='md-bold'>**</span></b>`);
 
   return mds;
 }

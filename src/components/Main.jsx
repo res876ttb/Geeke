@@ -22,8 +22,8 @@ import {
   markdownDecorator
 } from '../utils/parser.js';
 import {
-  getCaretRange,
-  setCaretRange,
+  getCaretPosition,
+  setCaretPosition,
 } from '../utils/caret.js';
 
 // ============================================
@@ -79,28 +79,29 @@ class Main extends React.Component {
         onCompositionEnd={this.handleCompositionEnd}
         mdtype={'main editor'}
       >
-        <div>Text here is editable.</div>
+        <div>Text here **is** editable.</div>
       </div>
     );
   }
 
   handleEditorChange(e) {
-    console.log(`Content of element ${editorId} is changed!`);
-    let main = document.getElementById(editorId);
-    console.log(main.innerHTML);
-    if (!this.state.composition) {
-      if (main.textContent === '') {
-        main.innerHTML = editorEmptyHtmlString;
-        setCaretRange([1, 1, 1], editorId); // Put caret into the editorEmptyHtmlString
-      } else {
-        main.innerHTML = markdownDecorator(main.textContent);
-        setCaretRange(this.state.range, editorId);
+    if (e.inputType !== 'insertParagraph') {
+      console.log(`Content of element ${editorId} is changed!`);
+      let main = document.getElementById(editorId);
+      if (!this.state.composition) {
+        if (main.textContent === '') {
+          main.innerHTML = editorEmptyHtmlString;
+          setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
+        } else {
+          main.innerHTML = markdownDecorator(main.textContent);
+          setCaretPosition(this.state.range, editorId);
+        }
       }
     }
   }
 
   getCaretPos(e) {
-    getCaretRange(editorId, range => {
+    getCaretPosition(editorId, range => {
       if (range) {
         this.setState({
           range: range
