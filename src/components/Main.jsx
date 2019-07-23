@@ -101,7 +101,6 @@ class Main extends React.Component {
 
   getCaretPos(e) {
     getCaretPosition(editorId, range => {
-      console.log(range);
       if (range) {
         this.setState({
           range: range
