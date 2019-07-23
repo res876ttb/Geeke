@@ -99,47 +99,6 @@ function getCaretRangeCore(editorId, cbf) {
   });
 }
 
-// Get caret position from the index list.
-// Find node from the root DOM element.
-// If current element does not exist, the element the index specify is removed.
-// function setCaretRangeCore(pos, editorId) {
-//   let curEle = document.getElementById(editorId);
-//   for (let i in pos) {
-//     let idx = pos[i];
-//     if (curEle && curEle.hasChildNodes && curEle.hasChildNodes()) {
-//       curEle = curEle.childNodes[curEle.childNodes.length - idx];
-//     } else {
-//       if (curEle && curEle.createTextRange) {
-//         range = curEle.createTextRange();
-//         range.move('character', curEle.length - idx);
-//         range.select();
-//       } else { 
-//         // @copyright: https://medium.com/compass-true-north/a-dancing-caret-the-unknown-perils-of-adjusting-cursor-position-f252734f595e
-//         let selection = window.getSelection();
-//         let range = document.createRange();
-//         range.setStart(curEle, curEle.length - idx);
-//         range.collapse(true);
-//         selection.removeAllRanges();
-//         selection.addRange(range);
-//       }
-//       break;
-//     }
-//   }
-// }
-
-// Remove all focus marks
-// function clearCaretFocusCore(range, cbf) {
-  
-// }
-
-// Specify which DOM element is focused by caret.
-// function setCaretFocusCore(range, cbf) {
-
-// }
-
-
-
-
 function _getCaretPositionCore(range, editorId, cbf) {
   let found = false;
   if (range.parentNode.getAttribute('id') === editorId) {
@@ -198,6 +157,7 @@ function _setCaretPositionCore(range, restLength) {
       return;
     } else if (restLength === node.textContent.length) {
       _setCaretPositionCore(node, restLength);
+      return;
     } else {
       restLength -= node.textContent.length;
     }
@@ -213,9 +173,31 @@ function getCaretPositionCore(editorId, cbf) {
 function setCaretPositionCore(pos, editorId) {
   let range = document.getElementById(editorId);
   // select line
-  range = range.childNodes[pos[0]]; 
+  range = range.childNodes[pos[0]];
   // select character
   _setCaretPositionCore(range, range.textContent.length - pos[1], editorId);
+}
+
+function _setCaretFocusCore(bound, ele, idx) {
+  if (idx > max(bound[0].length, bound[1].length) || ele.hasChildNodes() === false) {
+    return;
+  }
+  
+}
+
+// Remove all focus marks
+function clearCaretFocusCore(range, cbf) {
+  
+}
+
+// Specify which DOM element is focused by caret.
+function setCaretFocusCore(editorId) {
+  // get bound (left & right)
+  _getCaretRange(getCurrentRange(), 'start', editorId, leftBound => {
+    _getCaretRange(getCurrentRange(), 'end', editorId, rightBound => {
+      _setCaretFocusCore([leftBound, rightBound], document.getElementById(editorId), 0);
+    });
+  });
 }
 
 // ===================================================================================
@@ -229,10 +211,10 @@ export function setCaretPosition(pos, editorId) {
   setCaretPositionCore(pos, editorId);
 }
 
-export function setCaretFocus(cbf) {
-  setCaretFocusCore(getCurrentRange(), cbf);
+export function setCaretFocus(editorId) {
+  setCaretFocusCore(editorId);
 }
 
-export function clearCaretFocus(cbf) {
-  clearCaretFocusCore(getCurrentRange(), cbf);
+export function clearCaretFocus(editorId, cbf) {
+  clearCaretFocusCore(editorId, cbf);
 }

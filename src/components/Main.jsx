@@ -86,7 +86,6 @@ class Main extends React.Component {
 
   handleEditorChange(e) {
     if (e.inputType !== 'insertParagraph') {
-      console.log(`Content of element ${editorId} is changed!`);
       let main = document.getElementById(editorId);
       if (!this.state.composition) {
         if (main.textContent === '') {
@@ -102,6 +101,7 @@ class Main extends React.Component {
 
   getCaretPos(e) {
     getCaretPosition(editorId, range => {
+      console.log(range);
       if (range) {
         this.setState({
           range: range
