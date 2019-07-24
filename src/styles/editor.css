@@ -4,6 +4,10 @@ html, body {
 }
 
 /* Other detailed */
+.hide {
+  display: none;
+}
+
 span.md-bold {
   color: gray;
 }

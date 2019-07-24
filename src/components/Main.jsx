@@ -60,7 +60,7 @@ class Main extends React.Component {
     this.handleCompositionEnd = this.handleCompositionEnd.bind(this);
 
     this.state = {
-      range: null,
+      caretPos: null,
       composition: false,
       lastFocus: [null, null],
     };
@@ -100,8 +100,8 @@ class Main extends React.Component {
           main.innerHTML = editorEmptyHtmlString;
           setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
         } else {
-          main.innerHTML = markdownDecorator(main.textContent);
-          setCaretPosition(this.state.range, editorId);
+          main.innerHTML = markdownDecorator(main.textContent, this.state.caretPos);
+          setCaretPosition(this.state.caretPos, editorId);
         }
       }
     }
@@ -120,10 +120,10 @@ class Main extends React.Component {
   }
 
   getCaretPos(e) {
-    getCaretPosition(editorId, range => {
-      if (range) {
+    getCaretPosition(editorId, caretPos => {
+      if (caretPos) {
         this.setState({
-          range: range
+          caretPos: caretPos
         });
       }
     });

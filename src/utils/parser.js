@@ -36,11 +36,35 @@ function markdownDecoratorCore(mds) {
   return mds;
 }
 
+function prerenderFocusMarker(range, restLength) {
+  if (!(range && range.hasChildNodes())) {
+    return;
+  }
+  for (let i = 0; i < range.childNodes.length; i++) {
+    let node = range.childNodes[i];
+    if (node.textContent.length >= restLength) {
+      if (node.nodeType === 1) node.classList.add('md-focus');
+      prerenderFocusMarker(node, restLength);
+      return;
+    } else {
+      restLength -= node.textContent.length;
+    }
+  }
+}
+
+// prerender: render focus on dom
+function prerender(marstr, caretPos) {
+  let dom = document.getElementById('prerender');
+  dom.innerHTML = marstr;
+  prerenderFocusMarker(dom, dom.textContent.length - caretPos[1]);
+  return dom.innerHTML;
+}
+
 // ============================================
 // public function
 
-export function markdownDecorator(marstr) {
+export function markdownDecorator(marstr, caretPos) {
   marstr = markdownDecoratorCore(marstr);
-  
+  marstr = prerender(marstr, caretPos);
   return marstr;
 }

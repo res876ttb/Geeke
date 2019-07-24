@@ -172,7 +172,7 @@ function setCaretPositionCore(pos, editorId) {
   // select line
   range = range.childNodes[pos[0]];
   // select character
-  _setCaretPositionCore(range, range.textContent.length - pos[1], editorId);
+  _setCaretPositionCore(range, range.textContent.length - pos[1]);
 }
 
 function getNextElement(ele, offset, editorId) {
