@@ -24,6 +24,8 @@ import {
 import {
   getCaretPosition,
   setCaretPosition,
+  updateCaretFocus,
+  setFocus
 } from '../utils/caret.js';
 
 // ============================================
@@ -49,6 +51,10 @@ class Main extends React.Component {
     this.handleEditorChange = this.handleEditorChange.bind(this);
     this.getCaretPos = this.getCaretPos.bind(this);
 
+    // handle keyboard event
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleSelectionChange = this.handleSelectionChange.bind(this);
+
     // handle input method with composition
     this.handleCompositionStart = this.handleCompositionStart.bind(this);
     this.handleCompositionEnd = this.handleCompositionEnd.bind(this);
@@ -56,6 +62,7 @@ class Main extends React.Component {
     this.state = {
       range: null,
       composition: false,
+      lastFocus: [null, null],
     };
   }
 
@@ -74,10 +81,11 @@ class Main extends React.Component {
         contentEditable='true'
         suppressContentEditableWarning='true'
         style={{minHeight: '2rem'}}
-        onKeyDown={this.getCaretPos}
+        onKeyDown={this.handleKeyDown}
         onCompositionStart={this.handleCompositionStart}
         onCompositionEnd={this.handleCompositionEnd}
         mdtype={'main editor'}
+        onSelect={this.handleSelectionChange}
       >
         <div>Text here **is** editable.</div>
       </div>
@@ -97,6 +105,18 @@ class Main extends React.Component {
         }
       }
     }
+  }
+
+  handleKeyDown(e){
+    this.getCaretPos();
+  }
+
+  handleSelectionChange(e) {
+    updateCaretFocus(editorId, this.state.lastFocus, newFocus => {
+      this.setState({
+        lastFocus: newFocus
+      });
+    });
   }
 
   getCaretPos(e) {

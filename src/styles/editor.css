@@ -1,9 +1,16 @@
+/* Font */
+html, body {
+  font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+
+/* Other detailed */
 span.md-bold {
   color: gray;
 }
 
 span.md-bold {
-  /* display: none; */
+  display: none;
+  font-weight: 100;
 }
 
 b.md-focus span.md-bold {

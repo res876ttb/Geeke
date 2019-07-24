@@ -66,7 +66,7 @@ function _getCaretRange(range, dir, editorId, cbf) {
       cbf(result);
     });
   } else {
-    if (range.parentNode.getAttribute('id') === editorId) {
+    if (range.parentNode.id === editorId) {
       let result = []
       for (let i = 0; i < range.parentNode.childNodes.length; i++) {
         if (range.parentNode.childNodes[i].isEqualNode(range)) {
@@ -101,7 +101,7 @@ function getCaretRangeCore(editorId, cbf) {
 
 function _getCaretPositionCore(range, editorId, cbf) {
   let found = false;
-  if (range.parentNode.getAttribute('id') === editorId) {
+  if (range.parentNode.id === editorId) {
     let result = 0, i = 0;
     for (; i < range.parentNode.childNodes.length; i++) {
       if (range.parentNode.childNodes[i].isEqualNode(range)) {
@@ -175,26 +175,53 @@ function setCaretPositionCore(pos, editorId) {
   _setCaretPositionCore(range, range.textContent.length - pos[1], editorId);
 }
 
-function _setCaretFocusCore(bound, ele, idx) {
-  if (idx > max(bound[0].length, bound[1].length) || ele.hasChildNodes() === false) {
-    return;
+function getNextElement(ele, offset, editorId) {
+  if (ele.textContent.length != offset) return null;
+  while (1) {
+    if (ele.nextSibling) return ele.nextSibling;
+    if (ele.nodeType === 1 && ele.id === editorId) return null;
+    ele = ele.parentNode;
   }
-  
 }
 
-// Remove all focus marks
-function clearCaretFocusCore(range, cbf) {
-  
-}
+function updateCaretFocusCore(editorId, lastFocus, cbf) {
+  let range = getCurrentRange();
+  let curEle = range.endContainer;
+  let nextEle = getNextElement(curEle, range.endOffset, editorId);
+  let newFocus = [];
 
-// Specify which DOM element is focused by caret.
-function setCaretFocusCore(editorId) {
-  // get bound (left & right)
-  _getCaretRange(getCurrentRange(), 'start', editorId, leftBound => {
-    _getCaretRange(getCurrentRange(), 'end', editorId, rightBound => {
-      _setCaretFocusCore([leftBound, rightBound], document.getElementById(editorId), 0);
-    });
-  });
+  // remove last focus element
+  for (let i = 0; i < lastFocus.length; i++) {
+    if (lastFocus[i]) lastFocus[i].classList.remove('md-focus');
+  }
+
+  // add focus element
+  while (1) {
+    if (!curEle) break;
+    if (curEle.nodeType === 1) {
+      if (curEle.id === editorId) {
+        break;
+      } else {
+        newFocus.push(curEle);
+        curEle.classList.add('md-focus');
+      }
+    }
+    curEle = curEle.parentNode;
+  }
+  while (1) {
+    if (!nextEle) break;
+    if (nextEle.nodeType === 1) {
+      if (nextEle.id === editorId) {
+        break;
+      } else {
+        newFocus.push(nextEle);
+        nextEle.classList.add('md-focus');
+      }
+    }
+    nextEle = nextEle.parentNode;
+  }
+
+  cbf(newFocus);
 }
 
 // ===================================================================================
@@ -208,10 +235,6 @@ export function setCaretPosition(pos, editorId) {
   setCaretPositionCore(pos, editorId);
 }
 
-export function setCaretFocus(editorId) {
-  setCaretFocusCore(editorId);
-}
-
-export function clearCaretFocus(editorId, cbf) {
-  clearCaretFocusCore(editorId, cbf);
+export function updateCaretFocus(editorId, lastFocus, cbf) {
+  updateCaretFocusCore(editorId, lastFocus, cbf);
 }
