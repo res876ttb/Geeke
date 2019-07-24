@@ -57,6 +57,7 @@ function prerender(marstr, caretPos) {
   let dom = document.getElementById('prerender');
   dom.innerHTML = marstr;
   prerenderFocusMarker(dom, dom.textContent.length - caretPos[1]);
+  prerenderFocusMarker(dom, dom.textContent.length - caretPos[1] + 1);
   return dom.innerHTML;
 }
 
