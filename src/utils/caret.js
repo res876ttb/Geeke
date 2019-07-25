@@ -170,7 +170,11 @@ function getCaretPositionCore(editorId, cbf) {
 function setCaretPositionCore(pos, editorId) {
   let range = document.getElementById(editorId);
   // select line
-  range = range.childNodes[pos[0]];
+  if (pos[0] >= range.childNodes.length) {
+    range = range.childNodes[range.childNodes.length - 1];
+  } else {
+    range = range.childNodes[pos[0]];
+  }
   // select character
   if (pos[1] === -1) {
     _setCaretPositionCore(range, 0);
