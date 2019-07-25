@@ -70,15 +70,17 @@ const mddItalicParser = [
   mds => mds.replace(/¨i´/g, `<span class='md-italic'>*</span>`)
 ];
 
-function addParser(parser, func) {
-  parser[0].push(func[0]);
-  parser[1].push(func[1]);
-}
-
-function applyParser(parser, mds) {
-  for (let i = 0; i < parser[0].length; i++) mds = parser[0][i](mds);
-  for (let i = 0; i < parser[1].length; i++) mds = parser[1][i](mds);
-  return mds;
+class MDParser {
+  constructor() {this.parser = [[],[]];}
+  add(func) {
+    this.parser[0].push(func[0]);
+    this.parser[1].push(func[1]);
+  }
+  apply(mds) {
+    for (let i = 0; i < this.parser[0].length; i++) mds = this.parser[0][i](mds);
+    for (let i = 0; i < this.parser[1].length; i++) mds = this.parser[1][i](mds);
+    return mds;
+  }
 }
 
 // markdown decorator core
@@ -88,13 +90,13 @@ function markdownDecoratorCore(mds) {
   // 1. deal with \n
   mds = mddNewLine(mds);
 
-  let parser = [[], []];
-  addParser(parser, mddBoldItalicParser);
-  addParser(parser, mddBoldParser);
-  addParser(parser, mddItalicParser);
+  let parser = new MDParser();
+  parser.add(mddBoldItalicParser);
+  parser.add(mddBoldParser);
+  parser.add(mddItalicParser);
 
   // 2. convert markdown to HTML
-  for (let i = 0; i < mds.length; i++) mds[i] = applyParser(parser, mds[i]);
+  for (let i = 0; i < mds.length; i++) mds[i] = parser.apply(mds[i]);
   
   // 3. wrap each line with div and add new line symbol back
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
