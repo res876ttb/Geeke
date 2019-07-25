@@ -13,10 +13,10 @@ span.md-bold {
 }
 
 span.md-bold {
-  display: none;
+  font-size: 0px;
   font-weight: 100;
 }
 
 b.md-focus span.md-bold {
-  display: initial;
+  font-size: 1rem;
 }

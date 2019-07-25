@@ -25,7 +25,6 @@ import {
   getCaretPosition,
   setCaretPosition,
   updateCaretFocus,
-  setFocus
 } from '../utils/caret.js';
 
 // ============================================
