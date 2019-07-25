@@ -35,8 +35,10 @@ function prerender(marstr, caretPos) {
   let dom = document.getElementById('prerender');
   dom.innerHTML = marstr;
   let dom1 = dom.childNodes[caretPos[0]];
-  prerenderFocusMarker(dom1, dom1.textContent.length - caretPos[1]);
-  prerenderFocusMarker(dom1, dom1.textContent.length - caretPos[1] + 1);
+  if (dom1) {
+    prerenderFocusMarker(dom1, dom1.textContent.length - caretPos[1]);
+    prerenderFocusMarker(dom1, dom1.textContent.length - caretPos[1] + 1);
+  }
   return dom.innerHTML;
 }
 
@@ -78,7 +80,13 @@ function markdownDecoratorCore(mds) {
   
   // 3. wrap each line with div and add new line symbol back
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
-  for (let i = 0; i < mds.length - 1; i++) mds[i] += '<span class="hide">¶</span>';
+  for (let i = 0; i < mds.length - 1; i++) {
+    if (mds[i] === '') {
+      mds[i] = '<br><span class="hide">¶</span>';
+    } else {
+      mds[i] += '<span class="hide">¶</span>';
+    }
+  }
   for (let i = 0; i < mds.length; i++) mds[i] = "<div>" + mds[i] + "</div>";
   for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
   

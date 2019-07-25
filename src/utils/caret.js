@@ -233,7 +233,11 @@ function insertNewLineAfterCaretCore() {
   let caretPos = getCurrentRange();
 
   // 2. add node after that
-  caretPos.endContainer.insertData(caretPos.endOffset, '¶');
+  if (caretPos.endContainer.nodeType === 3) {
+    caretPos.endContainer.insertData(caretPos.endOffset, '¶');
+  } else {
+    caretPos.endContainer.parentNode.innerHTML = caretPos.endContainer.parentNode.innerHTML + '¶';
+  }
 }
 
 // ===================================================================================
