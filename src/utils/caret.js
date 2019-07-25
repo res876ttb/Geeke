@@ -172,7 +172,11 @@ function setCaretPositionCore(pos, editorId) {
   // select line
   range = range.childNodes[pos[0]];
   // select character
-  _setCaretPositionCore(range, range.textContent.length - pos[1]);
+  if (pos[1] === -1) {
+    _setCaretPositionCore(range, 0);
+  } else {
+    _setCaretPositionCore(range, range.textContent.length - pos[1]);
+  }
 }
 
 function getNextElement(ele, offset, editorId) {
@@ -224,6 +228,14 @@ function updateCaretFocusCore(editorId, lastFocus, cbf) {
   cbf(newFocus);
 }
 
+function insertNewLineAfterCaretCore() {
+  // 1. get caret position
+  let caretPos = getCurrentRange();
+
+  // 2. add node after that
+  caretPos.endContainer.insertData(caretPos.endOffset, '¶');
+}
+
 // ===================================================================================
 // public function
 
@@ -237,4 +249,8 @@ export function setCaretPosition(pos, editorId) {
 
 export function updateCaretFocus(editorId, lastFocus, cbf) {
   updateCaretFocusCore(editorId, lastFocus, cbf);
+}
+
+export function insertNewLineAfterCaret() {
+  insertNewLineAfterCaretCore();
 }

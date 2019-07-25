@@ -25,6 +25,7 @@ import {
   getCaretPosition,
   setCaretPosition,
   updateCaretFocus,
+  insertNewLineAfterCaret,
 } from '../utils/caret.js';
 
 // ============================================
@@ -35,6 +36,7 @@ import '../styles/editor.css';
 // constants
 const editorId = 'mde';
 const editorEmptyHtmlString = '<div><br /></div>';
+const newLineSymbol = '<span class="hide">¶</span>';
 
 // ============================================
 // react components
@@ -92,7 +94,12 @@ class Main extends React.Component {
   }
 
   handleEditorChange(e) {
-    if (e.inputType !== 'insertParagraph') {
+    if (e.inputType === 'insertParagraph') {
+      // insertNewLineAfterCaret();
+      let main = document.getElementById(editorId);
+      main.innerHTML = markdownDecorator(main.textContent, this.state.caretPos);
+      setCaretPosition([this.state.caretPos[0] + 1, -1], editorId);
+    } else {
       let main = document.getElementById(editorId);
       if (!this.state.composition) {
         if (main.textContent === '') {
@@ -107,7 +114,13 @@ class Main extends React.Component {
   }
 
   handleKeyDown(e){
+    let keyCode = e.which | e.keyCode;
     this.getCaretPos();
+
+    // handle newline
+    if (keyCode === 13) {
+      insertNewLineAfterCaret();
+    }
   }
 
   handleSelectionChange(e) {
