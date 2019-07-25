@@ -42,18 +42,6 @@ function prerender(marstr, caretPos) {
   return dom.innerHTML;
 }
 
-// markdown decorator: Bold parser
-// test: https://regex101.com/r/l1yUUj/1
-function mddBoldParser(mds) {
-  // remove wrong bold html style
-  
-  // make bold html style
-  // mds = mds.replace(/\<b\>\<span class=\'md-bold\' mdid=\'\d+\.\d+\'\>\*\*\<\/span\>([^\s][^\*\n]*[^\s]|[^\s])\<span class=\'md-bold\'\>\*\*\<\/span\>\<b\\\>/g, "**$1**");
-  mds = mds.replace(/\*\*([^\s][^\*\n]*[^\s]|[^\s])\*\*/g, `<b><span class='md-bold' mdid='${getNewID()}'>**</span>$1<span class='md-bold'>**</span></b>`);
-
-  return mds;
-}
-
 // markdwon decotator: new line handler
 function mddNewLine(mds) {
   // 1. convert new line symbol back to \n
@@ -65,18 +53,48 @@ function mddNewLine(mds) {
   return mds;
 }
 
+// markdown decorator: Bold parser
+// test: https://regex101.com/r/l1yUUj/4
+const mddBoldParser = [
+  mds => mds.replace(/(?<!\\)\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `<b>¨b´$1¨b´</b>`),
+  mds => mds.replace(/¨b´/g, `<span class='md-bold'>**</span>`)
+];
+
+const mddBoldItalicParser = [
+  mds => mds.replace(/(?<!\\)\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `<b><i>¨bi´$1¨bi´</i></b>`),
+  mds => mds.replace(/¨bi´/g, `<span class='md-bold-italic'>***</span>`) 
+];
+
+const mddItalicParser = [
+  mds => mds.replace(/(?<!\\)\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*/g, `<i>¨i´$1¨i´</i>`),
+  mds => mds.replace(/¨i´/g, `<span class='md-italic'>*</span>`)
+];
+
+function addParser(parser, func) {
+  parser[0].push(func[0]);
+  parser[1].push(func[1]);
+}
+
+function applyParser(parser, mds) {
+  for (let i = 0; i < parser[0].length; i++) mds = parser[0][i](mds);
+  for (let i = 0; i < parser[1].length; i++) mds = parser[1][i](mds);
+  return mds;
+}
+
 // markdown decorator core
 function markdownDecoratorCore(mds) {
+  let idCounter = 0;
+
   // 1. deal with \n
   mds = mddNewLine(mds);
 
+  let parser = [[], []];
+  addParser(parser, mddBoldItalicParser);
+  addParser(parser, mddBoldParser);
+  addParser(parser, mddItalicParser);
+
   // 2. convert markdown to HTML
-  for (let i = 0; i < mds.length; i++) {
-    // bold & italic parser
-    // bold parser
-    mds[i] = mddBoldParser(mds[i]);
-    // italic parser
-  }
+  for (let i = 0; i < mds.length; i++) mds[i] = applyParser(parser, mds[i]);
   
   // 3. wrap each line with div and add new line symbol back
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';

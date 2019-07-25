@@ -3,20 +3,27 @@ html, body {
   font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 
+/* Custimizable stype */
+span.md-bold, 
+span.md-italic,
+span.md-bold-italic {
+  color: gray;
+}
+
 /* Other detailed */
 .hide {
   display: none;
 }
 
-span.md-bold {
-  color: gray;
-}
-
-span.md-bold {
+span.md-bold,
+span.md-italic,
+span.md-bold-italic {
   font-size: 0px;
   font-weight: 100;
 }
 
-b.md-focus span.md-bold {
+b.md-focus span.md-bold,
+i.md-focus span.md-italic,
+b.md-focus span.md-bold-italic {
   font-size: 1rem;
 }
