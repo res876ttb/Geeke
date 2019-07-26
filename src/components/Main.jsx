@@ -78,6 +78,7 @@ class Main extends React.Component {
   render() {
     return (
       <div 
+        className='md-editor'
         id={editorId}
         contentEditable='true'
         suppressContentEditableWarning='true'

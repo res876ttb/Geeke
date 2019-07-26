@@ -1,36 +1,18 @@
-// Font
-html, body {
-  font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+.hide {
+  display: none;
 }
 
 // variables
 $marker: (
   bold:b,
   italic:i,
-  bold-italic:b
+  bold-italic:b,
+  inline-code:code
 );
-
-// End of variables
-// =========================================================================
-// Custimizable style
-
-// color of md marker when it is visible
-@each $item, $cover in $marker {
-  span.md-#{$item} {
-    color: gray;
-  }
-}
-
-// End of custimizable style
-// =========================================================================
-// Other detailed
-.hide {
-  display: none;
-}
 
 // hide md marker
 @each $item, $cover in $marker {
-  span.md-#{$item} {
+  .md-editor span.md-#{$item} {
     font-size: 0px;
     font-weight: 100;
   }
@@ -38,7 +20,29 @@ $marker: (
 
 // show md marker
 @each $item, $cover in $marker {
-  #{$cover}.md-focus span.md-#{$item} {
+  .md-editor #{$cover}.md-focus span.md-#{$item} {
     font-size: 1rem;
   }
+}
+
+// End of variables
+// =========================================================================
+// Custimizable style
+
+// Font
+html, body {
+  font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+
+// color of md marker when it is visible
+@each $item, $cover in $marker {
+  .md-editor span.md-#{$item} {
+    color: gray;
+  }
+}
+
+// inline code block style
+.md-editor code {
+  background-color: #f3f4f4;
+  padding: 0 2px 0 2px;
 }
