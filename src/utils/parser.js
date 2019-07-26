@@ -116,7 +116,7 @@ function markdownDecoratorCore(mds) {
   // 2. convert markdown to HTML
   for (let i = 0; i < mds.length; i++) mds[i] = parser.apply(mds[i]);
   
-  // 3. wrap each line with div and add new line symbol back
+  // 3. wrap each line with p and add new line symbol back
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
   for (let i = 0; i < mds.length - 1; i++) {
     if (mds[i] === '') {
@@ -125,7 +125,7 @@ function markdownDecoratorCore(mds) {
       mds[i] += '<span class="hide">¶</span>';
     }
   }
-  for (let i = 0; i < mds.length; i++) mds[i] = "<div>" + mds[i] + "</div>";
+    for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
   for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
   
   return mds[0];
