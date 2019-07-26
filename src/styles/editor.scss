@@ -1,3 +1,11 @@
+// Custimizable options
+
+$fontColor: black;
+$codeBlockFontColor: gray;
+
+// End of custimizable options
+// =========================================================================
+
 .hide {
   display: none;
 }
@@ -8,7 +16,8 @@ $marker: (
   italic:i,
   bold-italic:b,
   inline-code:code,
-  link:a
+  link:a,
+  escaper:'span.md-escaper-wraper'
 );
 
 // hide md marker
@@ -24,6 +33,12 @@ $marker: (
   .md-editor #{$cover}.md-focus span.md-#{$item} {
     font-size: 1rem;
   }
+}
+
+// patch escaper visibility in code block
+.md-editor code .md-escaper {
+  font-size: 1rem;
+  color: $codeBlockFontColor;
 }
 
 // End of variables
@@ -46,4 +61,5 @@ html, body {
 .md-editor code {
   background-color: #f3f4f4;
   padding: 0 2px 0 2px;
+  color: $codeBlockFontColor;
 }

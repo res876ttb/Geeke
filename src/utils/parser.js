@@ -92,6 +92,11 @@ const mddLinkParser = [
             .replace(/¨l4´/g, `)</span>`)
 ]
 
+const mddEscaperParser = [
+  mds => mds.replace(/\\(.)/g, `<span class='md-escaper-wraper'>¨e´$1</span>`),
+  mds => mds.replace(/¨e´/g, `<span class='md-escaper'>\\</span>`)
+];
+
 class MDParser {
   constructor() {this.parser = [[],[]];}
   add(func) {
@@ -123,6 +128,7 @@ function markdownDecoratorCore(mds) {
   parser.add(mddItalicParser2);
   parser.add(mddInlineCodeParser);
   parser.add(mddLinkParser);
+  parser.add(mddEscaperParser);
 
   // 2. convert markdown to HTML
   for (let i = 0; i < mds.length; i++) mds[i] = parser.apply(mds[i]);

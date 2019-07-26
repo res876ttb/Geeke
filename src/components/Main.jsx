@@ -90,7 +90,7 @@ class Main extends React.Component {
         mdtype={'main editor'}
         onSelect={this.handleSelectionChange}
       >
-        Text here is editable.¶¶These are **bold1** and __bold2__¶These are *italic2* and _italic2_¶These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶This is `code block` ¶This is a [link example](http://google.com).
+        Text here is editable.¶¶These are **bold1** and __bold2__¶These are *italic2* and _italic2_¶These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶This is `code block` ¶This is a [link example](http://google.com).¶There are lots o\f\ \e\s\c\a\p\e\r.¶However, escaper could not in `code\block`.
       </div>
     );
   }
