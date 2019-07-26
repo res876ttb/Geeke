@@ -5,11 +5,13 @@ html, body {
 
 // variables
 $marker: (
-  bold:b, 
-  italic:i, 
+  bold:b,
+  italic:i,
   bold-italic:b
 );
 
+// End of variables
+// =========================================================================
 // Custimizable style
 
 // color of md marker when it is visible
@@ -19,6 +21,8 @@ $marker: (
   }
 }
 
+// End of custimizable style
+// =========================================================================
 // Other detailed
 .hide {
   display: none;

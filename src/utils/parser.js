@@ -55,19 +55,27 @@ function mddNewLine(mds) {
 
 // markdown decorator: Bold parser
 // test: https://regex101.com/r/l1yUUj/4
-const mddBoldParser = [
-  mds => mds.replace(/(?<!\\)\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `<b>¨b´$1¨b´</b>`),
-  mds => mds.replace(/¨b´/g, `<span class='md-bold'>**</span>`)
+const mddBoldParser1 = [
+  mds => mds.replace(/(?<!\\)\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `<b>¨b1´$1¨b1´</b>`),
+  mds => mds.replace(/¨b1´/g, `<span class='md-bold'>**</span>`)
+];
+const mddBoldParser2 = [
+  mds => mds.replace(/__([^\s][^_\n]*[^\s]|[^\s])__/g, `<b>¨b2´$1¨b2´</b>`),
+  mds => mds.replace(/¨b2´/g, `<span class='md-bold'>__</span>`)
 ];
 
-const mddBoldItalicParser = [
-  mds => mds.replace(/(?<!\\)\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `<b><i>¨bi´$1¨bi´</i></b>`),
-  mds => mds.replace(/¨bi´/g, `<span class='md-bold-italic'>***</span>`) 
-];
+// const mddBoldItalicParser = [
+//   mds => mds.replace(/(?<!\\)\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `<b><i>¨bi´$1¨bi´</i></b>`),
+//   mds => mds.replace(/¨bi´/g, `<span class='md-bold-italic'>***</span>`) 
+// ];
 
-const mddItalicParser = [
-  mds => mds.replace(/(?<!\\)\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*/g, `<i>¨i´$1¨i´</i>`),
-  mds => mds.replace(/¨i´/g, `<span class='md-italic'>*</span>`)
+const mddItalicParser1 = [
+  mds => mds.replace(/(?<!\\)\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*/g, `<i>¨i1´$1¨i1´</i>`),
+  mds => mds.replace(/¨i1´/g, `<span class='md-italic'>*</span>`)
+];
+const mddItalicParser2 = [
+  mds => mds.replace(/_([^\s][^_\n]*[^\s]|[^\s])_/g, `<i>¨i2´$1¨i2´</i>`),
+  mds => mds.replace(/¨i2´/g, `<span class='md-italic'>_</span>`)
 ];
 
 // test: https://regex101.com/r/pxbM5w/2
@@ -96,10 +104,13 @@ function markdownDecoratorCore(mds) {
   // 1. deal with \n
   mds = mddNewLine(mds);
 
+  // TODO: export parser definition to function
   let parser = new MDParser();
-  parser.add(mddBoldItalicParser);
-  parser.add(mddBoldParser);
-  parser.add(mddItalicParser);
+  // parser.add(mddBoldItalicParser);
+  parser.add(mddBoldParser1);
+  parser.add(mddBoldParser2);
+  parser.add(mddItalicParser1);
+  parser.add(mddItalicParser2);
   parser.add(mddInlineCodeParser);
 
   // 2. convert markdown to HTML
