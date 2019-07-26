@@ -84,6 +84,14 @@ const mddInlineCodeParser = [
   mds => mds.replace(/¨ic´/g, `<span class='md-inline-code'>\`</span>`)
 ];
 
+const mddLinkParser = [
+  mds => mds.replace(/\[(([^\s\]]|[^\s\]]\s|\s[^\s\]])+)\]\(([^\)]*)\)/g, `<a href='$3'>¨l1´$1¨l2´¨l3´$3¨l4´</a>`),
+  mds => mds.replace(/¨l1´/g, `<span class='md-link'>[</span>`)
+            .replace(/¨l2´/g, `<span class='md-link'>]`)
+            .replace(/¨l3´/g, `(`)
+            .replace(/¨l4´/g, `)</span>`)
+]
+
 class MDParser {
   constructor() {this.parser = [[],[]];}
   add(func) {
@@ -114,6 +122,7 @@ function markdownDecoratorCore(mds) {
   parser.add(mddItalicParser1);
   parser.add(mddItalicParser2);
   parser.add(mddInlineCodeParser);
+  parser.add(mddLinkParser);
 
   // 2. convert markdown to HTML
   for (let i = 0; i < mds.length; i++) mds[i] = parser.apply(mds[i]);
