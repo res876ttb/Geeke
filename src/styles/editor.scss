@@ -19,7 +19,8 @@ $marker: (
   bold-italic:b,
   inline-code:code,
   link:a,
-  escaperm:'span.md-escaper'
+  escaperm:'span.md-escaper',
+  strikethrough:del
 );
 @for $i from 1 through 6 {
   $marker: append($marker, h#{$i}m 'span.md-h#{$i}');

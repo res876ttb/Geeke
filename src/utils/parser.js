@@ -116,6 +116,12 @@ const mddEscaperParser = [
   mds => mds.replace(/¨e´/g, `<span class='md-escaperm'>\\</span>`)
 ];
 
+// test: https://regex101.com/r/hm1MSB/1
+const mddStrikethroughParser = [
+  mds => mds.replace(/(?<!\\)~~(([^\s]|\\.)([^~\n]|\\~)*[^\s\\]|[^\s\\])~~/g, `<del>¨s´$1¨s´</del>`),
+  mds => mds.replace(/¨s´/g, `<span class='md-strikethrough'>~~</span>`)
+]
+
 class MDParser {
   constructor() {this.parser = [[],[]];}
   add(func) {
@@ -145,6 +151,7 @@ function markdownDecoratorCore(mds) {
   parser.add(mddItalicParser2);
   parser.add(mddInlineCodeParser);
   parser.add(mddLinkParser);
+  parser.add(mddStrikethroughParser);
   parser.add(mddEscaperParser);
   parser.add(mddHeaderParser);
 
