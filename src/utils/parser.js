@@ -84,17 +84,33 @@ const mddInlineCodeParser = [
   mds => mds.replace(/¨ic´/g, `<span class='md-inline-code'>\`</span>`)
 ];
 
+// test: https://regex101.com/r/B0Ui3g/1
 const mddLinkParser = [
   mds => mds.replace(/\[(([^\s\]]|[^\s\]]\s|\s[^\s\]])+)\]\(([^\)]*)\)/g, `<a href='$3'>¨l1´$1¨l2´¨l3´$3¨l4´</a>`),
   mds => mds.replace(/¨l1´/g, `<span class='md-link'>[</span>`)
             .replace(/¨l2´/g, `<span class='md-link'>]`)
             .replace(/¨l3´/g, `(`)
             .replace(/¨l4´/g, `)</span>`)
-]
+];
+
+const mddHeaderParser = [
+  mds => mds.replace(/^#\ (\s*)(.+$)/g, `<span class='md-h1'>¨h1´$1$2</span>`)
+            .replace(/^##\ (\s*)(.+$)/g, `<span class='md-h2'>¨h2´$1$2</span>`)
+            .replace(/^###\ (\s*)(.+$)/g, `<span class='md-h3'>¨h3´$1$2</span>`)
+            .replace(/^####\ (\s*)(.+$)/g, `<span class='md-h4'>¨h4´$1$2</span>`)
+            .replace(/^#####\ (\s*)(.+$)/g, `<span class='md-h5'>¨h5´$1$2</span>`)
+            .replace(/^######\ (\s*)(.+$)/g, `<span class='md-h6'>¨h6´$1$2</span>`),
+  mds => mds.replace(/¨h1´/g, `<span class='md-h1m'># </span>`)
+            .replace(/¨h2´/g, `<span class='md-h2m'>## </span>`)
+            .replace(/¨h3´/g, `<span class='md-h3m'>### </span>`)
+            .replace(/¨h4´/g, `<span class='md-h4m'>#### </span>`)
+            .replace(/¨h5´/g, `<span class='md-h5m'>##### </span>`)
+            .replace(/¨h6´/g, `<span class='md-h6m'>###### </span>`)
+];
 
 const mddEscaperParser = [
-  mds => mds.replace(/\\(.)/g, `<span class='md-escaper-wraper'>¨e´$1</span>`),
-  mds => mds.replace(/¨e´/g, `<span class='md-escaper'>\\</span>`)
+  mds => mds.replace(/\\(.)/g, `<span class='md-escaper'>¨e´$1</span>`),
+  mds => mds.replace(/¨e´/g, `<span class='md-escaperm'>\\</span>`)
 ];
 
 class MDParser {
@@ -114,8 +130,6 @@ class MDParser {
 // render the whole document
 // TODO: render only 1 paragraph at a time to improve performance
 function markdownDecoratorCore(mds) {
-  let idCounter = 0;
-
   // 1. deal with \n
   mds = mddNewLine(mds);
 
@@ -129,6 +143,7 @@ function markdownDecoratorCore(mds) {
   parser.add(mddInlineCodeParser);
   parser.add(mddLinkParser);
   parser.add(mddEscaperParser);
+  parser.add(mddHeaderParser);
 
   // 2. convert markdown to HTML
   for (let i = 0; i < mds.length; i++) mds[i] = parser.apply(mds[i]);
@@ -142,9 +157,9 @@ function markdownDecoratorCore(mds) {
       mds[i] += '<span class="hide">¶</span>';
     }
   }
-    for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
+  for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
   for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
-  
+  console.log(mds[0]);
   return mds[0];
 }
 

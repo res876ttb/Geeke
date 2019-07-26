@@ -6,6 +6,8 @@ $codeBlockFontColor: gray;
 // End of custimizable options
 // =========================================================================
 
+// style
+
 .hide {
   display: none;
 }
@@ -17,27 +19,35 @@ $marker: (
   bold-italic:b,
   inline-code:code,
   link:a,
-  escaper:'span.md-escaper-wraper'
+  escaperm:'span.md-escaper'
 );
+@for $i from 1 through 6 {
+  $marker: append($marker, h#{$i}m 'span.md-h#{$i}');
+}
 
 // hide md marker
 @each $item, $cover in $marker {
   .md-editor span.md-#{$item} {
     font-size: 0px;
-    font-weight: 100;
+    font-weight: unset;
   }
+}
+
+// patch font-weight under bold
+.md-editor b.md-focus span.md-bold {
+  font-weight: 100;
 }
 
 // show md marker
 @each $item, $cover in $marker {
   .md-editor #{$cover}.md-focus span.md-#{$item} {
-    font-size: 1rem;
+    font-size: unset;
   }
 }
 
 // patch escaper visibility in code block
 .md-editor code .md-escaper {
-  font-size: 1rem;
+  font-size: unset;
   color: $codeBlockFontColor;
 }
 
@@ -48,6 +58,15 @@ $marker: (
 // Font
 html, body {
   font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+
+// header size
+$header-size: (2rem 1.5rem 1.17rem 1rem 0.83rem 0.67rem);
+@for $i from 1 through 6 {
+  .md-editor span.md-h#{$i} {
+    font-size: nth($header-size, $i);
+    font-weight: bold;
+  }
 }
 
 // color of md marker when it is visible
