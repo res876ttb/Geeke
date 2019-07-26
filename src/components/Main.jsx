@@ -71,7 +71,9 @@ class Main extends React.Component {
   }
 
   componentDidMount() {
-    document.getElementById(editorId).addEventListener("input", this.handleEditorChange, false);
+    let editor = document.getElementById(editorId);
+    editor.addEventListener("input", this.handleEditorChange, false);
+    editor.innerHTML = markdownDecorator(editor.textContent, this.state.caretPos);
   }
 
   render() {
@@ -88,7 +90,7 @@ class Main extends React.Component {
         mdtype={'main editor'}
         onSelect={this.handleSelectionChange}
       >
-        <p>Text here is editable.<span className="hide">¶</span></p><p><br/><span className="hide">¶</span></p><p>These are&nbsp;<b><span className="md-bold">**</span>bold1<span className="md-bold">**</span></b>&nbsp;and <b><span className="md-bold">__</span>bold2<span className="md-bold">__</span></b><span className="hide">¶</span></p><p>These are&nbsp;<i><span className="md-italic">*</span>italic2<span className="md-italic">*</span></i>&nbsp;and <i><span className="md-italic">_</span>italic2<span className="md-italic">_</span></i><span className="hide">¶</span></p><p>These are lots of&nbsp;<b><i><span className="md-bold-italic">***</span>bold and italic<span className="md-bold-italic">***</span></i></b>: <i><span className="md-italic">_</span><b><span className="md-bold">**</span>bold and italic<span className="md-bold">**</span></b><span className="md-italic">_</span></i>&nbsp;<b><span className="md-bold">**</span><i><span className="md-italic">_</span>bold and italic<span className="md-italic">_</span></i><span className="md-bold">**</span></b><span className="hide">¶</span></p><p className="md-focus">This is <code><span className="md-inline-code">`</span>code block<span className="md-inline-code">`</span></code>&nbsp;</p>
+        Text here is editable.¶¶These are **bold1** and __bold2__¶These are *italic2* and _italic2_¶These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶This is `code block` ¶This is a [link example](http://google.com).
       </div>
     );
   }
@@ -122,7 +124,7 @@ class Main extends React.Component {
       insertNewLineAfterCaret();
     }
 
-    console.log(document.getElementById(editorId).innerHTML);
+    // console.log(document.getElementById(editorId).textContent);
   }
 
   handleSelectionChange(e) {

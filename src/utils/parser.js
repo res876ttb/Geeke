@@ -98,6 +98,8 @@ class MDParser {
 }
 
 // markdown decorator core
+// render the whole document
+// TODO: render only 1 paragraph at a time to improve performance
 function markdownDecoratorCore(mds) {
   let idCounter = 0;
 
@@ -136,6 +138,6 @@ function markdownDecoratorCore(mds) {
 
 export function markdownDecorator(marstr, caretPos) {
   marstr = markdownDecoratorCore(marstr);
-  marstr = prerender(marstr, caretPos);
+  if (caretPos) marstr = prerender(marstr, caretPos);
   return marstr;
 }
