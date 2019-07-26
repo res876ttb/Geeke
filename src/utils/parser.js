@@ -70,6 +70,12 @@ const mddItalicParser = [
   mds => mds.replace(/¨i´/g, `<span class='md-italic'>*</span>`)
 ];
 
+// test: https://regex101.com/r/pxbM5w/2
+const mddInlineCodeParser = [
+  mds => mds.replace(/(?<!\\)`((([^`\n]|\\`)+([^\\`]|\\`))|[^\s\\`])`/g, `<code>¨ic´$1¨ic´</code>`),
+  mds => mds.replace(/¨ic´/g, `<span class='md-inline-code'>\`</span>`)
+];
+
 class MDParser {
   constructor() {this.parser = [[],[]];}
   add(func) {
@@ -94,6 +100,7 @@ function markdownDecoratorCore(mds) {
   parser.add(mddBoldItalicParser);
   parser.add(mddBoldParser);
   parser.add(mddItalicParser);
+  parser.add(mddInlineCodeParser);
 
   // 2. convert markdown to HTML
   for (let i = 0; i < mds.length; i++) mds[i] = parser.apply(mds[i]);
