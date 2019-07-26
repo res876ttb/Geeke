@@ -1,0 +1,40 @@
+// Font
+html, body {
+  font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+
+// variables
+$marker: (
+  bold:b, 
+  italic:i, 
+  bold-italic:b
+);
+
+// Custimizable style
+
+// color of md marker when it is visible
+@each $item, $cover in $marker {
+  span.md-#{$item} {
+    color: gray;
+  }
+}
+
+// Other detailed
+.hide {
+  display: none;
+}
+
+// hide md marker
+@each $item, $cover in $marker {
+  span.md-#{$item} {
+    font-size: 0px;
+    font-weight: 100;
+  }
+}
+
+// show md marker
+@each $item, $cover in $marker {
+  #{$cover}.md-focus span.md-#{$item} {
+    font-size: 1rem;
+  }
+}

@@ -30,7 +30,7 @@ import {
 
 // ============================================
 // import css file
-import '../styles/editor.css';
+import '../styles/editor.scss';
 
 // ============================================
 // constants
