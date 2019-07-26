@@ -239,8 +239,9 @@ function insertNewLineAfterCaretCore() {
   // 2. add node after that
   if (caretPos.endContainer.nodeType === 3) {
     caretPos.endContainer.insertData(caretPos.endOffset, '¶');
+    caretPos.endContainer.insertData(caretPos.endOffset, '¶');
   } else {
-    caretPos.endContainer.parentNode.innerHTML = caretPos.endContainer.parentNode.innerHTML + '¶';
+    caretPos.endContainer.parentNode.innerHTML = caretPos.endContainer.parentNode.innerHTML + '¶¶';
   }
 }
 

@@ -90,7 +90,8 @@ class Main extends React.Component {
         mdtype={'main editor'}
         onSelect={this.handleSelectionChange}
       >
-        # Header1¶## Header2¶### Header3¶#### Header4¶##### Header5¶###### Header6¶Text here is editable.¶¶These are **bold1** and __bold2__¶These are *italic2* and _italic2_¶These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶This is `code block` ¶This is a [link example](http://google.com).¶There are lots o\f\ \e\s\c\a\p\e\r.¶However, escaper could not in `code\block`.
+        {/* line1¶¶line2¶¶line3 */}
+        # Header1¶## Header2¶### Header3¶#### Header4¶##### Header5¶###### Header6¶Text here is editable.¶¶¶These are **bold1** and __bold2__¶These are *italic2* and _italic2_¶These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶This is `code block` ¶This is a [link example](http://google.com).¶There are lots o\f\ \e\s\c\a\p\e\r.¶However, escaper could not in `code\block`.
       </div>
     );
   }
@@ -103,6 +104,7 @@ class Main extends React.Component {
       setCaretPosition([this.state.caretPos[0] + 1, -1], editorId);
     } else {
       let main = document.getElementById(editorId);
+      console.log(main.innerHTML);
       if (!this.state.composition) {
         if (main.textContent === '') {
           main.innerHTML = editorEmptyHtmlString;

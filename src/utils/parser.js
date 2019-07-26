@@ -7,9 +7,11 @@ import { isValidElement } from "react";
 
 // ============================================
 // import
-import {
-  getNewID
-} from './id.js';
+
+// ============================================
+// constant
+const newLineSymbol = '<span class="hide">¶</span>';
+const emptyLine = '<br/><span class="hide">¶</span>';
 
 // ============================================
 // private function
@@ -44,7 +46,8 @@ function prerender(marstr, caretPos) {
 
 // markdwon decotator: new line handler
 function mddNewLine(mds) {
-  // 1. convert new line symbol back to \n
+  // 1. convert new line symbol back to \n (Both ¶ and ¶¶ represent \n\n)
+  mds = mds.replace(/¶¶/g, '\n');
   mds = mds.replace(/¶/g, '\n');
 
   // 2. split line
@@ -150,13 +153,15 @@ function markdownDecoratorCore(mds) {
   
   // 3. wrap each line with p and add new line symbol back
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
-  for (let i = 0; i < mds.length - 1; i++) {
+  mds[0] = mds[0] + newLineSymbol;
+  for (let i = 1; i < mds.length - 1; i++) {
     if (mds[i] === '') {
-      mds[i] = '<br><span class="hide">¶</span>';
+      mds[i] = emptyLine;
     } else {
-      mds[i] += '<span class="hide">¶</span>';
+      mds[i] = newLineSymbol + mds[i] + newLineSymbol;
     }
   }
+  mds[mds.length - 1] = newLineSymbol + mds[mds.length - 1];
   for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
   for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
   console.log(mds[0]);

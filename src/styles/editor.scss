@@ -47,7 +47,7 @@ $marker: (
 
 // patch escaper visibility in code block
 .md-editor code .md-escaperm {
-  font-size: 1rem;
+  font-size: unset;
   color: $codeBlockFontColor;
 }
 
