@@ -36,7 +36,6 @@ import '../styles/editor.scss';
 // constants
 const editorId = 'mde';
 const editorEmptyHtmlString = '<div><br /></div>';
-const newLineSymbol = '<span class="hide">¶</span>';
 
 // ============================================
 // react components
@@ -89,7 +88,7 @@ class Main extends React.Component {
         mdtype={'main editor'}
         onSelect={this.handleSelectionChange}
       >
-        <div>Text here **is** editable.</div>
+        <div>Text here is editable.<span className="hide">¶</span></div><div><br/><span className="hide">¶</span></div><div>These are&nbsp;<b><span className="md-bold">**</span>bold1<span className="md-bold">**</span></b>&nbsp;and <b><span className="md-bold">__</span>bold2<span className="md-bold">__</span></b><span className="hide">¶</span></div><div>These are&nbsp;<i><span className="md-italic">*</span>italic2<span className="md-italic">*</span></i>&nbsp;and <i><span className="md-italic">_</span>italic2<span className="md-italic">_</span></i><span className="hide">¶</span></div><div>These are lots of&nbsp;<b><span className="md-bold">**</span><i><span className="md-italic">*</span>bold and italic<span className="md-italic">*</span></i><span className="md-bold">**</span></b>: <i><span className="md-italic">_</span><b><span className="md-bold">**</span>bold and italic<span className="md-bold">**</span></b><span className="md-italic">_</span></i>&nbsp;<b><span className="md-bold">**</span><i><span className="md-italic">_</span>bold and italic<span className="md-italic">_</span></i><span className="md-bold">**</span></b><span className="hide">¶</span></div><div>This is <code><span className="md-inline-code">`</span>code block<span className="md-inline-code">`</span></code></div>
       </div>
     );
   }

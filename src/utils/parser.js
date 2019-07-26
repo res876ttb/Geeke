@@ -64,10 +64,10 @@ const mddBoldParser2 = [
   mds => mds.replace(/¨b2´/g, `<span class='md-bold'>__</span>`)
 ];
 
-// const mddBoldItalicParser = [
-//   mds => mds.replace(/(?<!\\)\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `<b><i>¨bi´$1¨bi´</i></b>`),
-//   mds => mds.replace(/¨bi´/g, `<span class='md-bold-italic'>***</span>`) 
-// ];
+const mddBoldItalicParser = [
+  mds => mds.replace(/(?<!\\)\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `<b><i>¨bi´$1¨bi´</i></b>`),
+  mds => mds.replace(/¨bi´/g, `<span class='md-bold-italic'>***</span>`) 
+];
 
 const mddItalicParser1 = [
   mds => mds.replace(/(?<!\\)\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*/g, `<i>¨i1´$1¨i1´</i>`),
@@ -106,7 +106,7 @@ function markdownDecoratorCore(mds) {
 
   // TODO: export parser definition to function
   let parser = new MDParser();
-  // parser.add(mddBoldItalicParser);
+  parser.add(mddBoldItalicParser);
   parser.add(mddBoldParser1);
   parser.add(mddBoldParser2);
   parser.add(mddItalicParser1);
