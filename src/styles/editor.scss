@@ -1,12 +1,19 @@
 // Custimizable options
 
+$fontSize: 16px;
 $fontColor: black;
 $codeBlockFontColor: gray;
+$lineHeight: 16px;
 
 // End of custimizable options
 // =========================================================================
 
 // style
+
+.md-editor {
+  font-size: $fontSize;
+  line-height: $lineHeight;
+}
 
 .hide {
   display: none;
