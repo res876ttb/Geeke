@@ -177,7 +177,8 @@ function setCaretPositionCore(pos, editorId) {
   }
   // select character
   if (pos[1] === -1) {
-    _setCaretPositionCore(range, 0);
+    if (pos[0] === 0) _setCaretPositionCore(range, 0);
+    else _setCaretPositionCore(range, 1);
   } else {
     _setCaretPositionCore(range, range.textContent.length - pos[1]);
   }
@@ -253,6 +254,7 @@ export function getCaretPosition(editorId, cbf) {
 }
 
 export function setCaretPosition(pos, editorId) {
+  console.log(pos);
   setCaretPositionCore(pos, editorId);
 }
 

@@ -1,4 +1,5 @@
 import { isValidElement } from "react";
+import { Minimatch } from "minimatch";
 
 /**
  * @name parser.js
@@ -44,14 +45,31 @@ function prerender(marstr, caretPos) {
   return dom.innerHTML;
 }
 
-// markdwon decotator: new line handler
-function mddNewLine(mds) {
+// markdwon decorator: new line handler
+function mddNewLineAnalyzer(mds) {
   // 1. convert new line symbol back to \n (Both ¶ and ¶¶ represent \n\n)
   mds = mds.replace(/¶¶/g, '\n');
   mds = mds.replace(/¶/g, '\n');
 
   // 2. split line
   mds = mds.split('\n');
+  
+  return mds;
+}
+
+// markdown decorator: new line wrapper
+function mddNewLineWrapper(mds) {
+  if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
+  mds[0] = mds[0] + newLineSymbol;
+  for (let i = 1; i < mds.length - 1; i++) {
+    if (mds[i] === '') {
+      mds[i] = emptyLine;
+    } else {
+      mds[i] = newLineSymbol + mds[i] + newLineSymbol;
+    }
+  }
+  mds[mds.length - 1] = newLineSymbol + mds[mds.length - 1];
+  for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
   
   return mds;
 }
@@ -120,24 +138,59 @@ const mddEscaperParser = [
 const mddStrikethroughParser = [
   mds => mds.replace(/(?<!\\)~~(([^\s]|\\.)([^~\n]|\\~)*[^\s\\]|[^\s\\])~~/g, `<del>¨s´$1¨s´</del>`),
   mds => mds.replace(/¨s´/g, `<span class='md-strikethrough'>~~</span>`)
-]
+];
 
 // test: https://regex101.com/r/dY5dYq/1
 // TODO: patch text content after improve render performance
 const mddSeperatorParser = [
   mds => mds.replace(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/g, `<span class='md-seperator'>¨sl´</span>`),
   mds => mds.replace(/¨sl´/g, `<span class='md-seperatorm'>***</span>`)
-]
+];
 
 class MDParser {
-  constructor() {this.parser = [[],[]];}
-  add(func) {
-    this.parser[0].push(func[0]);
-    this.parser[1].push(func[1]);
+  constructor() {
+    this.parser = {
+      singleLine: {
+        parser: [],
+        marker: []
+      },
+      paragraph: [],
+      lineWraper: [],
+    };
+    this.slpl = 0;
+    this.ppl = 0;
+    this.lpl = 0;
   }
+
+  addSingleLineParser(func) {
+    this.parser.singleLine.parser.push(func[0]);
+    this.parser.singleLine.marker.push(func[1]);
+    this.slpl++;
+  }
+
+  addParagraphParser(func) {
+    this.parser.paragraph.push(func);
+    this.ppl++;
+  }
+
+  addLineWraper(func) {
+    this.parser.lineWraper.push(func);
+    this.lpl++;
+  }
+
   apply(mds) {
-    for (let i = 0; i < this.parser[0].length; i++) mds = this.parser[0][i](mds);
-    for (let i = 0; i < this.parser[1].length; i++) mds = this.parser[1][i](mds);
+    // paragraph
+    let paragraph = this.parser.paragraph;
+    for (let i = 0; i < this.ppl; i++) mds = paragraph[i](mds);
+    // single line
+    let singleLine = this.parser.singleLine;
+    for (let j = 0; j < mds.length; j++) {
+      for (let i = 0; i < this.slpl; i++) mds[j] = singleLine.parser[i](mds[j]);
+      for (let i = 0; i < this.slpl; i++) mds[j] = singleLine.marker[i](mds[j]);
+    }
+    // line wraper
+    let lineWraper = this.parser.lineWraper;
+    for (let i = 0; i < this.lpl; i++) mds = lineWraper[i](mds);
     return mds;
   }
 }
@@ -145,49 +198,59 @@ class MDParser {
 // markdown decorator core
 // render the whole document
 // TODO: render only 1 paragraph at a time to improve performance
-function markdownDecoratorCore(mds) {
-  // 1. deal with \n
-  mds = mddNewLine(mds);
-
-  // TODO: export parser definition to function
-  let parser = new MDParser();
-  parser.add(mddSeperatorParser);
-  parser.add(mddBoldItalicParser);
-  parser.add(mddBoldParser1);
-  parser.add(mddBoldParser2);
-  parser.add(mddItalicParser1);
-  parser.add(mddItalicParser2);
-  parser.add(mddInlineCodeParser);
-  parser.add(mddLinkParser);
-  parser.add(mddStrikethroughParser);
-  parser.add(mddEscaperParser);
-  parser.add(mddHeaderParser);
-
-  // 2. convert markdown to HTML
-  for (let i = 0; i < mds.length; i++) mds[i] = parser.apply(mds[i]);
-  
-  // 3. wrap each line with p and add new line symbol back
-  if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
-  mds[0] = mds[0] + newLineSymbol;
-  for (let i = 1; i < mds.length - 1; i++) {
-    if (mds[i] === '') {
-      mds[i] = emptyLine;
-    } else {
-      mds[i] = newLineSymbol + mds[i] + newLineSymbol;
-    }
+function markdownDecoratorCore(editor, caretPos, parser, mode) {
+  let mds = '';
+  if (!caretPos) mode = 'all';
+  switch (mode) {
+    case '3p':
+      for (let i = Math.max(caretPos[0] - 1, 0); i < Math.min(caretPos[0] + 2, editor.childNodes.length); i++) {
+        mds += editor.childNodes[i].textContent;
+      }
+      // remove redundent paragraph seperation symbol
+      mds = mds.replace(/^¶{1,2}/, '').replace(/¶{1,2}$/, '');
+      mds = parser.apply(mds);
+      if (caretPos[0] > 0) mds[0] = mds[0].replace(/^\<p\>/, newLineSymbol);
+      if (caretPos[0] + 1 < editor.childNodes.length) mds[mds.length - 1] = mds[mds.length - 1].replace(/\<\/p\>$/, newLineSymbol);
+      for (let i = Math.max(caretPos[0] - 1, 0), j = 0; i < Math.min(caretPos[0] + 2, editor.childNodes.length); i++, j++) {
+        editor.childNodes[i].innerHTML = mds[j].replace(/^\<p\>/, '').replace(/\<\/p\>$/, '');
+      }
+      return editor.innerHTML;
+    case 'all':
+    default:
+      mds = parser.apply(editor.textContent);
+      for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
+      return mds[0];
   }
-  mds[mds.length - 1] = newLineSymbol + mds[mds.length - 1];
-  for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
-  for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
-  console.log(mds[0]);
-  return mds[0];
 }
 
 // ============================================
 // public function
 
-export function markdownDecorator(marstr, caretPos) {
-  marstr = markdownDecoratorCore(marstr);
-  if (caretPos) marstr = prerender(marstr, caretPos);
-  return marstr;
+// dom element, array, parser object, string
+export function markdownDecorator(editor, caretPos, parser, mode) {
+  let html = markdownDecoratorCore(editor, caretPos, parser, mode);
+  if (caretPos) html = prerender(html, caretPos);
+  return html;
+}
+
+export function initParser() {
+  let parser = new MDParser();
+  // paragraph parser
+  parser.addParagraphParser(mddNewLineAnalyzer);
+  // parser.addParagraphParser(mddListAnalyzer);
+  // single line parser
+  parser.addSingleLineParser(mddSeperatorParser);
+  parser.addSingleLineParser(mddBoldItalicParser);
+  parser.addSingleLineParser(mddBoldParser1);
+  parser.addSingleLineParser(mddBoldParser2);
+  parser.addSingleLineParser(mddItalicParser1);
+  parser.addSingleLineParser(mddItalicParser2);
+  parser.addSingleLineParser(mddInlineCodeParser);
+  parser.addSingleLineParser(mddLinkParser);
+  parser.addSingleLineParser(mddStrikethroughParser);
+  parser.addSingleLineParser(mddEscaperParser);
+  parser.addSingleLineParser(mddHeaderParser);
+  // line wraper
+  parser.addLineWraper(mddNewLineWrapper);
+  return parser;
 }

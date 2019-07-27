@@ -19,7 +19,8 @@ import {
 // ============================================
 // import apis
 import {
-  markdownDecorator
+  markdownDecorator,
+  initParser,
 } from '../utils/parser.js';
 import {
   getCaretPosition,
@@ -63,6 +64,7 @@ class Main extends React.Component {
       caretPos: null,
       composition: false,
       lastFocus: [null, null],
+      parser: initParser(),
     };
   }
 
@@ -73,7 +75,7 @@ class Main extends React.Component {
   componentDidMount() {
     let editor = document.getElementById(editorId);
     editor.addEventListener("input", this.handleEditorChange, false);
-    editor.innerHTML = markdownDecorator(editor.textContent, this.state.caretPos);
+    editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'all');
   }
 
   render() {
@@ -100,17 +102,17 @@ class Main extends React.Component {
     if (e.inputType === 'insertParagraph') {
       // insertNewLineAfterCaret();
       let main = document.getElementById(editorId);
-      main.innerHTML = markdownDecorator(main.textContent, this.state.caretPos);
+      main.innerHTML = markdownDecorator(main, this.state.caretPos, this.state.parser, '3p');
       setCaretPosition([this.state.caretPos[0] + 1, -1], editorId);
     } else {
       let main = document.getElementById(editorId);
-      console.log(main.innerHTML);
+      // console.log(main.innerHTML);
       if (!this.state.composition) {
         if (main.textContent === '') {
           main.innerHTML = editorEmptyHtmlString;
           setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
         } else {
-          main.innerHTML = markdownDecorator(main.textContent, this.state.caretPos);
+          main.innerHTML = markdownDecorator(main, this.state.caretPos, this.state.parser, '3p');
           setCaretPosition(this.state.caretPos, editorId);
         }
       }
