@@ -53,6 +53,20 @@ $marker: (
   color: $codeBlockFontColor;
 }
 
+// seperator style
+.md-editor span.md-seperator {
+  width: 100%;
+  display: block;
+  &:not(.md-focus)::after {
+    content: " ";
+    position: relative;
+    top: -0.5rem;
+    left: 0;
+    width: 100%;
+    display: block;
+  }
+}
+
 // End of variables
 // =========================================================================
 // Custimizable style
@@ -86,8 +100,6 @@ $header-size: (2rem 1.5rem 1.17rem 1rem 0.83rem 0.67rem);
 }
 
 // seperator style
-.md-editor span.md-seperator {
-  width: 100%;
-  display: block;
-  border-top: solid 2px gray;
+.md-editor span.md-seperator::after {
+  border-bottom: 1px solid #111;
 }
