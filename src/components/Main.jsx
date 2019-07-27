@@ -53,6 +53,7 @@ class Main extends React.Component {
 
     // handle keyboard event
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleKeyUp = this.handleKeyUp.bind(this);
     this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
     // handle input method with composition
@@ -60,6 +61,7 @@ class Main extends React.Component {
     this.handleCompositionEnd = this.handleCompositionEnd.bind(this);
 
     this.state = {
+      caretPos: null,
       composition: false,
       lastFocus: [null, null],
       parser: initParser(),
@@ -89,54 +91,58 @@ class Main extends React.Component {
         suppressContentEditableWarning='true'
         style={{minHeight: '2rem'}}
         onKeyDown={this.handleKeyDown}
+        onKeyUp={this.handleKeyUp}
         onCompositionStart={this.handleCompositionStart}
         onCompositionEnd={this.handleCompositionEnd}
         mdtype={'main editor'}
         onSelect={this.handleSelectionChange}
       >
-        {/* line1¶¶line2¶¶line3 */}
         # Header1¶## Header2¶### Header3¶#### Header4¶##### Header5¶###### Header6¶Text here is editable.¶***¶These are **bold1** and __bold2__¶These are *italic2* and _italic2_¶These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶This is `code block` ¶This is a [link example](http://google.com).¶There are lots o\f\ \e\s\c\a\p\e\r.¶However, escaper could not in `code\block`.¶Also, ~~strikethrough~~ is supported!
       </div>
     );
   }
 
   handleEditorChange(e) {
-    getCaretPosition(editorId, caretPos => {
-      if (e.inputType === 'insertParagraph') {
-        // insertNewLineAfterCaret();
-        let main = document.getElementById(editorId);
-        main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
-        setCaretPosition([caretPos[0], -1], editorId);
+    let caretPos = this.state.caretPos;
+    if (e.inputType === 'insertParagraph') {
+      let main = document.getElementById(editorId);
+      main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
+      setCaretPosition([caretPos[0] + 1, -1], editorId);
+      this.setState({
+        numParagraph: main.childNodes.length
+      });
+    } else {
+      let main = document.getElementById(editorId);
+      // console.log(main.innerHTML);
+      if (!this.state.composition) {
+        if (main.textContent === '') {
+          main.innerHTML = editorEmptyHtmlString;
+          setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
+        } else {
+          let poffset = 0;
+
+          // render new style
+          main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
+
+          // check if any line is deleted
+          if (main.childNodes.length < this.state.numParagraph) caretPos[0] -= this.state.numParagraph - main.childNodes.length;
+
+          // check caretpos
+          let textContent = main.childNodes[caretPos[0]].textContent;
+          if (caretPos[1] === 0 && textContent[textContent.length - 1] === '¶') caretPos[1] = 1;
+
+          setCaretPosition(caretPos, editorId);
+        }
         this.setState({
           numParagraph: main.childNodes.length
         });
-      } else {
-        let main = document.getElementById(editorId);
-        // console.log(main.innerHTML);
-        if (!this.state.composition) {
-          if (main.textContent === '') {
-            main.innerHTML = editorEmptyHtmlString;
-            setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
-          } else {
-            let poffset = 0;
-            main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
-
-            // check caretpos
-            let textContent = main.childNodes[caretPos[0]].textContent;
-            if (caretPos[1] === 0 && textContent[textContent.length - 1] === '¶') caretPos[1] = 1;
-
-            setCaretPosition(caretPos, editorId);
-          }
-          this.setState({
-            numParagraph: main.childNodes.length
-          });
-        }
       }
-    })
+    }
   }
 
   handleKeyDown(e){
     let keyCode = e.which | e.keyCode;
+    this.getCaretPos();
 
     // handle newline
     if (keyCode === 13) {
@@ -144,6 +150,24 @@ class Main extends React.Component {
     }
 
     // console.log(document.getElementById(editorId).textContent);
+  }
+
+  handleKeyUp(e) {
+    let keyCode = e.which | e.keyCode;
+    switch (keyCode) {
+      case 8: case 13: case 38: case 40: 
+        this.getCaretPos();
+    }
+  }
+
+  getCaretPos(e) {
+    getCaretPosition(editorId, caretPos => {
+      if (caretPos) {
+        this.setState({
+          caretPos: caretPos
+        });
+      }
+    });
   }
 
   handleSelectionChange(e) {
