@@ -60,7 +60,12 @@ function mddNewLineAnalyzer(mds) {
 // markdown decorator: new line wrapper
 function mddNewLineWrapper(mds) {
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
-  mds[0] = mds[0] + newLineSymbol;
+
+  // check if first line is empty
+  if (mds[0] === '') mds[0] = emptyLine;
+  else mds[0] += newLineSymbol;
+
+  // wrap each line with new line symbol
   for (let i = 1; i < mds.length - 1; i++) {
     if (mds[i] === '') {
       mds[i] = emptyLine;
@@ -68,7 +73,11 @@ function mddNewLineWrapper(mds) {
       mds[i] = newLineSymbol + mds[i] + newLineSymbol;
     }
   }
+
+  // add new line symbol at last line
   mds[mds.length - 1] = newLineSymbol + mds[mds.length - 1];
+
+  // wrap with <p></p>
   for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
   
   return mds;
@@ -203,16 +212,18 @@ function markdownDecoratorCore(editor, caretPos, parser, mode) {
   if (!caretPos) mode = 'all';
   switch (mode) {
     case '3p':
+      console.log(caretPos);
       for (let i = Math.max(caretPos[0] - 1, 0); i < Math.min(caretPos[0] + 2, editor.childNodes.length); i++) {
         mds += editor.childNodes[i].textContent;
       }
       // remove redundent paragraph seperation symbol
-      mds = mds.replace(/^¶{1,2}/, '').replace(/¶{1,2}$/, '');
+      if (!mds.match(/^¶+$/)) mds = mds.replace(/^¶/, '').replace(/¶$/, '');
       mds = parser.apply(mds);
       if (caretPos[0] > 0) mds[0] = mds[0].replace(/^\<p\>/, newLineSymbol);
-      if (caretPos[0] + 1 < editor.childNodes.length) mds[mds.length - 1] = mds[mds.length - 1].replace(/\<\/p\>$/, newLineSymbol);
+      if (caretPos[0] + 2 < editor.childNodes.length) mds[mds.length - 1] = mds[mds.length - 1].replace(/\<\/p\>$/, newLineSymbol);
       for (let i = Math.max(caretPos[0] - 1, 0), j = 0; i < Math.min(caretPos[0] + 2, editor.childNodes.length); i++, j++) {
         editor.childNodes[i].innerHTML = mds[j].replace(/^\<p\>/, '').replace(/\<\/p\>$/, '');
+        console.log(editor.childNodes[i].innerHTML);
       }
       return editor.innerHTML;
     case 'all':

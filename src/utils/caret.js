@@ -255,7 +255,7 @@ export function getCaretPosition(editorId, cbf) {
 }
 
 export function setCaretPosition(pos, editorId) {
-  console.log(pos);
+  // console.log(pos);
   setCaretPositionCore(pos, editorId);
 }
 

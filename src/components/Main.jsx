@@ -50,7 +50,6 @@ class Main extends React.Component {
     super(props);
 
     this.handleEditorChange = this.handleEditorChange.bind(this);
-    this.getCaretPos = this.getCaretPos.bind(this);
 
     // handle keyboard event
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -61,7 +60,6 @@ class Main extends React.Component {
     this.handleCompositionEnd = this.handleCompositionEnd.bind(this);
 
     this.state = {
-      caretPos: null,
       composition: false,
       lastFocus: [null, null],
       parser: initParser(),
@@ -76,7 +74,7 @@ class Main extends React.Component {
   componentDidMount() {
     let editor = document.getElementById(editorId);
     editor.addEventListener("input", this.handleEditorChange, false);
-    editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'all');
+    editor.innerHTML = markdownDecorator(editor, null, this.state.parser, 'all');
     this.setState({
       numParagraph: editor.childNodes.length
     });
@@ -103,38 +101,38 @@ class Main extends React.Component {
   }
 
   handleEditorChange(e) {
-    if (e.inputType === 'insertParagraph') {
-      // insertNewLineAfterCaret();
-      let main = document.getElementById(editorId);
-      main.innerHTML = markdownDecorator(main, this.state.caretPos, this.state.parser, '3p');
-      setCaretPosition([this.state.caretPos[0] + 1, -1], editorId);
-      this.setState({
-        numParagraph: main.childNodes.length
-      });
-    } else {
-      let main = document.getElementById(editorId);
-      // console.log(main.innerHTML);
-      if (!this.state.composition) {
-        if (main.textContent === '') {
-          main.innerHTML = editorEmptyHtmlString;
-          setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
-        } else {
-          let poffset = 0;
-          main.innerHTML = markdownDecorator(main, this.state.caretPos, this.state.parser, '3p');
-          if (main.childNodes.length < this.state.numParagraph) poffset = this.state.numParagraph - main.childNodes.length;
-          console.log(main.childNodes.length, this.state.numParagraph);
-          setCaretPosition([this.state.caretPos[0] - poffset, this.state.caretPos[1]], editorId);
-        }
+    getCaretPosition(editorId, caretPos => {
+      if (e.inputType === 'insertParagraph') {
+        // insertNewLineAfterCaret();
+        let main = document.getElementById(editorId);
+        main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
+        setCaretPosition([caretPos[0] + 1, -1], editorId);
         this.setState({
           numParagraph: main.childNodes.length
         });
+      } else {
+        let main = document.getElementById(editorId);
+        // console.log(main.innerHTML);
+        if (!this.state.composition) {
+          if (main.textContent === '') {
+            main.innerHTML = editorEmptyHtmlString;
+            setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
+          } else {
+            let poffset = 0;
+            main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
+            if (main.childNodes.length < this.state.numParagraph) poffset = this.state.numParagraph - main.childNodes.length;
+            setCaretPosition([caretPos[0] - poffset, caretPos[1]], editorId);
+          }
+          this.setState({
+            numParagraph: main.childNodes.length
+          });
+        }
       }
-    }
+    })
   }
 
   handleKeyDown(e){
     let keyCode = e.which | e.keyCode;
-    this.getCaretPos();
 
     // handle newline
     if (keyCode === 13) {
@@ -149,16 +147,6 @@ class Main extends React.Component {
       this.setState({
         lastFocus: newFocus
       });
-    });
-  }
-
-  getCaretPos(e) {
-    getCaretPosition(editorId, caretPos => {
-      if (caretPos) {
-        this.setState({
-          caretPos: caretPos
-        });
-      }
     });
   }
 
