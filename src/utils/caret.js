@@ -153,6 +153,7 @@ function _setCaretPositionCore(range, restLength) {
   for (let i = 0; i < range.childNodes.length; i++) {
     let node = range.childNodes[i];
     if (node.textContent.length >= restLength) {
+      // console.log(restLength);
       _setCaretPositionCore(node, restLength);
       return;
     } else {

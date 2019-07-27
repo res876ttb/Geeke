@@ -65,6 +65,7 @@ class Main extends React.Component {
       composition: false,
       lastFocus: [null, null],
       parser: initParser(),
+      numParagraph: 1,
     };
   }
 
@@ -76,6 +77,9 @@ class Main extends React.Component {
     let editor = document.getElementById(editorId);
     editor.addEventListener("input", this.handleEditorChange, false);
     editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'all');
+    this.setState({
+      numParagraph: editor.childNodes.length
+    });
   }
 
   render() {
@@ -104,6 +108,9 @@ class Main extends React.Component {
       let main = document.getElementById(editorId);
       main.innerHTML = markdownDecorator(main, this.state.caretPos, this.state.parser, '3p');
       setCaretPosition([this.state.caretPos[0] + 1, -1], editorId);
+      this.setState({
+        numParagraph: main.childNodes.length
+      });
     } else {
       let main = document.getElementById(editorId);
       // console.log(main.innerHTML);
@@ -112,9 +119,15 @@ class Main extends React.Component {
           main.innerHTML = editorEmptyHtmlString;
           setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
         } else {
+          let poffset = 0;
           main.innerHTML = markdownDecorator(main, this.state.caretPos, this.state.parser, '3p');
-          setCaretPosition(this.state.caretPos, editorId);
+          if (main.childNodes.length < this.state.numParagraph) poffset = this.state.numParagraph - main.childNodes.length;
+          console.log(main.childNodes.length, this.state.numParagraph);
+          setCaretPosition([this.state.caretPos[0] - poffset, this.state.caretPos[1]], editorId);
         }
+        this.setState({
+          numParagraph: main.childNodes.length
+        });
       }
     }
   }
