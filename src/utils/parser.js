@@ -122,6 +122,13 @@ const mddStrikethroughParser = [
   mds => mds.replace(/¨s´/g, `<span class='md-strikethrough'>~~</span>`)
 ]
 
+// test: https://regex101.com/r/dY5dYq/1
+// TODO: patch text content after improve render performance
+const mddSeperatorParser = [
+  mds => mds.replace(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/g, `<span class='md-seperator'>¨sl´</span>`),
+  mds => mds.replace(/¨sl´/g, `<span class='md-seperatorm'>***</span>`)
+]
+
 class MDParser {
   constructor() {this.parser = [[],[]];}
   add(func) {
@@ -144,6 +151,7 @@ function markdownDecoratorCore(mds) {
 
   // TODO: export parser definition to function
   let parser = new MDParser();
+  parser.add(mddSeperatorParser);
   parser.add(mddBoldItalicParser);
   parser.add(mddBoldParser1);
   parser.add(mddBoldParser2);

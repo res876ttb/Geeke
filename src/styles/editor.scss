@@ -20,7 +20,8 @@ $marker: (
   inline-code:code,
   link:a,
   escaperm:'span.md-escaper',
-  strikethrough:del
+  strikethrough:del,
+  seperatorm:'span.md-seperator'
 );
 @for $i from 1 through 6 {
   $marker: append($marker, h#{$i}m 'span.md-h#{$i}');
@@ -82,4 +83,11 @@ $header-size: (2rem 1.5rem 1.17rem 1rem 0.83rem 0.67rem);
   background-color: #f3f4f4;
   padding: 0 2px 0 2px;
   color: $codeBlockFontColor;
+}
+
+// seperator style
+.md-editor span.md-seperator {
+  width: 100%;
+  display: block;
+  border-top: solid 2px gray;
 }
