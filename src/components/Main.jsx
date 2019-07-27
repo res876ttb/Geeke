@@ -106,7 +106,7 @@ class Main extends React.Component {
         // insertNewLineAfterCaret();
         let main = document.getElementById(editorId);
         main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
-        setCaretPosition([caretPos[0] + 1, -1], editorId);
+        setCaretPosition([caretPos[0], -1], editorId);
         this.setState({
           numParagraph: main.childNodes.length
         });
@@ -120,8 +120,12 @@ class Main extends React.Component {
           } else {
             let poffset = 0;
             main.innerHTML = markdownDecorator(main, caretPos, this.state.parser, '3p');
-            if (main.childNodes.length < this.state.numParagraph) poffset = this.state.numParagraph - main.childNodes.length;
-            setCaretPosition([caretPos[0] - poffset, caretPos[1]], editorId);
+
+            // check caretpos
+            let textContent = main.childNodes[caretPos[0]].textContent;
+            if (caretPos[1] === 0 && textContent[textContent.length - 1] === '¶') caretPos[1] = 1;
+
+            setCaretPosition(caretPos, editorId);
           }
           this.setState({
             numParagraph: main.childNodes.length
