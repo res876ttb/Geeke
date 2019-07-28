@@ -213,23 +213,20 @@ class MDParser {
 // TODO: render only 1 paragraph at a time to improve performance
 function markdownDecoratorCore(editor, caretPos, parser, mode, mdtext) {
   let mds = '';
-  console.log(caretPos);
   if (!caretPos) mode = 'all';
   switch (mode) {
     case 'p':
       let index = caretPos[0];
+      if (!editor.childNodes[index]) return null;
       if (mdtext) mds = mdtext;
       else mds = editor.childNodes[index].textContent;
       mds = mds.replace(/^¶([^$])/, (match, p1) => p1).replace(/¶$/, '');
       // parse markdown
       mds = parser.apply(mds)[0]; // Parser returns a list of paragraphs. 
                                   // However, we have only 1 paragraph, just use the first one.
-      console.log(mds);
 
       // remove <p> wrapper
       mds = mds.replace(/^\<p( mid='[\d]+')?\>/, '').replace(/\<\/p\>$/, '');
-
-      console.log(mds);
 
       // put rendered result back to dom
       editor.childNodes[index].innerHTML = mds;
@@ -250,6 +247,7 @@ function markdownDecoratorCore(editor, caretPos, parser, mode, mdtext) {
 // dom element, array, parser object, string
 export function markdownDecorator(editor, caretPos, parser, mode, mdtext) {
   let html = markdownDecoratorCore(editor, caretPos, parser, mode, mdtext);
+  if (!html) return null;
   if (caretPos) html = prerender(html, caretPos);
   return html;
 }

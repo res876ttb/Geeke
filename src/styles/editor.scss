@@ -18,6 +18,11 @@ $lineHeight: 16px;
   display: none;
 }
 
+.hide-visible {
+  display: initial;
+  font-size: 0px;
+}
+
 // variables
 $marker: (
   bold:b,
@@ -48,7 +53,7 @@ $marker: (
 
 // show md marker
 @each $item, $cover in $marker {
-  .md-editor #{$cover}.md-focus span.md-#{$item} {
+  .md-editor p.md-focus #{$cover}.md-focus span.md-#{$item} {
     font-size: unset;
   }
 }

@@ -249,7 +249,7 @@ function insertNewLineAfterCaretCore() {
   }
 }
 
-function getCurrentparagraphCore(editorId) {
+function getCurrentParagraphCore(editorId) {
   let node = getCurrentRange().endContainer;
   for (; node.parentNode.id !== editorId; node = node.parentNode) ;
   return node;
@@ -299,8 +299,8 @@ export function insertNewLineAfterCaret() {
   insertNewLineAfterCaretCore();
 }
 
-export function getCurrentparagraph(editorId) {
-  return getCurrentparagraphCore(editorId);
+export function getCurrentParagraph(editorId) {
+  return getCurrentParagraphCore(editorId);
 }
 
 export function getSelectedParagraph(editorId) {

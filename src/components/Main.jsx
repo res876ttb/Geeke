@@ -27,7 +27,7 @@ import {
   getCaretPosition,
   setCaretPosition,
   updateCaretFocus,
-  getCurrentparagraph
+  getCurrentParagraph
 } from '../utils/caret.js';
 
 // ============================================
@@ -37,7 +37,7 @@ import '../styles/editor.scss';
 // ============================================
 // constants
 const editorId = 'mde';
-const editorEmptyHtmlString = '<p><br /></p>';
+const editorEmptyHtmlString = '<p><br/></p>';
 
 // ============================================
 // variables
@@ -58,7 +58,6 @@ class Main extends React.Component {
 
     // handle keyboard event
     this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleKeyUp = this.handleKeyUp.bind(this);
     this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
     // handle input method with composition
@@ -110,36 +109,48 @@ class Main extends React.Component {
   }
 
   handleEditorChange(e) {
-    console.log(e.inputType);
     getCaretPosition(editorId, caretPos => {
+      console.log(caretPos);
       let editor = document.getElementById(editorId);
       // console.log(editor.innerHTML);
-      if (!this.state.composition) {
-        // reset editor
-        if (editor.textContent === '') {
-          editor.innerHTML = editorEmptyHtmlString;
-          setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
-        } else {
-          let poffset = 0;
+      if (!this.state.composition || e.endComposition) {
+        switch(e.inputType) {
+          default:
+            // reset editor if there are no content in the editor
+            if (editor.textContent === '') {
+              editor.innerHTML = editorEmptyHtmlString;
+              setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
+            } else {
+              // render current result
+              let poffset = 0;
+              let coffset = 0;
 
-          // render new style
-          editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'p', null);
+              // render new style
+              let newHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'p', null);
+              if (newHTML) editor.innerHTML = newHTML;
+              else {
+                // patch for delete last paragraph, which cause difference on number of paragraph
+                this.setState({
+                  numParagraph: editor.childNodes.length
+                });
+                return;
+              }
 
-          // check if any line is deleted
-          console.log(editor.childNodes.length, this.state.numParagraph);
-          if (editor.childNodes.length < this.state.numParagraph) poffset = this.state.numParagraph - editor.childNodes.length;
+              // check if any line is deleted
+              if (editor.childNodes.length < this.state.numParagraph) poffset = this.state.numParagraph - editor.childNodes.length;
 
-          // check caretpos
-          let textContent = editor.childNodes[caretPos[0]].textContent;
-          if (caretPos[1] === 0 && textContent.slice(-1) === '¶') caretPos[1] = 1;
+              // check caretpos
+              let textContent = editor.childNodes[caretPos[0]].textContent;
+              if (caretPos[1] === 0 && textContent.slice(-1) === '¶') coffset = 1;
 
-          // for delete a word with md marks, it should use last position
-          setCaretPosition([this.state.caretPos[0] - poffset, this.state.caretPos[1]], editorId);
-          // setCaretPosition(caretPos, editorId);
+              // for delete a word with md marks, it should use last position
+              setCaretPosition([this.state.caretPos[0] - poffset, coffset ? coffset : this.state.caretPos[1]], editorId);
+              // setCaretPosition(caretPos, editorId);
+            }
+            this.setState({
+              numParagraph: editor.childNodes.length
+            });
         }
-        this.setState({
-          numParagraph: editor.childNodes.length
-        });
       }
     });
   }
@@ -150,63 +161,65 @@ class Main extends React.Component {
     this.getCaretPos();
 
     // handle newline
-    if (keyCode === 13) { // enter is pressed
-      // check current state to insert corresponding element
+    switch (keyCode) {
+      // case 8:  // backspace is pressed
+        // let curP = getCurrentParagraph(editorId);
+        // getCaretPosition(editorId, caretPos => {
+        //   console.log(caretPos, curP, curP.textContent.length);
+        //   if (caretPos[1] === curP.textContent.replace(/^¶/, '').replace(/¶$/, '').length) {
+        //     // make visible paragraph wrap symbol
+        //     let newSpan = document.createElement('span');
+        //     newSpan.classList.add('hide-visible');
+        //     newSpan.innerText = '¶';
+        //     console.log(newSpan);
+        //     curP.previousSibling.appendChild(newSpan);
+        //   }
+        // });
+        // break;
+      case 13: // enter is pressed
+        // check current state to insert corresponding element
 
-      // insert a new paragraph
-      // check if there are word after current caret
-      getCaretPosition(editorId, caretPos => {
-        // prevent default enter event
-        e.preventDefault();
+        // insert a new paragraph
+        // check if there are word after current caret
+        getCaretPosition(editorId, caretPos => {
+          // prevent default enter event
+          e.preventDefault();
 
-        // get current paragraph
-        let curP = getCurrentparagraph(editorId);
-        // create a new paragraph
-        let newP = document.createElement('p');
-        newP.id = `${getCounter()}`; // assign each paragraph an id
-        newP.appendChild(newPSymbol.cloneNode(true)); // add paragraph symbol first
-        
-        // check if we have to split word into the new paragraph
-        let temp = editor.childNodes[caretPos[0]].textContent;
-        console.log(temp, caretPos[1]);
-        if (caretPos[1] > (temp.slice(-1) === '¶' ? 1 : 0)) { // YES
-          console.log('HERE');
-          return;
-        } else { // NO
-          // add empty symbol into the new paragraph
-          newP.appendChild(document.createElement('br'));
-          // wrap the empty symbol with paragraph symbol if there is an paragraph after the new paragraph
-          if (curP.nextSibling) newP.appendChild(newPSymbol.cloneNode(true));
-          else curP.appendChild(newPSymbol.cloneNode(true));
-        }
-        // insert the new paragraph after this one
-        curP.after(newP);
+          // get current paragraph
+          let curP = getCurrentParagraph(editorId);
+          // create a new paragraph
+          let newP = document.createElement('p');
+          newP.id = `${getCounter()}`; // assign each paragraph an id
+          newP.appendChild(newPSymbol.cloneNode(true)); // add paragraph symbol first
+          
+          // check if we have to split word into the new paragraph
+          let temp = editor.childNodes[caretPos[0]].textContent;
+          if (caretPos[1] > (temp.slice(-1) === '¶' ? 1 : 0)) { // YES
+            console.log('Text after me is too heavy!!');
+            return;
+          } else { // NO
+            // add empty symbol into the new paragraph
+            newP.appendChild(document.createElement('br'));
+            // wrap the empty symbol with paragraph symbol if there is an paragraph after the new paragraph
+            if (curP.nextSibling) newP.appendChild(newPSymbol.cloneNode(true));
+            else curP.appendChild(newPSymbol.cloneNode(true));
+          }
+          // insert the new paragraph after this one
+          curP.after(newP);
 
-        // set caret position
-        setCaretPosition([caretPos[0] + 1, 0], editorId);
+          // set caret position
+          setCaretPosition([caretPos[0] + 1, 0], editorId);
 
-        // update caret focus status and number of paragraph
-        updateCaretFocus(editorId, this.state.lastFocus, newFocus => {
-          this.setState({
-            lastFocus: newFocus,
-            numParagraph: document.getElementById(editorId).childNodes.length
-          })
+          // update caret focus status and number of paragraph
+          updateCaretFocus(editorId, this.state.lastFocus, newFocus => {
+            this.setState({
+              lastFocus: newFocus,
+              numParagraph: document.getElementById(editorId).childNodes.length
+            })
+          });
         });
-      });
+        break;
     }
-
-    // console.log(document.getElementById(editorId).textContent);
-  }
-
-  handleKeyUp(e) {
-    // let keyCode = e.which | e.keyCode;
-    // switch (keyCode) {
-    //   case 8: case 13: case 38: case 40: 
-    //     this.getCaretPos();
-    // }
-    getCaretPosition(editorId, caretPos => {
-      console.log(caretPos);
-    })
   }
 
   getCaretPos(e) {
@@ -237,6 +250,7 @@ class Main extends React.Component {
     this.setState({
       composition: false
     });
+    this.handleEditorChange({endComposition: true});
   }
 }
 
