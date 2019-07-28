@@ -152,7 +152,10 @@ class Main extends React.Component {
 
     // handle newline
     if (keyCode === 13) {
-      // insertNewLineAfterCaret();
+      // check current state
+      // insert corresponding element
+
+      // insert a new paragraph
       e.preventDefault();
       let curP = getCurrentparagraph(editorId);
       let newP = document.createElement('p');
@@ -177,6 +180,9 @@ class Main extends React.Component {
     //   case 8: case 13: case 38: case 40: 
     //     this.getCaretPos();
     // }
+    getCaretPosition(editorId, caretPos => {
+      console.log(caretPos);
+    })
   }
 
   getCaretPos(e) {

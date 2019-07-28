@@ -217,13 +217,20 @@ function markdownDecoratorCore(editor, caretPos, parser, mode) {
   switch (mode) {
     case '3p':
       let start = Math.max(caretPos[0] - 1, 0), end = Math.min(caretPos[0] + 2, editor.childNodes.length);
-      for (let i = start; i < end; i++) {
+      mds += editor.childNodes[start].textContent.replace(/^¶/, '');
+      for (let i = start + 1; i < end - 1; i++) {
         mds += editor.childNodes[i].textContent;
-        console.log(editor.childNodes[i].textContent);
+        if (mds[mds.length - 1] !== '¶') mds += '¶';
       }
+      if (start === end) {
+        mds = mds.replace(/¶$/, '');
+      } else {
+        mds += editor.childNodes[end - 1].textContent.replace(/¶$/, '');
+      }
+      console.log(mds);
       // remove redundent paragraph seperation symbol
-      if (!mds.match(/^¶+$/)) mds = mds.replace(/^¶/, '').replace(/¶$/, '');
-      else mds = mds.replace(/¶+/g, '¶'.repeat((end - start - 1) * 2));
+      // if (!mds.match(/^¶+$/)) mds = mds.replace(/^¶/, '').replace(/¶$/, '/');
+      // else mds = mds.replace(/¶+/g, '¶'.repeat((end - start - 1) * 2));
 
       // parse markdown
       mds = parser.apply(mds);
