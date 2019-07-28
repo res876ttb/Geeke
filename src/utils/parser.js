@@ -1,6 +1,3 @@
-import { isValidElement } from "react";
-import { Minimatch } from "minimatch";
-
 /**
  * @name parser.js
  * @desc Parser for Markdown string.
@@ -8,6 +5,9 @@ import { Minimatch } from "minimatch";
 
 // ============================================
 // import
+import {
+  getSelectedParagraph
+} from './caret.js';
 
 // ============================================
 // constant
@@ -213,40 +213,26 @@ class MDParser {
 // TODO: render only 1 paragraph at a time to improve performance
 function markdownDecoratorCore(editor, caretPos, parser, mode) {
   let mds = '';
+  console.log(caretPos);
   if (!caretPos) mode = 'all';
   switch (mode) {
-    case '3p':
-      let start = Math.max(caretPos[0] - 1, 0), end = Math.min(caretPos[0] + 2, editor.childNodes.length);
-      mds += editor.childNodes[start].textContent.replace(/^¶/, '');
-      console.log(mds);
-      for (let i = start + 1; i < end - 1; i++) {
-        mds += editor.childNodes[i].textContent;
-        if (mds[mds.length - 1] !== '¶') mds += '¶';
-        console.log(editor.childNodes[i].textContent);
-      }
-      if (start === end) {
-        mds = mds.replace(/¶$/, '');
-      } else {
-        mds += editor.childNodes[end - 1].textContent.replace(/¶$/, '');
-        console.log(editor.childNodes[end - 1].textContent);
-      }
-      console.log(mds);
-      // remove redundent paragraph seperation symbol
-      // if (!mds.match(/^¶+$/)) mds = mds.replace(/^¶/, '').replace(/¶$/, '/');
-      // else mds = mds.replace(/¶+/g, '¶'.repeat((end - start - 1) * 2));
+    case 'p':
+      let index = caretPos[0];
+      mds = editor.childNodes[index].textContent.replace(/^¶([^$])/, (match, p1) => p1).replace(/¶$/, '');
 
       // parse markdown
       mds = parser.apply(mds);
 
-      // patch for optimization
-      if (caretPos[0] - 1 > 0) mds[0] = mds[0].replace(/^\<p( mid='[\d]+')?\>/, newLineSymbol);
-      if (caretPos[0] + 2 < editor.childNodes.length) mds[mds.length - 1] = mds[mds.length - 1].replace(/\<\/p\>$/, newLineSymbol);
-      for (let i = Math.max(caretPos[0] - 1, 0), j = 0; i < Math.min(caretPos[0] + 2, editor.childNodes.length); i++, j++) {
-        editor.childNodes[i].innerHTML = mds[j].replace(/^\<p( mid='[\d]+')?\>/, '').replace(/\<\/p\>$/, '');
-      }
+      // remove <p> wrapper
+      mds = mds.replace(/^\<p( mid='[\d]+')?\>/, newLineSymbol).replace(/\<\/p\>$/, '');
+
+      // put rendered result back to dom
+      editor.childNodes[index].innerHTML = mds;
+
       return editor.innerHTML;
     case 'all':
     default:
+      // just apply oarser on textContent
       mds = parser.apply(editor.textContent);
       for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
       return mds[0];
@@ -257,9 +243,9 @@ function markdownDecoratorCore(editor, caretPos, parser, mode) {
 // public function
 
 // dom element, array, parser object, string
-export function markdownDecorator(editor, newCaretPos, prevCaretPos, parser, mode) {
-  let html = markdownDecoratorCore(editor, prevCaretPos, parser, mode);
-  if (newCaretPos) html = prerender(html, newCaretPos);
+export function markdownDecorator(editor, caretPos, parser, mode) {
+  let html = markdownDecoratorCore(editor, caretPos, parser, mode);
+  if (caretPos) html = prerender(html, caretPos);
   return html;
 }
 

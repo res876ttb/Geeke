@@ -27,8 +27,7 @@ import {
   getCaretPosition,
   setCaretPosition,
   updateCaretFocus,
-  insertNewLineAfterCaret,
-  getCurrentparagraph,
+  getCurrentparagraph
 } from '../utils/caret.js';
 
 // ============================================
@@ -84,7 +83,7 @@ class Main extends React.Component {
   componentDidMount() {
     let editor = document.getElementById(editorId);
     editor.addEventListener("input", this.handleEditorChange, false);
-    editor.innerHTML = markdownDecorator(editor, null, null, this.state.parser, 'all');
+    editor.innerHTML = markdownDecorator(editor, null, this.state.parser, 'all');
     this.setState({
       numParagraph: editor.childNodes.length
     });
@@ -112,7 +111,6 @@ class Main extends React.Component {
 
   handleEditorChange(e) {
     console.log(e.inputType);
-    // let caretPos = this.state.caretPos;
     getCaretPosition(editorId, caretPos => {
       let editor = document.getElementById(editorId);
       // console.log(editor.innerHTML);
@@ -125,7 +123,7 @@ class Main extends React.Component {
           let poffset = 0;
 
           // render new style
-          editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.caretPos, this.state.parser, '3p');
+          editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, '3p');
 
           // check if any line is deleted
           console.log(editor.childNodes.length, this.state.numParagraph);
@@ -133,7 +131,7 @@ class Main extends React.Component {
 
           // check caretpos
           let textContent = editor.childNodes[caretPos[0]].textContent;
-          if (caretPos[1] === 0 && textContent[textContent.length - 1] === '¶') caretPos[1] = 1;
+          if (caretPos[1] === 0 && textContent.slice(-1) === '¶') caretPos[1] = 1;
 
           // for delete a word with md marks, it should use last position
           setCaretPosition([this.state.caretPos[0] - poffset, this.state.caretPos[1]], editorId);
@@ -148,6 +146,7 @@ class Main extends React.Component {
 
   handleKeyDown(e){
     let keyCode = e.which | e.keyCode;
+    let editor = document.getElementById(editorId);
     this.getCaretPos();
 
     // handle newline
@@ -156,19 +155,32 @@ class Main extends React.Component {
       // insert corresponding element
 
       // insert a new paragraph
-      e.preventDefault();
-      let curP = getCurrentparagraph(editorId);
-      let newP = document.createElement('p');
-      newP.id = `${getCounter()}`;
-      newP.appendChild(newPSymbol.cloneNode(true));
-      newP.appendChild(document.createElement('br'));
-      if (curP.nextSibling) newP.appendChild(newPSymbol.cloneNode(true));
-      else curP.appendChild(newPSymbol.cloneNode(true));
-      curP.after(newP);
+      // check if there are word after current caret
       getCaretPosition(editorId, caretPos => {
+        e.preventDefault();
+        let curP = getCurrentparagraph(editorId);
+        let newP = document.createElement('p');
+        newP.id = `${getCounter()}`;
+        newP.appendChild(newPSymbol.cloneNode(true));
+        
+        // check if we have to split word into the new paragraph
+        let temp = editor.childNodes[caretPos[0]].textContent;
+        console.log(temp, caretPos[1]);
+        if (caretPos[1] > (temp.slice(-1) === '¶' ? 1 : 0)) { // YES
+          console.log('HERE');
+          return;
+        } else { // NO
+          newP.appendChild(document.createElement('br'));
+          if (curP.nextSibling) newP.appendChild(newPSymbol.cloneNode(true));
+          else curP.appendChild(newPSymbol.cloneNode(true));
+        }
+        curP.after(newP);
         setCaretPosition([caretPos[0] + 1, 0], editorId);
-        this.setState({
-          numParagraph: document.getElementById(editorId).childNodes.length
+        updateCaretFocus(editorId, this.state.lastFocus, newFocus => {
+          this.setState({
+            lastFocus: newFocus,
+            numParagraph: document.getElementById(editorId).childNodes.length
+          })
         });
       });
     }

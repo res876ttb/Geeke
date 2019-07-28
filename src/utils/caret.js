@@ -155,7 +155,6 @@ function _setCaretPositionCore(range, restLength) {
   for (let i = 0; i < range.childNodes.length; i++) {
     let node = range.childNodes[i];
     if (node.textContent.length >= restLength) {
-      // console.log(restLength);
       _setCaretPositionCore(node, restLength);
       return;
     } else {
@@ -192,7 +191,7 @@ function getNextElement(ele, offset, editorId) {
   if (ele.textContent.length != offset) return null;
   while (1) {
     if (ele.nextSibling) return ele.nextSibling;
-    if (ele.nodeType === 1 && ele.id === editorId) return null;
+    if (ele.nodeType === 1 && ele.id === editorId) return null; // BUG: cross paratraph detection
     ele = ele.parentNode;
   }
 }
@@ -256,6 +255,30 @@ function getCurrentparagraphCore(editorId) {
   return node;
 }
 
+function _getSelectedParagraphCore(range, editorId) {
+  let found = false;
+  if (!range.parentNode) return cbf(null);
+  if (range.parentNode.id === editorId) {
+    let result = 0, i = 0;
+    for (; i < range.parentNode.childNodes.length; i++) {
+      if (range.parentNode.childNodes[i].isEqualNode(range)) {
+        result = i;
+        found = true;
+        break;
+      }
+    }
+    console.assert(found, 'Node under main editor is not found!');
+    return result;
+  } else {
+    return _getSelectedParagraphCore(range.parentNode, editorId);
+  }
+}
+
+function getSelectedParagraphCore(editorId) {
+  let caretPos = getCurrentRange();
+  return [_getSelectedParagraphCore(caretPos.startContainer, editorId), _getSelectedParagraphCore(caretPos.endContainer, editorId)];
+}
+
 // ===================================================================================
 // public function
 
@@ -278,4 +301,8 @@ export function insertNewLineAfterCaret() {
 
 export function getCurrentparagraph(editorId) {
   return getCurrentparagraphCore(editorId);
+}
+
+export function getSelectedParagraph(editorId) {
+  return getSelectedParagraphCore(editorId);
 }
