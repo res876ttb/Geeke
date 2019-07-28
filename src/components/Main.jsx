@@ -41,6 +41,10 @@ const editorId = 'mde';
 const editorEmptyHtmlString = '<p><br /></p>';
 
 // ============================================
+// variables
+var newPSymbol;
+
+// ============================================
 // react components
 class Main extends React.Component {
   static propTypes = {
@@ -72,7 +76,9 @@ class Main extends React.Component {
   }
 
   componentWillMount() {
-
+    newPSymbol = document.createElement('span');
+    newPSymbol.innerText = '¶';
+    newPSymbol.classList.add('hide');
   }
 
   componentDidMount() {
@@ -108,40 +114,34 @@ class Main extends React.Component {
     console.log(e.inputType);
     // let caretPos = this.state.caretPos;
     getCaretPosition(editorId, caretPos => {
-      if (e.inputType === 'insertParagraph') {
-        e.preventDefault();
-        let main = document.getElementById(editorId);
-        main.innerHTML = markdownDecorator(main, caretPos, this.state.caretPos, this.state.parser, '3p');
-        setCaretPosition([caretPos[0], -1], editorId);
-        this.setState({
-          numParagraph: main.childNodes.length
-        });
-      } else {
-        let main = document.getElementById(editorId);
-        // console.log(main.innerHTML);
-        if (!this.state.composition) {
-          if (main.textContent === '') {
-            main.innerHTML = editorEmptyHtmlString;
-            setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
-          } else {
-            let poffset = 0;
-  
-            // render new style
-            main.innerHTML = markdownDecorator(main, this.state.caretPos, this.state.caretPos, this.state.parser, '3p');
-  
-            // check if any line is deleted
-            // if (main.childNodes.length < this.state.numParagraph) caretPos[0] -= this.state.numParagraph - main.childNodes.length;
-  
-            // check caretpos
-            let textContent = main.childNodes[caretPos[0]].textContent;
-            if (caretPos[1] === 0 && textContent[textContent.length - 1] === '¶') caretPos[1] = 1;
-  
-            setCaretPosition(caretPos, editorId);
-          }
-          this.setState({
-            numParagraph: main.childNodes.length
-          });
+      let editor = document.getElementById(editorId);
+      // console.log(editor.innerHTML);
+      if (!this.state.composition) {
+        // reset editor
+        if (editor.textContent === '') {
+          editor.innerHTML = editorEmptyHtmlString;
+          setCaretPosition([0, 0], editorId); // Put caret into the editorEmptyHtmlString
+        } else {
+          let poffset = 0;
+
+          // render new style
+          editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.caretPos, this.state.parser, '3p');
+
+          // check if any line is deleted
+          console.log(editor.childNodes.length, this.state.numParagraph);
+          if (editor.childNodes.length < this.state.numParagraph) poffset = this.state.numParagraph - editor.childNodes.length;
+
+          // check caretpos
+          let textContent = editor.childNodes[caretPos[0]].textContent;
+          if (caretPos[1] === 0 && textContent[textContent.length - 1] === '¶') caretPos[1] = 1;
+
+          // for delete a word with md marks, it should use last position
+          setCaretPosition([this.state.caretPos[0] - poffset, this.state.caretPos[1]], editorId);
+          // setCaretPosition(caretPos, editorId);
         }
+        this.setState({
+          numParagraph: editor.childNodes.length
+        });
       }
     });
   }
@@ -151,7 +151,7 @@ class Main extends React.Component {
     this.getCaretPos();
 
     // handle newline
-    if (keyCode === 13) {
+    if (keyCode === 13) { // enter is pressed
       // check current state
       // insert corresponding element
 
@@ -159,15 +159,17 @@ class Main extends React.Component {
       e.preventDefault();
       let curP = getCurrentparagraph(editorId);
       let newP = document.createElement('p');
-      let newLineSymbol = document.createElement('span');
-      newLineSymbol.innerText = '¶';
-      newLineSymbol.classList.add('hide');
       newP.id = `${getCounter()}`;
-      newP.appendChild(newLineSymbol);
+      newP.appendChild(newPSymbol.cloneNode(true));
       newP.appendChild(document.createElement('br'));
+      if (curP.nextSibling) newP.appendChild(newPSymbol.cloneNode(true));
+      else curP.appendChild(newPSymbol.cloneNode(true));
       curP.after(newP);
       getCaretPosition(editorId, caretPos => {
         setCaretPosition([caretPos[0] + 1, 0], editorId);
+        this.setState({
+          numParagraph: document.getElementById(editorId).childNodes.length
+        });
       });
     }
 

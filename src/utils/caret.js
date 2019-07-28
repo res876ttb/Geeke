@@ -101,6 +101,7 @@ function getCaretRangeCore(editorId, cbf) {
 
 function _getCaretPositionCore(range, editorId, cbf) {
   let found = false;
+  if (!range.parentNode) return cbf(null);
   if (range.parentNode.id === editorId) {
     let result = 0, i = 0;
     for (; i < range.parentNode.childNodes.length; i++) {
@@ -114,6 +115,7 @@ function _getCaretPositionCore(range, editorId, cbf) {
     cbf([result, range.parentNode.childNodes[i].textContent.length]);
   } else {
     _getCaretPositionCore(range.parentNode, editorId, result => {
+      if (!result) return cbf(null);
       for (let i = 0; i < range.parentNode.childNodes.length; i++) {
         let node = range.parentNode.childNodes[i];
         if (node.isEqualNode(range)) {
@@ -164,7 +166,8 @@ function _setCaretPositionCore(range, restLength) {
 
 function getCaretPositionCore(editorId, cbf) {
   _getCaretPositionCore(getCurrentRange().endContainer, editorId, result => {
-    cbf([result[0], result[1] - getCurrentRange().endOffset]);
+    if (!result) cbf(null);
+    else cbf([result[0], result[1] - getCurrentRange().endOffset]);
   });
 }
 
