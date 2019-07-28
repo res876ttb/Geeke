@@ -83,7 +83,7 @@ class Main extends React.Component {
   componentDidMount() {
     let editor = document.getElementById(editorId);
     editor.addEventListener("input", this.handleEditorChange, false);
-    editor.innerHTML = markdownDecorator(editor, null, this.state.parser, 'all');
+    editor.innerHTML = markdownDecorator(editor, null, this.state.parser, 'all', null);
     this.setState({
       numParagraph: editor.childNodes.length
     });
@@ -123,7 +123,7 @@ class Main extends React.Component {
           let poffset = 0;
 
           // render new style
-          editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, '3p');
+          editor.innerHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'p', null);
 
           // check if any line is deleted
           console.log(editor.childNodes.length, this.state.numParagraph);
@@ -151,17 +151,20 @@ class Main extends React.Component {
 
     // handle newline
     if (keyCode === 13) { // enter is pressed
-      // check current state
-      // insert corresponding element
+      // check current state to insert corresponding element
 
       // insert a new paragraph
       // check if there are word after current caret
       getCaretPosition(editorId, caretPos => {
+        // prevent default enter event
         e.preventDefault();
+
+        // get current paragraph
         let curP = getCurrentparagraph(editorId);
+        // create a new paragraph
         let newP = document.createElement('p');
-        newP.id = `${getCounter()}`;
-        newP.appendChild(newPSymbol.cloneNode(true));
+        newP.id = `${getCounter()}`; // assign each paragraph an id
+        newP.appendChild(newPSymbol.cloneNode(true)); // add paragraph symbol first
         
         // check if we have to split word into the new paragraph
         let temp = editor.childNodes[caretPos[0]].textContent;
@@ -170,12 +173,19 @@ class Main extends React.Component {
           console.log('HERE');
           return;
         } else { // NO
+          // add empty symbol into the new paragraph
           newP.appendChild(document.createElement('br'));
+          // wrap the empty symbol with paragraph symbol if there is an paragraph after the new paragraph
           if (curP.nextSibling) newP.appendChild(newPSymbol.cloneNode(true));
           else curP.appendChild(newPSymbol.cloneNode(true));
         }
+        // insert the new paragraph after this one
         curP.after(newP);
+
+        // set caret position
         setCaretPosition([caretPos[0] + 1, 0], editorId);
+
+        // update caret focus status and number of paragraph
         updateCaretFocus(editorId, this.state.lastFocus, newFocus => {
           this.setState({
             lastFocus: newFocus,

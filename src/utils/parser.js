@@ -211,20 +211,25 @@ class MDParser {
 // markdown decorator core
 // render the whole document
 // TODO: render only 1 paragraph at a time to improve performance
-function markdownDecoratorCore(editor, caretPos, parser, mode) {
+function markdownDecoratorCore(editor, caretPos, parser, mode, mdtext) {
   let mds = '';
   console.log(caretPos);
   if (!caretPos) mode = 'all';
   switch (mode) {
     case 'p':
       let index = caretPos[0];
-      mds = editor.childNodes[index].textContent.replace(/^¶([^$])/, (match, p1) => p1).replace(/¶$/, '');
-
+      if (mdtext) mds = mdtext;
+      else mds = editor.childNodes[index].textContent;
+      mds = mds.replace(/^¶([^$])/, (match, p1) => p1).replace(/¶$/, '');
       // parse markdown
-      mds = parser.apply(mds);
+      mds = parser.apply(mds)[0]; // Parser returns a list of paragraphs. 
+                                  // However, we have only 1 paragraph, just use the first one.
+      console.log(mds);
 
       // remove <p> wrapper
-      mds = mds.replace(/^\<p( mid='[\d]+')?\>/, newLineSymbol).replace(/\<\/p\>$/, '');
+      mds = mds.replace(/^\<p( mid='[\d]+')?\>/, '').replace(/\<\/p\>$/, '');
+
+      console.log(mds);
 
       // put rendered result back to dom
       editor.childNodes[index].innerHTML = mds;
@@ -232,7 +237,7 @@ function markdownDecoratorCore(editor, caretPos, parser, mode) {
       return editor.innerHTML;
     case 'all':
     default:
-      // just apply oarser on textContent
+      // just apply parser on content
       mds = parser.apply(editor.textContent);
       for (let i = 1; i < mds.length; i++) mds[0] += mds[i];
       return mds[0];
@@ -243,8 +248,8 @@ function markdownDecoratorCore(editor, caretPos, parser, mode) {
 // public function
 
 // dom element, array, parser object, string
-export function markdownDecorator(editor, caretPos, parser, mode) {
-  let html = markdownDecoratorCore(editor, caretPos, parser, mode);
+export function markdownDecorator(editor, caretPos, parser, mode, mdtext) {
+  let html = markdownDecoratorCore(editor, caretPos, parser, mode, mdtext);
   if (caretPos) html = prerender(html, caretPos);
   return html;
 }
