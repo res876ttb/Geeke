@@ -12,7 +12,11 @@ import { Minimatch } from "minimatch";
 // ============================================
 // constant
 const newLineSymbol = '<span class="hide">¶</span>';
-const emptyLine = '<br/><span class="hide">¶</span>';
+const emptyLine = '<br/>';
+
+// ============================================
+// global variable
+var mdcounter = 0;
 
 // ============================================
 // private function
@@ -62,13 +66,13 @@ function mddNewLineWrapper(mds) {
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
 
   // check if first line is empty
-  if (mds[0] === '') mds[0] = emptyLine;
+  if (mds[0] === '') mds[0] = emptyLine + newLineSymbol;
   else mds[0] += newLineSymbol;
 
   // wrap each line with new line symbol
   for (let i = 1; i < mds.length - 1; i++) {
     if (mds[i] === '') {
-      mds[i] = emptyLine;
+      mds[i] = newLineSymbol + emptyLine + newLineSymbol;
     } else {
       mds[i] = newLineSymbol + mds[i] + newLineSymbol;
     }
@@ -78,7 +82,7 @@ function mddNewLineWrapper(mds) {
   mds[mds.length - 1] = newLineSymbol + mds[mds.length - 1];
 
   // wrap with <p></p>
-  for (let i = 0; i < mds.length; i++) mds[i] = "<p>" + mds[i] + "</p>";
+  for (let i = 0; i < mds.length; i++) mds[i] = `<p mid='${getCounter()}'>` + mds[i] + "</p>";
   
   return mds;
 }
@@ -212,18 +216,23 @@ function markdownDecoratorCore(editor, caretPos, parser, mode) {
   if (!caretPos) mode = 'all';
   switch (mode) {
     case '3p':
-      console.log(caretPos);
-      for (let i = Math.max(caretPos[0] - 1, 0); i < Math.min(caretPos[0] + 2, editor.childNodes.length); i++) {
+      let start = Math.max(caretPos[0] - 1, 0), end = Math.min(caretPos[0] + 2, editor.childNodes.length);
+      for (let i = start; i < end; i++) {
         mds += editor.childNodes[i].textContent;
+        console.log(editor.childNodes[i].textContent);
       }
       // remove redundent paragraph seperation symbol
       if (!mds.match(/^¶+$/)) mds = mds.replace(/^¶/, '').replace(/¶$/, '');
+      else mds = mds.replace(/¶+/g, '¶'.repeat((end - start - 1) * 2));
+
+      // parse markdown
       mds = parser.apply(mds);
-      if (caretPos[0] > 0) mds[0] = mds[0].replace(/^\<p\>/, newLineSymbol);
+
+      // patch for optimization
+      if (caretPos[0] - 1 > 0) mds[0] = mds[0].replace(/^\<p( mid='[\d]+')?\>/, newLineSymbol);
       if (caretPos[0] + 2 < editor.childNodes.length) mds[mds.length - 1] = mds[mds.length - 1].replace(/\<\/p\>$/, newLineSymbol);
       for (let i = Math.max(caretPos[0] - 1, 0), j = 0; i < Math.min(caretPos[0] + 2, editor.childNodes.length); i++, j++) {
-        editor.childNodes[i].innerHTML = mds[j].replace(/^\<p\>/, '').replace(/\<\/p\>$/, '');
-        console.log(editor.childNodes[i].innerHTML);
+        editor.childNodes[i].innerHTML = mds[j].replace(/^\<p( mid='[\d]+')?\>/, '').replace(/\<\/p\>$/, '');
       }
       return editor.innerHTML;
     case 'all':
@@ -238,9 +247,9 @@ function markdownDecoratorCore(editor, caretPos, parser, mode) {
 // public function
 
 // dom element, array, parser object, string
-export function markdownDecorator(editor, caretPos, parser, mode) {
-  let html = markdownDecoratorCore(editor, caretPos, parser, mode);
-  if (caretPos) html = prerender(html, caretPos);
+export function markdownDecorator(editor, newCaretPos, prevCaretPos, parser, mode) {
+  let html = markdownDecoratorCore(editor, prevCaretPos, parser, mode);
+  if (newCaretPos) html = prerender(html, newCaretPos);
   return html;
 }
 
@@ -264,4 +273,9 @@ export function initParser() {
   // line wraper
   parser.addLineWraper(mddNewLineWrapper);
   return parser;
+}
+
+export function getCounter() {
+  mdcounter++;
+  return mdcounter;
 }

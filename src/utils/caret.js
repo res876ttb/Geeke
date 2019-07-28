@@ -247,6 +247,12 @@ function insertNewLineAfterCaretCore() {
   }
 }
 
+function getCurrentparagraphCore(editorId) {
+  let node = getCurrentRange().endContainer;
+  for (; node.parentNode.id !== editorId; node = node.parentNode) ;
+  return node;
+}
+
 // ===================================================================================
 // public function
 
@@ -265,4 +271,8 @@ export function updateCaretFocus(editorId, lastFocus, cbf) {
 
 export function insertNewLineAfterCaret() {
   insertNewLineAfterCaretCore();
+}
+
+export function getCurrentparagraph(editorId) {
+  return getCurrentparagraphCore(editorId);
 }
