@@ -77,10 +77,9 @@ function mddNewLineWrapper(mds) {
     let paragraph = '';
     for (let j = 0; j < mds[i].length; j++) {
       if (mds[i][j] == '') mds[i][j] = '<br/>';
-      paragraph += mds[i][j] + '<span class="hide">¬</span>';
+      paragraph += mds[i][j] + '†'; // use † to represent'<span class="hide">¬</span>'
     }
-    mds[i] = paragraph.replace(/\<span class="hide"\>¬\<\/span\>$/, '');
-    console.log(mds[i]);
+    mds[i] = paragraph.replace(/†$/, '').replace(/\<\/div\>†/g, '†</div>').replace(/†/g, '<span class="hide">¬</span>');
     doc += `<div mid='${getCounter()}'>` + mds[i] + "<span class=\"hide\">¶</span></div>";
   }
 
@@ -106,6 +105,72 @@ function mddNewLineWrapper(mds) {
   // wrap with <p></p>
   for (let i = 0; i < mds.length; i++) mds[i] = `<div mid='${getCounter()}'>` + mds[i] + "</div>";
   
+  return mds;
+}
+
+// This parser assume that the whole paragraph is list
+function mddUnorderedListAnalyzer(mds, options) {
+  let useTab = options.indentStyle === 'tab';
+  for (let i = 0; i < mds.length; i++) {
+    // 1. Check if match seperator rule. If so, continue;
+    if (mds[i][0].match(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/)) continue;
+
+    // 2. Check if first line match list rule. If not, following line should not be list
+    //    create regex: space before regex
+    let preSpace = useTab ? '' : `(\s){0,${options.indentSize - 1}}`;
+    let matchReg = new RegExp(`(^${preSpace}[\\*-\\+])\\s`);
+    if (!mds[i][0].match(matchReg)) continue;
+
+    // 3. Parse list
+    // Range of umber of spaces per intent level
+    let numSpaces = [0, options.indentSize, options.indentSize * 2];
+    // Number of tabs. 
+    // If exceed, it will be treated as normal text and drop all tabs before the first character.
+    let curLevel = 1; 
+      
+    for (let j = 0; j < mds[i].length; j++) {
+      // Check if this line is a list or just normal text.
+      // preSpace = options.indentStyle === 'tab' ? '\t'.repeat(curLevel) : `(\ ){${numSpaces[curLevel]},${numSpaces[curLevel + 1]}}`;
+      preSpace = useTab ? '\\t' : '\\ ';
+      matchReg = new RegExp(`^([${preSpace}]*[\\*-\\+])\\s[^\\*-\\+]`);
+      let isNormalText = !mds[i][j].match(matchReg);
+      if (!isNormalText) { // MATCH!!
+        // get number of space before *-+
+        let spaces = mds[i][j].replace(/^([\t\ ]*)\*.*$/, '$1');
+        let validIndent = useTab ? spaces.length <= curLevel : spaces.length < numSpaces[curLevel + 1]; // 1 more level is acceptable
+        if (!validIndent) {
+          // Mark it normal text and do not render it as list item
+          isNormalText = true;
+        } else {
+          // get accurate indent level
+          if (useTab) {
+            curLevel = spaces.length; // Just ignore numSpace list. You wont use it.
+          } else {
+            for (let k = 1; k <= curLevel + 1; k++) {
+              if (spaces.length - numSpaces[k] < 0) {
+                curLevel = k;
+                break;
+              }
+            }
+            // Update numSpaces list
+            if (numSpaces.length <= curLevel) numSpaces.push(spaces.length + options.indentSize);
+            else numSpaces[curLevel] = spaces.length + options.indentSize;
+            if (numSpaces.length <= curLevel + 1) numSpaces.push(spaces.length + options.indentSize * 2);
+            else numSpaces[curLevel + 1] = spaces.length + options.indentSize * 2;
+          }
+
+          // make mds[i][j] as list item
+          mds[i][j] = mds[i][j].replace(/^([\t\ ]*\*.)(.*)$/, `<div class='md-ulist md-indent-${curLevel}' mdtype='ulist'><span class='md-ulist-dot'></span><span class='md-ulistm'>$1</span>$2</div>`);
+        }
+      } 
+      if (isNormalText) { // not match. It is normal text and drop all spaces/tabs before it.
+        mds[i][j] = mds[i][j].replace(/^([\s]*)(.+)$/, `<div class='md-ulist md-indent-${curLevel}' mdtype='ulist'><span class='md-ulistm'>$1</span>$2</div>`);
+      }
+    }
+
+    // if (!mds[i][0].match(/(^(\t|(\ ){0,3})\*)[^$]/)) continue;
+    // console.log(`mds[${i}] match!`, mds[i]);
+  }
   return mds;
 }
 
@@ -184,7 +249,7 @@ const mddSeperatorParser = [
 ];
 
 class MDParser {
-  constructor() {
+  constructor(options) {
     this.parser = {
       singleLine: {
         parser: [],
@@ -196,6 +261,19 @@ class MDParser {
     this.slpl = 0;
     this.ppl = 0;
     this.lpl = 0;
+    this.loadOptions(options);
+  }
+
+  loadOptions(options) {
+    this.options = {
+      // only tab and space is acceptable
+      // default: space
+      indentStyle: (options && options.indentStyle && options.indentStyle.match(/space|tab/)) ? options.indentStyle : 'space',
+
+      // if indentStyle is tab, indentSize will be ignored
+      // default: 2
+      indentSize: (options && options.indentSize && (typeof options.indentStyle === 'number')) ? options.indentSize : 2,
+    }
   }
 
   addSingleLineParser(func) {
@@ -217,18 +295,18 @@ class MDParser {
   apply(mds) {
     // paragraph
     let paragraph = this.parser.paragraph;
-    for (let i = 0; i < this.ppl; i++) mds = paragraph[i](mds);
+    for (let i = 0; i < this.ppl; i++) mds = paragraph[i](mds, this.options);
     // single line
     let singleLine = this.parser.singleLine;
     for (let j = 0; j < mds.length; j++) {
       for (let k = 0; k < mds[j].length; k++) {
-        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.parser[i](mds[j][k]);
-        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.marker[i](mds[j][k]);
+        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.parser[i](mds[j][k], this.options);
+        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.marker[i](mds[j][k], this.options);
       }
     }
     // line wraper
     let lineWraper = this.parser.lineWraper;
-    for (let i = 0; i < this.lpl; i++) mds = lineWraper[i](mds);
+    for (let i = 0; i < this.lpl; i++) mds = lineWraper[i](mds, this.options);
     return mds;
   }
 }
@@ -286,7 +364,7 @@ export function initParser(options) {
   let parser = new MDParser();
   // paragraph parser
   parser.addParagraphParser(mddNewLineAnalyzer);
-  // parser.addParagraphParser(mddListAnalyzer);
+  parser.addParagraphParser(mddUnorderedListAnalyzer);
   // single line parser
   parser.addSingleLineParser(mddSeperatorParser);
   parser.addSingleLineParser(mddBoldItalicParser);
