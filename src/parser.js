@@ -54,17 +54,40 @@ function prerender(prerenderId, marstr, caretPos) {
 
 // markdwon decorator: new line handler
 function mddNewLineAnalyzer(mds) {
-  // 1. convert new line symbol back to \n
-  mds = mds.replace(/¶/g, '\n');
+  // 1. parse original \n to ¶ and 
+  mds = mds.replace(/\n\n/g, '¶');
+  mds = mds.replace(/\n/g, '¬');
 
-  // 2. split line
-  mds = mds.split('\n');
+  // 2. convert 2 new line into 1 paragraph
+  mds = mds.replace(/¬¬/g, '¶');
+
+  // 2. split new line
+  mds = mds.split('¶');
+  for (let i = 0; i < mds.length; i++) {
+    mds[i] = mds[i].split('¬');
+  }
   
   return mds;
 }
 
 // markdown decorator: new line wrapper
 function mddNewLineWrapper(mds) {
+  let doc = ''
+  for (let i = 0; i < mds.length; i++) {
+    let paragraph = '';
+    for (let j = 0; j < mds[i].length; j++) {
+      if (mds[i][j] == '') mds[i][j] = '<br/>';
+      paragraph += mds[i][j] + '<span class="hide">¬</span>';
+    }
+    mds[i] = paragraph.replace(/\<span class="hide"\>¬\<\/span\>$/, '');
+    console.log(mds[i]);
+    doc += `<div mid='${getCounter()}'>` + mds[i] + "<span class=\"hide\">¶</span></div>";
+  }
+
+  doc = doc.replace(/\<span class=\"hide\"\>¶\<\/span\>\<\/div\>$/, '</div>');
+
+  return doc;
+
   if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
 
   // check if first line is empty
@@ -126,6 +149,7 @@ const mddLinkParser = [
             .replace(/¨l4´/g, `)</span>`)
 ];
 
+// TODO: header should be paragraph parser
 const mddHeaderParser = [
   mds => mds.replace(/^#\ (\s*)(.+$)/g, `<span class='md-h1'>¨h1´$1$2</span>`)
             .replace(/^##\ (\s*)(.+$)/g, `<span class='md-h2'>¨h2´$1$2</span>`)
@@ -197,8 +221,10 @@ class MDParser {
     // single line
     let singleLine = this.parser.singleLine;
     for (let j = 0; j < mds.length; j++) {
-      for (let i = 0; i < this.slpl; i++) mds[j] = singleLine.parser[i](mds[j]);
-      for (let i = 0; i < this.slpl; i++) mds[j] = singleLine.marker[i](mds[j]);
+      for (let k = 0; k < mds[j].length; k++) {
+        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.parser[i](mds[j][k]);
+        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.marker[i](mds[j][k]);
+      }
     }
     // line wraper
     let lineWraper = this.parser.lineWraper;
@@ -213,6 +239,9 @@ class MDParser {
 function markdownDecoratorCore(editor, caretPos, parser, mode, mdtext) {
   let mds = '';
   if (!caretPos) mode = 'all';
+  mds = parser.apply(editor.textContent);
+  return mds;
+
   switch (mode) {
     case 'p':
       let index = caretPos[0];
