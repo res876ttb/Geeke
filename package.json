@@ -2,7 +2,7 @@
   "name": "Geeke",
   "version": "0.1.0",
   "description": "A web markdown editor.",
-  "main": "main.js",
+  "main": "Geeke.js",
   "repository": "https://github.com/res876ttb/Geeke.git",
   "author": "res876ttb <someone10851222@gmail.com>",
   "license": "MIT",

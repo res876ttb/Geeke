@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- index.html -->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+		<title>Geeke Demo</title>
+	</head>
+
+	<body>
+		<div id="root">
+# Header1¶
+## Header2¶
+### Header3¶
+#### Header4¶
+##### Header5¶
+###### Header6¶
+Text here is editable.¶
+***¶
+These are **bold1** and __bold2__¶
+These are *italic2* and _italic2_ _italic2_¶
+These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶
+This is `code block` ¶This is a [link example](http://google.com).¶
+There are lots o\f\ \e\s\c\a\p\e\r.¶
+However, escaper could not in `code\block`.¶
+Also, ~~strikethrough~~ is supported!
+		</div>
+  </body>
+
+	<!-- load main js -->
+	<script type="text/javascript" src="../dist/Geeke.js"></script>
+	<script>
+		window.onload = function() {
+			var editor = Geeke.createEditor(document.getElementById('root', {
+				id: 'mde'
+			}));
+		}
+	</script>
+</html>

@@ -126,10 +126,10 @@ class Main extends React.Component {
               let coffset = 0;
 
               // render new style
-              let newHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'p', null);
+              let newHTML = markdownDecorator(editor, this.state.caretPos, this.state.parser, 'all', null);
               if (newHTML) editor.innerHTML = newHTML;
               else {
-                // patch for delete last paragraph, which cause difference on number of paragraph
+                // patch for delete last paragraph, which causes difference on number of paragraph
                 this.setState({
                   numParagraph: editor.childNodes.length
                 });
@@ -159,6 +159,7 @@ class Main extends React.Component {
     let keyCode = e.which | e.keyCode;
     let editor = document.getElementById(editorId);
     this.getCaretPos();
+    return;
 
     // handle newline
     switch (keyCode) {
@@ -196,6 +197,7 @@ class Main extends React.Component {
           let temp = editor.childNodes[caretPos[0]].textContent;
           if (caretPos[1] > (temp.slice(-1) === '¶' ? 1 : 0)) { // YES
             console.log('Text after me is too heavy!!');
+
             return;
           } else { // NO
             // add empty symbol into the new paragraph

@@ -79,7 +79,7 @@ function mddNewLineWrapper(mds) {
   }
 
   // add new line symbol at last line
-  mds[mds.length - 1] = newLineSymbol + mds[mds.length - 1];
+  if (mds.length > 1) mds[mds.length - 1] = newLineSymbol + mds[mds.length - 1];
 
   // wrap with <p></p>
   for (let i = 0; i < mds.length; i++) mds[i] = `<p mid='${getCounter()}'>` + mds[i] + "</p>";
