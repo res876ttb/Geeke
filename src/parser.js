@@ -167,31 +167,31 @@ function mddListAnalyzer(mds, options) {
 // markdown decorator: Bold parser
 // test: https://regex101.com/r/l1yUUj/4
 const mddBoldParser1 = [
-  mds => mds.replace(/(?<!\\)\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `<b>¨b1´$1¨b1´</b>`),
+  mds => mds.replace(/([^\\])\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `$1<b>¨b1´$2¨b1´</b>`),
   mds => mds.replace(/¨b1´/g, `<span class='md-bold'>**</span>`)
 ];
 const mddBoldParser2 = [
-  mds => mds.replace(/__([^\s][^_\n]*[^\s]|[^\s])__/g, `<b>¨b2´$1¨b2´</b>`),
+  mds => mds.replace(/([^\\])__([^\s][^_\n]*[^\s]|[^\s])__/g, `$1<b>¨b2´$2¨b2´</b>`),
   mds => mds.replace(/¨b2´/g, `<span class='md-bold'>__</span>`)
 ];
 
 const mddBoldItalicParser = [
-  mds => mds.replace(/(?<!\\)\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `<b><i>¨bi´$1¨bi´</i></b>`),
+  mds => mds.replace(/([^\\])\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `$1<b><i>¨bi´$2¨bi´</i></b>`),
   mds => mds.replace(/¨bi´/g, `<span class='md-bold-italic'>***</span>`) 
 ];
 
 const mddItalicParser1 = [
-  mds => mds.replace(/(?<!\\)\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*/g, `<i>¨i1´$1¨i1´</i>`),
+  mds => mds.replace(/([^\\])\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*/g, `$1<i>¨i1´$2¨i1´</i>`),
   mds => mds.replace(/¨i1´/g, `<span class='md-italic'>*</span>`)
 ];
 const mddItalicParser2 = [
-  mds => mds.replace(/_([^\s][^_\n]*[^\s]|[^\s])_/g, `<i>¨i2´$1¨i2´</i>`),
+  mds => mds.replace(/([^\\])_([^\s][^_\n]*[^\s]|[^\s])_/g, `$1<i>¨i2´$2¨i2´</i>`),
   mds => mds.replace(/¨i2´/g, `<span class='md-italic'>_</span>`)
 ];
 
 // test: https://regex101.com/r/pxbM5w/2
 const mddInlineCodeParser = [
-  mds => mds.replace(/(?<!\\)`((([^`\n]|\\`)+([^\\`]|\\`))|[^\s\\`])`/g, `<code>¨ic´$1¨ic´</code>`),
+  mds => mds.replace(/([^\\])`((([^`\n]|\\`)+([^\\`]|\\`))|[^\s\\`])`/g, `$1<code>¨ic´$2¨ic´</code>`),
   mds => mds.replace(/¨ic´/g, `<span class='md-inline-code'>\`</span>`)
 ];
 
@@ -226,12 +226,11 @@ const mddEscaperParser = [
 
 // test: https://regex101.com/r/hm1MSB/1
 const mddStrikethroughParser = [
-  mds => mds.replace(/(?<!\\)~~(([^\s]|\\.)([^~\n]|\\~)*[^\s\\]|[^\s\\])~~/g, `<del>¨s´$1¨s´</del>`),
+  mds => mds.replace(/([^\\])~~(([^\s]|\\.)([^~\n]|\\~)*[^\s\\]|[^\s\\])~~/g, `$1<del>¨s´$2¨s´</del>`),
   mds => mds.replace(/¨s´/g, `<span class='md-strikethrough'>~~</span>`)
 ];
 
 // test: https://regex101.com/r/dY5dYq/1
-// TODO: patch text content after improve render performance
 const mddSeperatorParser = [
   (mds, options, storage) => {
     storage.seperator = [];
@@ -248,6 +247,11 @@ const mddSeperatorParser = [
     return mds;
   }
 ];
+
+const mddInlineQuoteParser = [
+  // mds => mds.replace(/([^\\])>/g, ),
+  // mds => mds
+]
 
 class MDParser {
   constructor(options) {
