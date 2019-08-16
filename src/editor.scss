@@ -56,7 +56,7 @@ $marker: (
 }
 
 // hide ulist marker
-span.md-ulistm {
+span.md-ulistm, span.md-olistm {
   font-size: 0px;
   white-space: pre;
   color: #999999;
@@ -64,7 +64,8 @@ span.md-ulistm {
 }
 
 // show ulist marker
-div.md-ulist.md-focus span.md-ulistm.md-focus {
+div.md-ulist.md-focus span.md-ulistm.md-focus,
+div.md-olist.md-focus span.md-olistm.md-focus {
   font-size: unset;
 }
 
@@ -101,7 +102,7 @@ span.md-seperator {
 }
 
 // list padding
-.md-ulist {
+.md-ulist, .md-olist {
   position: relative;
   padding: $inParagraphPadding 0rem;
 }
@@ -149,6 +150,13 @@ span.md-seperator::after {
 // list style
 span.md-ulist-dot::after {
   content: '•';
+  position: absolute;
+  left: -1rem;
+  text-align: right;
+}
+
+span.md-olist-number::after {
+  content: attr(olist-number);
   position: absolute;
   left: -1rem;
   text-align: right;
