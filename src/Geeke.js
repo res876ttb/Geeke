@@ -90,7 +90,7 @@ class Geeke {
     // create prerender element
     let prerender = document.createElement('div');
     prerender.id = this.prerenderId;
-    prerender.classList.add('hide');
+    prerender.classList.add('display-none');
     element.appendChild(prerender);
   }
 

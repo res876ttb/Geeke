@@ -4,9 +4,13 @@ $fontSize: 16px;
 $fontColor: black;
 $codeBlockFontColor: gray;
 $lineHeight: 16px;
-$indentSize: 32;
+$indentSize: 1;
 $paragraphPadding: 0.5rem;
 $inParagraphPadding: 0.2rem;
+
+.display-none {
+  display: none;
+}
 
 .md-editor {
 // End of custimizable options
@@ -97,7 +101,7 @@ span.md-seperator {
 // set list indent size
 @for $i from 1 to 20 {
   .md-indent-#{$i} {
-    margin-left: $indentSize * $i * 1px;
+    margin-left: 1 + $indentSize * $i * 1rem;
   }
 }
 

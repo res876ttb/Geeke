@@ -86,26 +86,6 @@ function mddNewLineWrapper(mds) {
   doc = doc.replace(/\<span class=\"hide\"\>¶\<\/span\>\<\/div\>$/, '</div>');
 
   return doc;
-
-  if (mds[mds.length - 1] == '') mds[mds.length - 1] = '<br>';
-
-  // check if first line is empty
-  if (mds[0] === '') mds[0] = emptyLine + newLineSymbol;
-  else mds[0] += newLineSymbol;
-
-  // wrap each line with new line symbol
-  for (let i = 1; i < mds.length - 1; i++) {
-    if (mds[i] === '') {
-      mds[i] = emptyLine + newLineSymbol;
-    } else {
-      mds[i] = mds[i] + newLineSymbol;
-    }
-  }
-
-  // wrap with <p></p>
-  for (let i = 0; i < mds.length; i++) mds[i] = `<div mid='${getCounter()}'>` + mds[i] + "</div>";
-  
-  return mds;
 }
 
 // This parser assume that the whole paragraph is list
@@ -224,7 +204,6 @@ const mddLinkParser = [
             .replace(/¨l4´/g, `)</span>`)
 ];
 
-// TODO: header should be paragraph parser
 const mddHeaderParser = [
   mds => mds.replace(/^#\ (\s*)(.+$)/g, `<span class='md-h1'>¨h1´$1$2</span>`)
             .replace(/^##\ (\s*)(.+$)/g, `<span class='md-h2'>¨h2´$1$2</span>`)
@@ -254,8 +233,20 @@ const mddStrikethroughParser = [
 // test: https://regex101.com/r/dY5dYq/1
 // TODO: patch text content after improve render performance
 const mddSeperatorParser = [
-  mds => mds.replace(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/g, `<span class='md-seperator'>¨sl´</span>`),
-  mds => mds.replace(/¨sl´/g, `<span class='md-seperatorm'>***</span>`)
+  (mds, options, storage) => {
+    storage.seperator = [];
+    return mds.replace(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/g, (match, p1) => {
+      storage.seperator.push(p1);
+      return `<span class='md-seperator'>¨sl´</span>`;
+    });
+  },
+  (mds, options, storage) => {
+    for (let i in storage.seperator) {
+      let str = storage.seperator[i];
+      mds = mds.replace(/¨sl´/, `<span class='md-seperatorm'>${str}</span>`);
+    }
+    return mds;
+  }
 ];
 
 class MDParser {
@@ -268,6 +259,7 @@ class MDParser {
       paragraph: [],
       lineWraper: [],
     };
+    this.storage = {};
     this.slpl = 0;
     this.ppl = 0;
     this.lpl = 0;
@@ -303,20 +295,22 @@ class MDParser {
   }
 
   apply(mds) {
+    // initialize storage
+    this.storage = {};
     // paragraph
     let paragraph = this.parser.paragraph;
-    for (let i = 0; i < this.ppl; i++) mds = paragraph[i](mds, this.options);
+    for (let i = 0; i < this.ppl; i++) mds = paragraph[i](mds, this.options, this.storage);
     // single line
     let singleLine = this.parser.singleLine;
     for (let j = 0; j < mds.length; j++) {
       for (let k = 0; k < mds[j].length; k++) {
-        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.parser[i](mds[j][k], this.options);
-        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.marker[i](mds[j][k], this.options);
+        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.parser[i](mds[j][k], this.options, this.storage);
+        for (let i = 0; i < this.slpl; i++) mds[j][k] = singleLine.marker[i](mds[j][k], this.options, this.storage);
       }
     }
     // line wraper
     let lineWraper = this.parser.lineWraper;
-    for (let i = 0; i < this.lpl; i++) mds = lineWraper[i](mds, this.options);
+    for (let i = 0; i < this.lpl; i++) mds = lineWraper[i](mds, this.options, this.storage);
     return mds;
   }
 }
