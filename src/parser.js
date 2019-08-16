@@ -154,7 +154,11 @@ function mddListAnalyzer(mds, options) {
         console.log(mds[i][j]);
       }
       if (isNormalText) { // not match. It is normal text and drop all spaces/tabs before it.
-        mds[i][j] = mds[i][j].replace(/^([\s]*)(.+)$/, `<div class='md-ulist md-indent-${curLevel}' mdtype='ulist'><span class='md-ulistm'>$1</span>$2</div>`);
+        if (mds[i][j] === '') {
+          mds[i][j] = `<div class='md-ulist md-indent-${curLevel}' mdtype='ulist'><span class='md-ulistm'></span></div>`;
+        } else {
+          mds[i][j] = mds[i][j].replace(/^([\s]*)(.+)$/, `<div class='md-ulist md-indent-${curLevel}' mdtype='ulist'><span class='md-ulistm'>$1</span>$2</div>`);
+        }
       }
     }
 
