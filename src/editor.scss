@@ -18,7 +18,7 @@ $inParagraphPadding: 0.2rem;
 
 // style
 font-size: $fontSize;
-min-height: 2rem;
+min-height: 100%;
 
 .hide {
   display: none;
@@ -38,7 +38,8 @@ $marker: (
   link:a,
   escaperm:'span.md-escaper',
   strikethrough:del,
-  seperatorm:'span.md-seperator'
+  seperatorm:'span.md-seperator',
+  quotem:'div.md-quote',
 );
 @for $i from 1 through 6 {
   $marker: append($marker, h#{$i}m 'span.md-h#{$i}');
@@ -56,6 +57,17 @@ $marker: (
 @each $item, $cover in $marker {
   div.md-focus #{$cover}.md-focus span.md-#{$item} {
     font-size: unset;
+  }
+}
+
+// quote style
+.md-quote {
+  color: gray;
+
+  &::before {
+    content: "1";
+    color: rgba(0, 0, 0, 0);
+    border-left: rgba(0, 0, 0, 0.1) solid 4px;
   }
 }
 
@@ -164,6 +176,10 @@ span.md-olist-number::after {
   position: absolute;
   left: -1rem;
   text-align: right;
+}
+
+.md-para {
+  margin: 0.5rem 0rem;
 }
 
 }

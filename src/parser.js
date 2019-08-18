@@ -8,6 +8,7 @@
 import {
   getSelectedParagraph
 } from './caret.js';
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 
 // ============================================
 // constant
@@ -70,6 +71,46 @@ function mddNewLineAnalyzer(mds) {
   return mds;
 }
 
+// markdown decorator: preprocessor
+function mddPreprocessor(mds) {
+  return mds.replace(/([^^])>/g, '$1¨q´');
+}
+
+// markdown decorator: quote
+// ASSUME: each quote are 1 block
+function mddQuoteParser(mds, options, storage) {
+  let useTab = options.indentStyle === 'tab';
+  let preSpace = useTab ? '' : `\\ {0,${options.indentSize - 1}}`;
+  let matchReg = new RegExp(`^${preSpace}¨q´`);
+  let parseReg = new RegExp(`^(${preSpace}¨q´\\ *)([^\\ ]?.*)$`);
+
+  storage.quote = {};
+
+  for (let i = 0; i < mds.length; i++) {
+    let quote = [];
+    if (!mds[i][0].match(matchReg)) continue;
+    for (let j = 0; j < mds[i].length; j++) {
+      mds[i][j] = mds[i][j].replace(parseReg, (match, p1, p2, offset, string) => {
+        quote.push([j, p1]);
+        return p2;
+      });
+    }
+    storage.quote[i] = quote;
+  }
+
+  return mds;
+}
+function mddQuoteDecorator(mds, options, storage) {
+  let quote = storage.quote;
+  for (let i in quote) {
+    let quotei = quote[i];
+    for (let j in quotei) {
+      mds[i][quotei[j][0]] = `<div class='md-quote'><span class='md-quotem'>${quotei[j][1].replace(/¨q´/g, '>')}</span>${mds[i][quotei[j][0]]}</div>`;
+    }
+  }
+  return mds;
+}
+
 // markdown decorator: new line wrapper
 function mddNewLineWrapper(mds) {
   let doc = ''
@@ -80,7 +121,7 @@ function mddNewLineWrapper(mds) {
       paragraph += mds[i][j] + '†'; // use † to represent'<span class="hide">¬</span>'
     }
     mds[i] = paragraph.replace(/†$/, '').replace(/\<\/div\>†/g, '†</div>').replace(/†/g, '<span class="hide">¬</span>');
-    doc += `<div mid='${getCounter()}'>` + mds[i] + "<span class=\"hide\">¶</span></div>";
+    doc += `<div class='md-para' mid='${getCounter()}'>${mds[i]}<span class=\"hide\">¶</span></div>`;
   }
 
   doc = doc.replace(/\<span class=\"hide\"\>¶\<\/span\>\<\/div\>$/, '</div>');
@@ -97,7 +138,7 @@ function mddListAnalyzer(mds, options) {
 
     // 2. Check if first line match list rule. If not, following line should not be list
     //    create regex: space before regex
-    let preSpace = useTab ? '' : `(\s){0,${options.indentSize - 1}}`;
+    let preSpace = useTab ? '' : `(\\ ){0,${options.indentSize - 1}}`;
     let matchReg = new RegExp(`(^${preSpace}([\\*-\\+])|([\\d])+\\.)\\s`);
     if (!mds[i][0].match(matchReg)) continue;
 
@@ -138,7 +179,6 @@ function mddListAnalyzer(mds, options) {
             else numSpaces[curLevel] = spaces.length + options.indentSize;
             if (numSpaces.length <= curLevel + 1) numSpaces.push(spaces.length + options.indentSize * 2);
             else numSpaces[curLevel + 1] = spaces.length + options.indentSize * 2;
-            console.log(numSpaces, mds[i][j]);
           }
           // justify if this is ordered list or unordered list
           let firstSymbol = mds[i][j].replace(/^[\t\ ]*([\*\+-]).*$/, '$1');
@@ -150,8 +190,6 @@ function mddListAnalyzer(mds, options) {
             mds[i][j] = mds[i][j].replace(/^([\t\ ]*([\d]+\.).)(.*)$/, `<div class='md-olist md-indent-${curLevel}' mdtype='olist'><span class='md-olist-number' olist-number='$2'></span><span class='md-olistm'>$1</span>$3</div>`)
           }
         }
-      } else {
-        console.log(mds[i][j]);
       }
       if (isNormalText) { // not match. It is normal text and drop all spaces/tabs before it.
         if (mds[i][j] === '') {
@@ -253,8 +291,8 @@ const mddSeperatorParser = [
 ];
 
 const mddInlineQuoteParser = [
-  // mds => mds.replace(/([^\\])>/g, ),
-  // mds => mds
+  mds => mds,
+  mds => mds.replace(/¨q´(.*)$/g, `<span class='md-quote'><span class='md-quotem'>></span>$1</span>`)
 ]
 
 class MDParser {
@@ -375,9 +413,13 @@ export function markdownDecorator(editor, prerenderId, caretPos, parser, mode, m
 export function initParser(options) {
   let parser = new MDParser();
   // paragraph parser
+  parser.addParagraphParser(mddPreprocessor);
   parser.addParagraphParser(mddNewLineAnalyzer);
+  parser.addParagraphParser(mddQuoteParser);
   parser.addParagraphParser(mddListAnalyzer);
+  parser.addParagraphParser(mddQuoteDecorator);
   // single line parser
+  // parser.addSingleLineParser(mddInlineQuoteParser);
   parser.addSingleLineParser(mddSeperatorParser);
   parser.addSingleLineParser(mddBoldItalicParser);
   parser.addSingleLineParser(mddBoldParser1);
