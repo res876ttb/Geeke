@@ -80,5 +80,8 @@ module.exports = {
     },
     // minimize: true
   },
-  devtool: 'cheap-source-map'
+  devtool: 'cheap-source-map',
+  watchOptions: {
+    poll: true
+  }
 };
