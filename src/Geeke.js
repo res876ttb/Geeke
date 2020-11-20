@@ -9,61 +9,79 @@ import {
   getNewID
 } from './utils/id.js';
 import {
-  getCaretPosition, 
-  setCaretPosition,
-  updateCaretFocus,
-  insertNewLineAfterCaret,
-} from './caret.js';
-import {
-  markdownDecorator, initParser
-} from './parser.js';
+  Decorator
+} from './Decorator.js';
 
 // ============================================
 // style
-import './editor.scss';
+import "./style.scss";
 
 // ============================================
 // class
 
 class Geeke {
-  constructor(element, options) {
-    this.editor = null;
-    this.counter = 0;
-    this.editorEmptyParagraphString = '<div><br/></div>';
-    this.mds = '';
-    this.lastFocus = [null, null];
-    this.prerenderId = getNewID();
+  constructor(element, options, defaultStr='') {
+    // The editor DOM element
+    this.editor = element;
 
+    // Default Editor content
+    this.editorEmptyParagraphString = '<div><br/></div>';
+
+    // The string to decorate
+    this.mds = defaultStr;
+
+    // Identify the input state
+    this.composition = false;
+
+    // Configurable options for Geeke
     this.options = {
-      id: getNewID(), // String, id of Geeke editor. If not specified by user, use a random number string.
-      eventListener: {}, // A map. Key is event name, value is the function of event listener.
+      // id: string, id of Geeke editor. If the original element does not has ID, then set the ID as a random string.
+      id: this.editor.id ? this.editor.id : getNewID(),
+
+      // eventListener: map. 
+      //   key: event name.
+      //   value: the function of event listener.
+      eventListener: {},
+
+      // useTab: bool, whether to use tab instead of space.
+      useTab: false,
+
+      // tabSize: number, the number of spaces equivalent to a tab
+      tabSize: 2,
+
+      // plugins: dictionary, custom parser plugins for MD parser.
+      // TODO: docs
+      plugins: []
     };
 
     // load all required options
     this.loadOptions(options);
 
-    // init markdown parser
-    this.parser = initParser(this.options);
+    // Initialize markdown decorator
+    this.decorator = new Decorator(this.options);
 
     // initialize editor and render existing text in the given element
-    this.init(element);
+    this.initEditor();
 
     // load all event listener
     this.loadEventListener(options);
+
+    console.log("Initialization... Done.");
   }
 
+  // Load user-given options
   loadOptions(options) {
+    // If no options, then exit
     if (!options) return;
-    this.options.id = (options.id) ? options.id : getNewID();
   }
 
   loadEventListener(options) {
     // load pre-defined event listener
-    this.editor.addEventListener("input", this.handleEditorChange.bind(this), false);
+    // this.editor.addEventListener("input", this.handleEditorChange.bind(this), false);
     this.editor.addEventListener("compositionstart", this.handleCompositionStart.bind(this), false);
     this.editor.addEventListener("compositionend", this.handleCompositionEnd.bind(this), false);
-    this.editor.addEventListener("keydown", this.handleKeyDown.bind(this), false);
-    document.addEventListener("selectionchange", this.handleSelectionChange.bind(this), false);
+    // this.editor.addEventListener("keydown", this.handleKeyDown.bind(this), false);
+    // document.addEventListener("selectionchange", this.handleSelectionChange.bind(this), false);
 
     // load user-defined event listener
     if (!options || !options.eventListener) return;
@@ -72,34 +90,23 @@ class Geeke {
     }
   }
 
-  init(element) {
-    let mds = element.textContent; // get text in the given element
-    element.innerHTML = ''; // reset given elementthis.createEditor()
-    element.appendChild(this.createEditor()); // create editor element
-    this.editorId = this.options.id;
-    this.editor = document.getElementById(this.editorId); // get rendered element
-    this.editor.innerText = mds;
+  initEditor() {
+    // Initialize the editor body
+    // 1. Reset the content of the given element.
+    // 2. Put the raw text into the editor core
+    // 3. Add default class `md-editor` into editor
+    // 4. Mark the editor as contenteditable
+    this.editor.innerHTML = '';
+    this.editor.innerText = this.mds;
+    this.editor.classList.add('md-editor')
+    this.editor.contentEditable = true;
     
     // render text in editor if there are words in the given element
-    if (mds !== '') {
-      this.editor.innerHTML = markdownDecorator(this.editor, this.prerenderId, null, this.parser, 'all', null);
+    if (this.mds !== '') {
+      this.editor.innerHTML = this.decorator.parse(this.mds);
     } else {
       this.editor.innerHTML = this.editorEmptyParagraphString;
     }
-
-    // create prerender element
-    let prerender = document.createElement('div');
-    prerender.id = this.prerenderId;
-    prerender.classList.add('display-none');
-    element.appendChild(prerender);
-  }
-
-  createEditor() {
-    let newDiv = document.createElement('div');
-    newDiv.id = this.options.id;
-    newDiv.classList.add('md-editor');
-    newDiv.contentEditable = true;
-    return newDiv;
   }
 
   handleCompositionStart(e) {
@@ -107,45 +114,24 @@ class Geeke {
   }
 
   handleCompositionEnd(e) {
+    console.log(e.data.length);
     this.composition = false;
   }
 
   handleKeyDown(e) {
     let keyCode = e.which | e.keyCode;
-    getCaretPosition(this.editorId, caretPos => {
-      if (caretPos) this.caretPos = caretPos;
-    });
-    switch (keyCode) {
-      case 13:
-        insertNewLineAfterCaret();
-        break;
-    }
+    
   }
 
   handleSelectionChange() {
-    updateCaretFocus(this.editorId, this.lastFocus, newFocus => {
-      this.lastFocus = newFocus;
-    });
+    
   }
 
   handleEditorChange(e) {
-    if (!this.composition) {
-      if (this.editor.textContent === '') {
-        this.editor.innerHTML = this.editorEmptyParagraphString;
-        setCaretPosition([0, 0], editorId);
-      } else {
-        this.editor.innerHTML = markdownDecorator(this.editor, this.prerenderId, this.caretPos, this.parser, 'all', null);
-        setCaretPosition(this.caretPos, this.editorId);
-      }
-    }
-  }
-
-  getCounter() {
-    this.counter++;
-    return this.counter;
+    
   }
 }
 
-export function createEditor(element, options) {
-  return new Geeke(element, options);
+export function createEditor(element, options, mds) {
+  return new Geeke(element, options, mds);
 }

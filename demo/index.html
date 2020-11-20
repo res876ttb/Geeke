@@ -11,36 +11,6 @@
 
 	<body>
 		<div id="root">
-# Header1¶
-## Header2¶
-### Header3¶
-#### Header4¶
-##### Header5¶
-###### Header6¶
-Text here is editable.¶
-***¶
-These are **bold1** and __bold2__¶
-These are *italic2* and _italic2_ _italic2_¶
-These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**¶
-This is `code block` ¶This is a [link example](http://google.com).¶
-There are lots o\f\ \e\s\c\a\p\e\r.¶
-However, escaper could not in `code\block`.¶
-Also, ~~strikethrough~~ is supported!¶
-* * *¶
-1. start with numberred list.¬
-2. ¬
-* List is also supported.¬
-*This should not be a list.¬
-+ Back to normal list.¬
-  * Second level.¬
-   * This should be level 2.¬
-     1. nested numberred list.¬
-And some word after the list,¬
-  Which be recognized as its text.¬
-* Finally, let's go back to normal.¶
----¶
-> quote¬
-> second line¬
 		</div>
   </body>
 
@@ -48,9 +18,38 @@ And some word after the list,¬
 	<script type="text/javascript" src="../dist/Geeke.js"></script>
 	<script>
 		window.onload = function() {
-			var editor = Geeke.createEditor(document.getElementById('root', {
-				id: 'mde'
-			}));
+			var editor = Geeke.createEditor(document.getElementById('root'), null, "\
+# Header1\n\n\
+## Header2\n\n\
+### Header3\n\n\
+#### Header4\n\n\
+##### Header5\n\n\
+###### Header6\n\n\
+Text here is editable.\n\n\
+***\n\n\
+These are **bold1** and __bold2__\n\n\
+These are *italic2* and _italic2_ _italic2_\n\n\
+These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**\n\n\
+This is `code block` This is a [link example](http://google.com).\n\n\
+There are lots o\\f\\ \\e\\s\\c\\a\\p\\e\\r.\n\n\
+However, escaper could not in `code\\block`.\n\n\
+Also, ~~strikethrough~~ is supported!\n\n\
+* * *\n\n\
+1. start with numberred list.\n\
+2. \n\
+12. stress test\n\
+* List is also supported.\n\
+*This should not be a list.\n\
++ Back to normal list.\n\
+  * Second level.\n\
+  * This should be level 2.\n\
+    1. nested numberred list.\n\
+And some word after the list,\n\
+  Which be recognized as its text.\n\
+* Finally, let's go back to normal.\n\n\
+---\n\n\
+> quote\n\
+> second line");
 		}
 	</script>
 </html>
