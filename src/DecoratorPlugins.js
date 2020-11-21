@@ -1,3 +1,4 @@
+const { options } = require("marked");
 const { getCounter } = require("./deprecated/parser");
 
 module.exports = {
@@ -199,10 +200,52 @@ module.exports = {
 
         if (buffers) processBuffers();
 
-        // ??? Collect the found lines into a list, and pass it into next recursion
-
-        console.log(paragraph, 'haha');
         return paragraph, true;
+      }
+    },
+
+    quote: {
+      type: 'recursive',
+      func: (paragraph, level, storage, options, recursiveFunc) => {
+        let matchReg = new RegExp(/^[>\s]+[^>\s]/);
+
+        // Find first quote symbol
+        let matchResult;
+        let buffers = [];        // Used to run the recursive parsing
+        let indexes = [];        // Used to remember the index mapping from buffers to paragraph
+        let markerIndexes = [];  // Used to remember which line has a prefix
+        let startPoint = 0;
+        for (; startPoint < paragraph.length; startPoint++) {
+          let line = paragraph[startPoint];
+          matchResult = line.match(matchReg);
+          if (matchResult) break;
+        }
+
+        if (!matchResult) return paragraph;
+
+        // Start from the first quote symbol
+        let processBuffers = () => {
+          let modified;
+
+          // Reset buffers, indexes, and markerIndexes
+          buffers = [];
+          indexes = [];
+          markerIndexes = [];
+        }
+
+        // Keep scanning until a empty line or an indent
+        for (let i = startPoint; i < paragraph.length; i++) {
+          
+        }
+
+        return paragraph;
+      }
+    },
+
+    checkBox: {
+      type: 'recursive',
+      func: (paragraph, level, storage, options, recursiveFunc) => {
+
       }
     }
   }

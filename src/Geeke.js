@@ -11,6 +11,9 @@ import {
 import {
   Decorator
 } from './Decorator.js';
+import {
+  Cursor
+} from './Cursor.js';
 
 // ============================================
 // style
@@ -60,8 +63,11 @@ class Geeke {
     // Initialize markdown decorator
     this.decorator = new Decorator(this.options);
 
-    // initialize editor and render existing text in the given element
+    // Initialize editor and render existing text in the given element
     this.initEditor();
+
+    // Initialize cursor modules
+    this.cursor = new Cursor(this.editor, this.options);
 
     // load all event listener
     this.loadEventListener(options);
@@ -77,7 +83,8 @@ class Geeke {
 
   loadEventListener(options) {
     // load pre-defined event listener
-    // this.editor.addEventListener("input", this.handleEditorChange.bind(this), false);
+    this.editor.addEventListener("click", this.handleEditorClick.bind(this), false);
+    this.editor.addEventListener("input", this.handleEditorChange.bind(this), false);
     this.editor.addEventListener("compositionstart", this.handleCompositionStart.bind(this), false);
     this.editor.addEventListener("compositionend", this.handleCompositionEnd.bind(this), false);
     // this.editor.addEventListener("keydown", this.handleKeyDown.bind(this), false);
@@ -129,6 +136,10 @@ class Geeke {
 
   handleEditorChange(e) {
     
+  }
+
+  handleEditorClick(e) {
+
   }
 }
 
