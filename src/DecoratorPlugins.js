@@ -96,7 +96,7 @@ module.exports = {
 
     list: {
       type: 'recursive',
-      func: (paragraph, level, storage, options, recursiveFunc) => {
+      func: (paragraph, level, prefixes, storage, options, recursiveFunc) => {
         // If this is seperator, skip it.
         if (paragraph[0].match(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/)) return paragraph;
 
@@ -206,7 +206,7 @@ module.exports = {
 
     quote: {
       type: 'recursive',
-      func: (paragraph, level, storage, options, recursiveFunc) => {
+      func: (paragraph, level, prefixes, storage, options, recursiveFunc) => {
         let matchReg = new RegExp(/^\s*>[>\s]*[^>\s]/);
 
         // Find first quote symbol
@@ -227,12 +227,31 @@ module.exports = {
         let processBuffers = () => {
           let modified;
 
+          // Put prefixes into markers
+          if (prefixes.length > 0) {
+            for (let i = 0; i < markers.length; i++) {
+              if (prefixes[indexes[i]] != null) {
+                markers[i] = prefixes[indexes[i]] + markers[i];
+              }
+            }
+          }
+
           // Recursively call
-          buffers, modified = recursiveFunc([buffers], 1);
+          buffers, modified = recursiveFunc([buffers], 1, markers);
+
+          // Put null back to prefixes so that upper layer can read it
+          for (let i = 0; i < markers.length; i++) {
+            prefixes[indexes[i]] = markers[i];
+          }
 
           // Add markers back
-          for (let i = 0; i < buffers.length; i++) {
-            buffers[i] = `<span class='md-blockm'>${markers[i]}</span>` + buffers[i];
+          if (!modified) {
+            for (let i = 0; i < buffers.length; i++) {
+              if (markers[i] != null) {
+                buffers[i] = `<span class='md-blockm'>${markers[i]}</span>` + buffers[i];
+                prefixes[indexes[i]] = null;
+              }
+            }
           }
           buffers[0] = `<div class='md-quote'>` + buffers[0];
           buffers[buffers.length - 1] = buffers[buffers.length - 1] + `</div>`;
@@ -276,6 +295,14 @@ module.exports = {
         }
 
         if (buffers) processBuffers();
+        if (prefixes.length > 0) {
+          for (let i = 0; i < prefixes.length; i++) {
+            if (prefixes[i] != null) {
+              paragraph[i] = `<span class='md-blockm'>${prefixes[i]}</span>` + paragraph[i];
+              prefixes[i] = null;
+            }
+          }
+        }
 
         return paragraph;
       }
@@ -283,14 +310,14 @@ module.exports = {
 
     checkBox: {
       type: 'recursive',
-      func: (paragraph, level, storage, options, recursiveFunc) => {
+      func: (paragraph, level, prefixes, storage, options, recursiveFunc) => {
 
       }
     },
 
     code: {
       type: 'recursive',
-      func: (paragraph, level, storage, options, recursiveFunc) => {
+      func: (paragraph, level, prefixes, storage, options, recursiveFunc) => {
 
       }
     },

@@ -131,7 +131,7 @@ export class Decorator {
   // Go through recursive plugins
   // Plugins will process a paragraph at a time
   // 2 return values: parsed result, and whether the content match to the rules in the plugins
-  recursiveFunc(mds, level=1) {
+  recursiveFunc(mds, level=1, prefixes=[]) {
     // Record whether content is modified
     let modified = false;
 
@@ -142,7 +142,7 @@ export class Decorator {
       for (let j in this.plugins.recursive) {
         let plugin = this.plugins.recursive[j];
         let m;
-        mds[i], m = plugin.func(paragraph, level, this.storage, this.options, this.recursiveFunc.bind(this));
+        mds[i], m = plugin.func(paragraph, level, prefixes, this.storage, this.options, this.recursiveFunc.bind(this));
         modified |= m;
       }
     }

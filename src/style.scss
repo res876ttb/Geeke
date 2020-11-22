@@ -5,11 +5,11 @@ $fontColor: black;
 $codeBlockFontColor: gray;
 $lineHeight: 16px;
 $indentSize: 1;
-$paragraphPadding: 0.5rem;
 $inParagraphPadding: 0.2rem;
 $fontFamily: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 $header-size: (2rem 1.5rem 1.17rem 1rem 0.83rem 0.67rem);
 $mdSymbolColor: gray;
+// $paragraphPadding: 0.5rem;
 
 // Fixed styles
 
@@ -69,31 +69,9 @@ $mdSymbolColor: gray;
   .md-quote {
     color: gray;
     border-left: rgba(0, 0, 0, 0.1) solid 4px;
-    padding: 1rem 0rem 1rem 1rem;
+    padding: 0.5rem 0rem 0.5rem 1rem;
+    margin: 0.5rem 0rem;
   }
-
-  // hide list marker
-  // span.md-ulistm, span.md-olistm {
-  //   font-size: 0px;
-  //   color: #999999;
-  //   text-decoration: underline
-  // }
-
-  // show list marker
-  // div.md-ulist.md-focus span.md-ulistm.md-focus,
-  // div.md-olist.md-focus span.md-olistm.md-focus {
-  //   font-size: unset;
-  // }
-
-  // hide quote marker
-  // span.md-quotem {
-  //   font-size: 0px;
-  // }
-
-  // show quote marker
-  // div.md-quote.md-focus span.md-quotem.md-focus {
-  //   font-size: unset;
-  // }
 
   // hide block marker
   span.md-blockm {
@@ -149,9 +127,9 @@ $mdSymbolColor: gray;
   }
 
   // paragraph style
-  &>div {
-    padding: $paragraphPadding 0rem;
-  }
+  // &>div {
+  //   padding: $paragraphPadding 0rem;
+  // }
 
   // header size
   @for $i from 1 through 6 {
