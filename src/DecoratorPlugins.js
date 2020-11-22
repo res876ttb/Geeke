@@ -114,43 +114,50 @@ module.exports = {
         }
         
         // If no, return directly
-        if (!matchResult) return paragraph;
+        if (!matchResult) return paragraph, false;
 
         // Find lines that match list rules
-        // buffers to the next recursion
-        let buffers = [];
-        // 1 to 1 mapping from buffers to paragraphs
-        let indexes = [];
+        let buffers = [];  // Used to run the recursive parsing
+        let indexes = [];  // Used to remember the index mapping from buffers to paragraph
+        let markers = [];  // Used to remember the prefix of each line
         let bufferStyle;
 
         // Run recursion on the bufferred lines
         let processBuffers = () => {
           let modified; // Whether the content is modified in next recursion
 
-          // Remove list mark
-          let listMatch = buffers[0].match(listReg)[0];
-          buffers[0] = buffers[0].split(listMatch)[1];
+          // Add concatenate prefixes and markers
+          for (let i = 0; i < markers.length; i++) {
+            if (prefixes[indexes[i]] != null) {
+              markers[i] = prefixes[indexes[i]] + markers[i];
+            }
+          }
 
           // Recursively call
-          buffers, modified = recursiveFunc([buffers], level + 1);
+          buffers, modified = recursiveFunc([buffers], level + 1, markers);
 
-          // Add list mark back
-          buffers[0] = listMatch + buffers[0];
+          // Put null back to prefixes so that upper layer can read it
+          for (let i = 0; i < markers.length; i++) {
+            prefixes[indexes[i]] = markers[i];
+          }
 
           // Start to append style to this line. Only the first line is list style
           if (bufferStyle == 'ul') {
-            buffers[0] = buffers[0].replace(/^([\t\ ]*[\*\+-].)(.*)$/, `<div class='md-ulist md-indent-${level}'><span class='md-ulist-dot'></span><span class='md-blockm'>$1</span>$2</div>`);
+            buffers[0] = `<div class='md-ulist md-indent-${level}'><span class='md-ulist-dot'></span><span class='md-blockm'>${markers[0]}</span>${buffers[0]}</div>`;
+            prefixes[indexes[0]] = null;
           } else {
-            buffers[0] = buffers[0].replace(/^([\t\ ]*([\d]+\.).)(.*)$/, `<div class='md-olist md-indent-${level}'><span class='md-olist-number' olist-number='$2'></span><span class='md-blockm'>$1</span>$3</div>`)
+            buffers[0] = `<div class='md-olist md-indent-${level}'><span class='md-olist-number' olist-number='${markers[0].replace(/^.*[^\d](\d+\.)\s*$/, `$1`)}'></span><span class='md-blockm'>${markers[0]}</span>${buffers[0]}</div>`;
+            prefixes[indexes[0]] = null;
           }
 
           // Append style to normal text
           if (!modified) {
             for (let i = 1; i < buffers.length; i++) {
               if (buffers[i] === '') {
-                buffers[i] = `<div class='md-ulist md-indent-${level}'><span class='md-ulistm'></span></div>`;
+                buffers[i] = `<div class='md-ulist md-indent-${level}'></div>`;
               } else {
-                buffers[i] = buffers[i].replace(/^([\s]*)(.+)$/, `<div class='md-ulist md-indent-${level}'><span class='md-blockm'>$1</span>$2</div>`);
+                buffers[i] = `<div class='md-ulist md-indent-${level}'><span class='md-blockm'>${markers[i]}</span>${buffers[i]}</div>`;
+                prefixes[indexes[i]] = null;
               }
             }
           }
@@ -160,14 +167,16 @@ module.exports = {
             paragraph[indexes[i]] = buffers[i];
           }
 
-          // Reset buffers and indexes
+          // Reset buffers, indexes, and markers
           buffers = [];
           indexes = [];
+          markers = [];
         }
 
         // Parse the paragraph
         for (let i = startPoint; i < paragraph.length; i++) {
           let line = paragraph[i];
+          let marker = '';
 
           // Whether match list rule
           let lookLikeMatch = line.match(matchReg);
@@ -191,11 +200,24 @@ module.exports = {
             } else {
               bufferStyle = 'ol';
             }
+
+            // Extract symbol into markers
+            if (bufferStyle == 'ul') {
+              marker = line.replace(/^([\t\ ]*[\*\+-].)(.*)$/, `$1`);
+              line = line.replace(/^([\t\ ]*[\*\+-].)(.*)$/, `$2`);
+            } else {
+              marker = line.replace(/^([\t\ ]*([\d]+\.).)(.*)$/, `$1`);
+              line = line.replace(/^([\t\ ]*([\d]+\.).)(.*)$/, `$3`);
+            }
+          } else {
+            marker = line.replace(/^([\s]*)(.+)$/, `$1`);
+            line = line.replace(/^([\s]*)(.+)$/, `$2`);
           }
 
           // This line is normal text
           buffers.push(line);
           indexes.push(i);
+          markers.push(marker);
         }
 
         if (buffers) processBuffers();
@@ -268,6 +290,7 @@ module.exports = {
         }
 
         // Keep scanning until a empty line or an indent
+        let numEmpty = 0;
         for (let i = startPoint; i < paragraph.length; i++) {
           let line = paragraph[i];
 
@@ -290,19 +313,12 @@ module.exports = {
             indexes.push(i);
             markers.push('');
           } else {
+            // console.log('HERE');
             processBuffers();
           }
         }
 
         if (buffers) processBuffers();
-        if (prefixes.length > 0) {
-          for (let i = 0; i < prefixes.length; i++) {
-            if (prefixes[i] != null) {
-              paragraph[i] = `<span class='md-blockm'>${prefixes[i]}</span>` + paragraph[i];
-              prefixes[i] = null;
-            }
-          }
-        }
 
         return paragraph;
       }
