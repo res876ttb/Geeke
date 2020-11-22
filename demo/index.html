@@ -27,13 +27,13 @@
 ###### Header6\n\n\
 Text here is editable.\n\n\
 ***\n\n\
-These are **bold1** and __bold2__\n\n\
-These are *italic2* and _italic2_ _italic2_\n\n\
+These are **bold1** **bold1** and __bold2__\n\
+These are *italic2* and _italic2_ _italic2_\n\
 These are lots of ***bold and italic***: _**bold and italic**_ **_bold and italic_**\n\n\
 This is `code block`\n\n\
 This is a [link example](http://google.com).\n\n\
-There are lots o\\f\\ \\e\\s\\c\\a\\p\\e\\r.\n\n\
-However, escaper could not in `code\\block`.\n\n\
+_There_ are lots o\\f\\ \\e\\s\\c\\a\\p\\e\\r.\n\
+**However**, escaper could not in `code\\block`.\n\n\
 Also, ~~strikethrough~~ is supported!\n\n\
 * * *\n\n\
 1. start with numberred list.\n\
@@ -50,7 +50,25 @@ And some word after the list,\n\
 * Finally, let's go back to normal.\n\n\
 ---\n\n\
 > quote\n\
-> second line");
+> second line\n\
+>  \n\n\
+>a quote\n\
+second line\n\n\
+>  a quote\n\
+>> second layer quote\n\
+>>> third layer quote\n\n\
+> normal text\n\
+> 1. list inside a quote\n\
+> * unordered list\n\
+> \n\
+> \n\
+> normal text\n\n\
+");
 		}
 	</script>
 </html>
+
+<!-- + a normal list\n\
++ > and a list inside the list\n\
+	> haha\n\
++ + second level list\n\ -->

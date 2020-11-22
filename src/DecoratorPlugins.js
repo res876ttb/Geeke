@@ -23,36 +23,36 @@ module.exports = {
   
     boldItalic: {
       type: 'onepass',
-      func1: mds => mds.replace(/([^\\])\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `$1<b><i>¨bi´$2¨bi´</i></b>`),
+      func1: mds => mds.replace(/([^\\]|^)\*\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*\*/g, `$1<b><i>¨bi´$2¨bi´</i></b>`),
       func2: mds => mds.replace(/¨bi´/g, `<span class='md-bold-italic'>***</span>`) 
     },
   
     bold1: {
       type: 'onepass',
-      func1: mds => mds.replace(/([^\\])\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `$1<b>¨b1´$2¨b1´</b>`),
+      func1: mds => mds.replace(/([^\\]|^)\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `$1<b>¨b1´$2¨b1´</b>`),
       func2: mds => mds.replace(/¨b1´/g, `<span class='md-bold'>**</span>`)
     },
     bold2: {
       type: 'onepass',
-      func1: mds => mds.replace(/([^\\])__([^\s][^_\n]*[^\s]|[^\s])__/g, `$1<b>¨b2´$2¨b2´</b>`),
+      func1: mds => mds.replace(/([^\\]|^)__([^\s][^_\n]*[^\s]|[^\s])__/g, `$1<b>¨b2´$2¨b2´</b>`),
       func2: mds => mds.replace(/¨b2´/g, `<span class='md-bold'>__</span>`)
     },
   
     italic1: {
       type: 'onepass',
-      func1: mds => mds.replace(/([^\\])\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*/g, `$1<i>¨i1´$2¨i1´</i>`),
+      func1: mds => mds.replace(/([^\\]|^)\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\\*]|[^\s\\\*])\*/g, `$1<i>¨i1´$2¨i1´</i>`),
       func2: mds => mds.replace(/¨i1´/g, `<span class='md-italic'>*</span>`)
     },
     italic2: {
       type: 'onepass',
-      func1: mds => mds.replace(/([^\\])_([^\s][^_\n]*[^\s]|[^\s])_/g, `$1<i>¨i2´$2¨i2´</i>`),
+      func1: mds => mds.replace(/([^\\]|^)_([^\s][^_\n]*[^\s]|[^\s])_/g, `$1<i>¨i2´$2¨i2´</i>`),
       func2: mds => mds.replace(/¨i2´/g, `<span class='md-italic'>_</span>`)
     },
   
     // test: https://regex101.com/r/pxbM5w/2
     inlineCode: {
       type: 'onepass',
-      func1: mds => mds.replace(/([^\\])`((([^`\n]|\\`)+([^\\`]|\\`))|[^\s\\`])`/g, `$1<code>¨ic´$2¨ic´</code>`),
+      func1: mds => mds.replace(/([^\\]|^)`((([^`\n]|\\`)+([^\\`]|\\`))|[^\s\\`])`/g, `$1<code>¨ic´$2¨ic´</code>`),
       func2: mds => mds.replace(/¨ic´/g, `<span class='md-inline-code'>\`</span>`)
     },
   
@@ -139,18 +139,18 @@ module.exports = {
 
           // Start to append style to this line. Only the first line is list style
           if (bufferStyle == 'ul') {
-            buffers[0] = buffers[0].replace(/^([\t\ ]*[\*\+-].)(.*)$/, `<div class='md-ulist md-indent-${level}' mdtype='ulist'><span class='md-ulist-dot'></span><span class='md-ulistm'>$1</span>$2</div>`);
+            buffers[0] = buffers[0].replace(/^([\t\ ]*[\*\+-].)(.*)$/, `<div class='md-ulist md-indent-${level}'><span class='md-ulist-dot'></span><span class='md-blockm'>$1</span>$2</div>`);
           } else {
-            buffers[0] = buffers[0].replace(/^([\t\ ]*([\d]+\.).)(.*)$/, `<div class='md-olist md-indent-${level}' mdtype='olist'><span class='md-olist-number' olist-number='$2'></span><span class='md-olistm'>$1</span>$3</div>`)
+            buffers[0] = buffers[0].replace(/^([\t\ ]*([\d]+\.).)(.*)$/, `<div class='md-olist md-indent-${level}'><span class='md-olist-number' olist-number='$2'></span><span class='md-blockm'>$1</span>$3</div>`)
           }
 
           // Append style to normal text
           if (!modified) {
             for (let i = 1; i < buffers.length; i++) {
               if (buffers[i] === '') {
-                buffers[i] = `<div class='md-ulist md-indent-${level}' mdtype='ulist'><span class='md-ulistm'></span></div>`;
+                buffers[i] = `<div class='md-ulist md-indent-${level}'><span class='md-ulistm'></span></div>`;
               } else {
-                buffers[i] = buffers[i].replace(/^([\s]*)(.+)$/, `<div class='md-ulist md-indent-${level}' mdtype='ulist'><span class='md-ulistm'>$1</span>$2</div>`);
+                buffers[i] = buffers[i].replace(/^([\s]*)(.+)$/, `<div class='md-ulist md-indent-${level}'><span class='md-blockm'>$1</span>$2</div>`);
               }
             }
           }
@@ -207,13 +207,13 @@ module.exports = {
     quote: {
       type: 'recursive',
       func: (paragraph, level, storage, options, recursiveFunc) => {
-        let matchReg = new RegExp(/^[>\s]+[^>\s]/);
+        let matchReg = new RegExp(/^\s*>[>\s]*[^>\s]/);
 
         // Find first quote symbol
         let matchResult;
         let buffers = [];        // Used to run the recursive parsing
         let indexes = [];        // Used to remember the index mapping from buffers to paragraph
-        let markerIndexes = [];  // Used to remember which line has a prefix
+        let markers = [];        // Used to remember the prefix of each line
         let startPoint = 0;
         for (; startPoint < paragraph.length; startPoint++) {
           let line = paragraph[startPoint];
@@ -227,16 +227,55 @@ module.exports = {
         let processBuffers = () => {
           let modified;
 
-          // Reset buffers, indexes, and markerIndexes
+          // Recursively call
+          buffers, modified = recursiveFunc([buffers], 1);
+
+          // Add markers back
+          for (let i = 0; i < buffers.length; i++) {
+            buffers[i] = `<span class='md-blockm'>${markers[i]}</span>` + buffers[i];
+          }
+          buffers[0] = `<div class='md-quote'>` + buffers[0];
+          buffers[buffers.length - 1] = buffers[buffers.length - 1] + `</div>`;
+
+          // Put buffers back to paragraph
+          for (let i = 0; i < buffers.length; i++) {
+            paragraph[indexes[i]] = buffers[i];
+          }
+
+          // Reset buffers, indexes, and markers
           buffers = [];
           indexes = [];
-          markerIndexes = [];
+          markers = [];
         }
 
         // Keep scanning until a empty line or an indent
         for (let i = startPoint; i < paragraph.length; i++) {
-          
+          let line = paragraph[i];
+
+          // check whether line is empty. If not, add it into buffers.
+          if (line.match(/^\s*>/)) {              // start with `>`
+            // remove first marker from line.
+            let marker = line.match(/^\s*>\s*/)[0];
+            line = line.split(marker);
+
+            // If line is splited into more than 2 parts, add the marker back.
+            if (line.length > 2) {
+              for (let i = 2; i < line.length; i++) line[1] += marker + line[i];
+            }
+
+            buffers.push(line[1]);
+            indexes.push(i);
+            markers.push(marker);
+          } else if (line.match(/^\s*[^\s>]+/)) { // start without `>`
+            buffers.push(line);
+            indexes.push(i);
+            markers.push('');
+          } else {
+            processBuffers();
+          }
         }
+
+        if (buffers) processBuffers();
 
         return paragraph;
       }
@@ -247,6 +286,13 @@ module.exports = {
       func: (paragraph, level, storage, options, recursiveFunc) => {
 
       }
-    }
+    },
+
+    code: {
+      type: 'recursive',
+      func: (paragraph, level, storage, options, recursiveFunc) => {
+
+      }
+    },
   }
 }

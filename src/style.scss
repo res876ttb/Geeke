@@ -24,6 +24,10 @@ $mdSymbolColor: gray;
   font-size: $fontSize;
   color: $fontColor;
   font-family: $fontFamily;
+  // line-height: $lineHeight;
+
+  // show all white space
+  white-space: pre;
 
   // Hide marker
   .hide {
@@ -40,7 +44,7 @@ $mdSymbolColor: gray;
     escaperm:'span.md-escaper',
     strikethrough:del,
     seperatorm:'span.md-seperator',
-    quotem:'div.md-quote',
+    // quotem:'div.md-quote',
   );
   @for $i from 1 through 6 {
     $marker: append($marker, h#{$i}m 'span.md-h#{$i}');
@@ -64,25 +68,44 @@ $mdSymbolColor: gray;
   // quote style
   .md-quote {
     color: gray;
-
-    &::before {
-      content: "1";
-      color: rgba(0, 0, 0, 0);
-      border-left: rgba(0, 0, 0, 0.1) solid 4px;
-    }
+    border-left: rgba(0, 0, 0, 0.1) solid 4px;
+    padding: 1rem 0rem 1rem 1rem;
   }
 
-  // hide ulist marker
-  span.md-ulistm, span.md-olistm {
+  // hide list marker
+  // span.md-ulistm, span.md-olistm {
+  //   font-size: 0px;
+  //   color: #999999;
+  //   text-decoration: underline
+  // }
+
+  // show list marker
+  // div.md-ulist.md-focus span.md-ulistm.md-focus,
+  // div.md-olist.md-focus span.md-olistm.md-focus {
+  //   font-size: unset;
+  // }
+
+  // hide quote marker
+  // span.md-quotem {
+  //   font-size: 0px;
+  // }
+
+  // show quote marker
+  // div.md-quote.md-focus span.md-quotem.md-focus {
+  //   font-size: unset;
+  // }
+
+  // hide block marker
+  span.md-blockm {
     font-size: 0px;
-    white-space: pre;
     color: #999999;
     text-decoration: underline
   }
 
-  // show ulist marker
-  div.md-ulist.md-focus span.md-ulistm.md-focus,
-  div.md-olist.md-focus span.md-olistm.md-focus {
+  // show block marker
+  div.md-ulist.md-focus span.md-blockm.md-focus,
+  div.md-olist.md-focus span.md-blockm.md-focus,
+  div.md-quote.md-focus span.md-blockm.md-focus {
     font-size: unset;
   }
 
@@ -122,6 +145,7 @@ $mdSymbolColor: gray;
   .md-ulist, .md-olist {
     position: relative;
     padding: $inParagraphPadding 0rem;
+    // line-height: $lineHeight;
   }
 
   // paragraph style

@@ -16,26 +16,18 @@ export class Decorator {
   }
 
   // Load plugins int decorator
-  // 2 types of plugins: onepass, recursive
+  // 3 types of plugins: onepass, recursive, entire
   // onepass: type: 'onepass', func1, func2
-  // recursive: 
+  // recursive: type: 'recursive', func
+  // entire: type: 'entire', func
   loadPlugin() {
     // Plugins list
     this.plugins = [];
 
     // Load default plugins
-    this.plugins.push(plugins.header);
-    this.plugins.push(plugins.boldItalic);
-    this.plugins.push(plugins.bold1);
-    this.plugins.push(plugins.bold2);
-    this.plugins.push(plugins.italic1);
-    this.plugins.push(plugins.italic2);
-    this.plugins.push(plugins.inlineCode);
-    this.plugins.push(plugins.link);
-    this.plugins.push(plugins.escaper);
-    this.plugins.push(plugins.strickethrough);
-    this.plugins.push(plugins.seperator);
-    this.plugins.push(plugins.list);
+    for (let i in this.options.defaultPlugins) {
+      this.plugins.push(plugins[this.options.defaultPlugins[i]]);
+    }
 
     // Load user-defined plugins
     for (let i in this.options.plugins) {
@@ -93,7 +85,7 @@ export class Decorator {
       }
 
       // Remove the newline symbol of the last line, then replace each line with <div>
-      paragraph = paragraph.replace(/†$/, '').replace(/\<\/div\>†/g, '†</div>').replace(/†/g, '<span class="hide">¬</span>');
+      paragraph = paragraph.replace(/†$/, '').replace(/\<\/div\>†/g, '†</div>').replace(/†/g, '<span class="hide">¬</span><br>');
 
       // Add new paragraph symbol to each paragraph
       doc += `<div class='md-para'>${paragraph}<span class=\"hide\">¶</span></div>`;

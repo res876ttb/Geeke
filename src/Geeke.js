@@ -52,6 +52,9 @@ class Geeke {
       // tabSize: number, the number of spaces equivalent to a tab
       tabSize: 2,
 
+      // defaultPlugins: list, the default plugins to load
+      defaultPlugins: ['header', 'boldItalic', 'bold1', 'bold2', 'italic1', 'italic2', 'inlineCode', 'link', 'escaper', 'strickethrough', 'seperator', 'seperator', 'list', 'quote'],
+
       // plugins: dictionary, custom parser plugins for MD parser.
       // TODO: docs
       plugins: []
@@ -139,7 +142,7 @@ class Geeke {
   }
 
   handleEditorClick(e) {
-
+    console.log(this.cursor.getCurrentRange());
   }
 }
 
