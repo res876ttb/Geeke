@@ -19,6 +19,11 @@
 	<script>
 		window.onload = function() {
 			var editor = Geeke.createEditor(document.getElementById('root'), null, "\
++ a normal list\n\
++ > and a list inside the list\n\
+  > haha\n\
+  + second level list\n\
+\n\n\
 # Header1\n\n\
 ## Header2\n\n\
 ### Header3\n\n\
@@ -54,22 +59,22 @@ And some word after the list,\n\
 >  \n\n\
 >a quote\n\
 second line\n\n\
->  a quote\n\
+> first layer quote\n\
 >> second layer quote\n\
->>> third layer quote\n\n\
+>>> third layer quote\n\
+>> \n\
+>> second layer quote\n\
+>>> third layer quote\n\
+without start mark\n\
+> \n\
+> first layer quote\n\n\
 > normal text\n\
 > normal text2\n\
 > 1. list inside a quote\n\
 > * unordered list\n\
-> \n\
 > \n\
 > normal text\n\n\
 ");
 		}
 	</script>
 </html>
-
-<!-- + a normal list\n\
-+ > and a list inside the list\n\
-	> haha\n\
-+ + second level list\n\ -->

@@ -91,8 +91,10 @@ export class Decorator {
       doc += `<div class='md-para'>${paragraph}<span class=\"hide\">¶</span></div>`;
     }
 
-    // Remove last new paragraph symbol
-    doc = doc.replace(/\<span class=\"hide\"\>¶\<\/span\>\<\/div\>$/, '</div>');
+    // Remove last new paragraph symbol and
+    // remove redundant `<br>`
+    doc = doc.replace(/\<span class=\"hide\"\>¶\<\/span\>\<\/div\>$/, '</div>')
+             .replace(/<br><\/div>/g, `</div>`);
 
     return doc;
   }

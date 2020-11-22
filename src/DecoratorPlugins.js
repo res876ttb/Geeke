@@ -267,16 +267,12 @@ module.exports = {
           }
 
           // Add markers back
-          if (!modified) {
-            for (let i = 0; i < buffers.length; i++) {
-              if (markers[i] != null) {
-                buffers[i] = `<span class='md-blockm'>${markers[i]}</span>` + buffers[i];
-                prefixes[indexes[i]] = null;
-              }
+          for (let i = 0; i < buffers.length; i++) {
+            if (markers[i] != null) {
+              buffers[i] = `<span class='md-blockm'>${markers[i]}</span>` + buffers[i];
+              prefixes[indexes[i]] = null;
             }
           }
-          buffers[0] = `<div class='md-quote'>` + buffers[0];
-          buffers[buffers.length - 1] = buffers[buffers.length - 1] + `</div>`;
 
           // Put buffers back to paragraph
           for (let i = 0; i < buffers.length; i++) {
@@ -305,6 +301,10 @@ module.exports = {
               for (let i = 2; i < line.length; i++) line[1] += marker + line[i];
             }
 
+            if (line[1].match(/^\s*$/)) {
+              processBuffers();
+            }
+
             buffers.push(line[1]);
             indexes.push(i);
             markers.push(marker);
@@ -312,13 +312,14 @@ module.exports = {
             buffers.push(line);
             indexes.push(i);
             markers.push('');
-          } else {
-            // console.log('HERE');
-            processBuffers();
           }
         }
 
         if (buffers) processBuffers();
+
+        // Add </div> to last line
+        paragraph[startPoint] = `<div class='md-quote'>` + paragraph[startPoint];
+        paragraph[paragraph.length - 1] += '</div>';
 
         return paragraph;
       }
