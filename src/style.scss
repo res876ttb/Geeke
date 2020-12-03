@@ -44,7 +44,7 @@ $mdSymbolColor: gray;
     escaperm:'span.md-escaper',
     strikethrough:del,
     seperatorm:'span.md-seperator',
-    // quotem:'div.md-quote',
+    highlightm:'span.md-highlight',
   );
   @for $i from 1 through 6 {
     $marker: append($marker, h#{$i}m 'span.md-h#{$i}');
@@ -179,6 +179,10 @@ $mdSymbolColor: gray;
 
   .md-para {
     margin: 0.5rem 0rem;
+  }
+
+  .md-highlight {
+    background-color: #ffe700;
   }
 
   .hide-visible {

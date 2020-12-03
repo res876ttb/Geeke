@@ -53,7 +53,7 @@ class Geeke {
       tabSize: 2,
 
       // defaultPlugins: list, the default plugins to load
-      defaultPlugins: ['header', 'boldItalic', 'bold1', 'bold2', 'italic1', 'italic2', 'inlineCode', 'link', 'escaper', 'strickethrough', 'seperator', 'seperator', 'list', 'quote'],
+      defaultPlugins: ['header', 'boldItalic', 'bold1', 'bold2', 'italic1', 'italic2', 'inlineCode', 'link', 'escaper', 'strickethrough', 'seperator', 'seperator', 'highlight'],
 
       // plugins: dictionary, custom parser plugins for MD parser.
       // TODO: docs
