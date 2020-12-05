@@ -27,7 +27,9 @@ module.exports = {
     bold1: {
       type: 'onepass',
       func1: mds => mds.replace(/([^\\]|^)\*\*(([^\s]|\\.)([^\*\n]|\\\*)*[^\s\\]|[^\s\\])\*\*/g, `$1<b>¨b1´$2¨b1´</b>`),
-      func2: mds => mds.replace(/¨b1´/g, `<span class='md-bold'>**</span>`)
+      func2: (mds, _, storage) => mds.replace(/¨b1´/g, (match) => {
+        return `<span class='md-bold'>**</span>`;
+      })
     },
     bold2: {
       type: 'onepass',
@@ -49,8 +51,17 @@ module.exports = {
     // test: https://regex101.com/r/pxbM5w/2
     inlineCode: {
       type: 'onepass',
-      func1: mds => mds.replace(/([^\\]|^)`((([^`\n]|\\`)+([^\\`]|\\`))|[^\s\\`])`/g, `$1<code>¨ic´$2¨ic´</code>`),
-      func2: mds => mds.replace(/¨ic´/g, `<span class='md-inline-code'>\`</span>`)
+      func1: (mds, count, storage) => {
+        return mds.replace(/(?<!\\)`((([^`\n]|\\`)+([^\\`]|\\`))|[^\s\\`])`/g, (_, p1) => {
+          storage.push(p1);
+          return `<code>¨ic´${count()}¨ic´</code>`;
+        })
+      },
+      func2: (mds, _, storage) => {
+        return mds.replace(/¨ic´([\d]+)¨ic´/g, (_, p1) => {
+          return `<span class='md-inline-code'>\`</span>${storage[parseInt(p1)]}<span class='md-inline-code'>\`</span>`
+        })
+      }
     },
   
     // test: https://regex101.com/r/B0Ui3g/1
@@ -65,8 +76,17 @@ module.exports = {
   
     escaper: {
       type: 'onepass',
-      func1: mds => mds.replace(/\\(.)/g, `<span class='md-escaper'>¨e´$1</span>`),
-      func2: mds => mds.replace(/¨e´/g, `<span class='md-escaperm'>\\</span>`)
+      func1: (mds, count, storage) => {
+        return mds.replace(/\\(.)/g, (_, p1) => {
+          storage.push(p1);
+          return `<span class='md-escaper'>¨e´${count()}¨</span>`;
+        });
+      },
+      func2: (mds, _, storage) => {
+        return mds.replace(/¨e´(\d*)¨/g, (_, p1) => {
+          return `<span class='md-escaperm'>\\</span>${storage[parseInt(p1)]}`
+        })
+      }
     },
   
     // test: https://regex101.com/r/hm1MSB/1
@@ -103,3 +123,60 @@ module.exports = {
     }
   }
 }
+
+/*
+
+Rules
+-----
+
+* Paragraph
+  * One blank line seperates two paragraphs
+* Quote
+  1. Each line has 1 `>` as start
+  2. Only the first line has `>`
+  3. Nested quote with proper number of `>`
+  4. Support all the other styles inside quote like list, table, and header <== Need re-organize parsing architecture
+* List
+  1. Support style like `+-*` and numbers
+  2. Note that in the number list, each number should follow by a `.`
+  3. The space before the next line can be any number
+  4. Accept for multiple paragraphs, but the next paragarph should have at least the same number of spaces, and no more than 1 blank line between the two paragraphs
+  5. Only the first line of the next paragraph should be indented properly
+  6. Support quote in list, but quote should be indented for at least the same number of spaces
+  7. Support code in list, but should be indented for 2 more spaces
+* Code
+  1. Start with 4 spaces or 1 tab or quote the block with ```
+  2. The indent space/tab will be removed
+  3. The code block will continue until the line without indent or EOF
+  4. Support specifying language with ```. The following code is the example:
+     ```cpp
+     #include <iostream>
+     using namespace std;
+
+     int main() {
+       return 0;
+     }
+     ```
+* Table (Reference: https://blog.fntsr.tw/articles/726/)
+  1. Component: title, seperator, and data
+     1. Title: seperate column with `|`
+     2. Seperator: seperate column with `|`, each column must has at least 3 symbol (`-` or `:`)
+     3. Data: seperate each column with `|`
+
+Bugs
+----
+
+*  ` in inline code block: `` ` `` should match
+* link: [google] [http://www.google.com] should work, there can be multiple spaces between 2 quote
+
+
+Not support right now
+---------------------
+
+* inline link, like <https://www.google.com> or <someone@gmail.com>
+  * <email@google.com> should be encoded with a bit of randomized decimal and hex entity-encoding to help obscure users' address from address-harvesting spambots.
+* link reference
+  * show the reference in the document at anywheter, like the line below, and add like like this: 
+    [id]: http://example.com/  "Optional Title Here"
+
+*/

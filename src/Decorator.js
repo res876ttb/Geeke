@@ -12,6 +12,9 @@ export class Decorator {
     this.resetCounter();
     this.resetStorage();
 
+    // Bind this to function getCounter
+    this.getCounter = this.getCounter.bind(this);
+
     console.log('All plugins loaded');
   }
 
@@ -100,8 +103,9 @@ export class Decorator {
   }
 
   // Go through onepass plugins
+  // phase must be 1 or 2
   // 1 return value: parsed result.
-  onepassFunc(mds) {
+  onepassFunc(mds, phase) {
     // For each paragraph...
     for (let i in mds) {
       let paragraph = mds[i];
@@ -110,15 +114,19 @@ export class Decorator {
       for (let j in paragraph) {
         let line = paragraph[j];
         // Go through func1 of `onepass` plugins
-        for (let k in this.plugins.onepass) {
-          let plugin = this.plugins.onepass[k];
-          line = plugin.func1(line, this.getCounter, this.storage, this.options);
+        if (phase == 1) {
+          for (let k in this.plugins.onepass) {
+            let plugin = this.plugins.onepass[k];
+            line = plugin.func1(line, this.getCounter, this.storage, this.options);
+          }
         }
     
         // Go through func2 of `onepass` plugins
-        for (let k in this.plugins.onepass) {
-          let plugin = this.plugins.onepass[k];
-          line = plugin.func2(line, this.getCounter, this.storage, this.options);
+        if (phase == 2) {
+          for (let k in this.plugins.onepass) {
+            let plugin = this.plugins.onepass[k];
+            line = plugin.func2(line, this.getCounter, this.storage, this.options);
+          }
         }
 
         paragraph[j] = line;
@@ -164,7 +172,7 @@ export class Decorator {
   }
   
   resetStorage() {
-    this.storage = {};
+    this.storage = [null];
   }
 
   parse(mds, level=0) {
@@ -178,10 +186,12 @@ export class Decorator {
     mds = this.analyzeParagraph(mds);
 
     // Parse markdown:
-    // 1. One pass parsing
-    // 2. Recursively parsing
-    mds = this.onepassFunc(mds);
+    // 1. One pass parsing phase 1
+    // 2. Parsing paragraph
+    // 3. One pass parsing phase 2
+    mds = this.onepassFunc(mds, 1);
     // mds, _ = this.recursiveFunc(mds);
+    mds = this.onepassFunc(mds, 2);
 
     // Assemble paragraphs
     mds = this.createInnerHTML(mds);
