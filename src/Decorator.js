@@ -53,51 +53,34 @@ export class Decorator {
 
   // Analyze paragraphs
   analyzeParagraph(mds) {
-    // 1. parse original \n to ¶ and ¬
-    // 2. convert 2 new line into 1 paragraph
-    // 3. split new line
-    mds = mds.replace(/\n\n/g, '¶');
     mds = mds.replace(/\n/g, '¬');
-    mds = mds.replace(/¬¬/g, '¶');
-    mds = mds.split('¶');
-    for (let i = 0; i < mds.length; i++) {
-      mds[i] = mds[i].split('¬');
-    }
-
-    return mds;
+    return mds.split('¬');
   }
 
   // Assemble paragraphs
   createInnerHTML(mds) {
-    // The assemble result
-    let doc = ''
+    // The assmble result
+    let doc = '';
+    
+    // Merge each lines
+    for (let i = 0; i < mds.length; i++) doc += mds[i] + '¬';
+    doc = doc.replace(/¬$/, ''); // Remove new line symbol at the last line
 
-    // Iterate through each paragraph
+    // Analyze paragraph: replace `¬¬` into `¶`
+    doc = doc.replace(/¬¬/g, '¶');
+    mds = doc.split('¶');
+
+    // Add paragraph symbol
     for (let i = 0; i < mds.length; i++) {
-      let paragraph = '';
-
-      // Iterate through each line in the paragraph
-      for (let j = 0; j < mds[i].length; j++) {
-        // If this line is empty, set it to `<br/>`
-        if (mds[i][j] == '') {
-          mds[i][j] = '<br>';
-        }
-
-        // Add newline symbol to each line
-        paragraph += mds[i][j] + '†'; // use † to represent'<span class="hide">¬</span>'
-      }
-
-      // Remove the newline symbol of the last line, then replace each line with <div>
-      paragraph = paragraph.replace(/†$/, '').replace(/\<\/div\>†/g, '†</div>').replace(/†/g, '<span class="hide">¬</span><br>');
-
-      // Add new paragraph symbol to each paragraph
-      doc += `<div class='md-para'>${paragraph}<span class=\"hide\">¶</span></div>`;
+      mds[i] = `<div class='md-para'>${mds[i]}<span class=\"hide\">¶</span></div>`;
     }
 
-    // Remove last new paragraph symbol and
-    // remove redundant `<br>`
-    doc = doc.replace(/\<span class=\"hide\"\>¶\<\/span\>\<\/div\>$/, '</div>')
-             .replace(/<br><\/div>/g, `</div>`);
+    // Merge paragraphs
+    doc = '';
+    for (let i = 0; i < mds.length; i++) doc += mds[i];
+
+    // Hide `¬`
+    doc = doc.replace(/¬/g, '<span class="hide">¬</span><br>');
 
     return doc;
   }
@@ -106,33 +89,27 @@ export class Decorator {
   // phase must be 1 or 2
   // 1 return value: parsed result.
   onepassFunc(mds, phase) {
-    // For each paragraph...
+    // For each line...
     for (let i in mds) {
-      let paragraph = mds[i];
+      let line = mds[i];
 
-      // For each line in a paragraph...
-      for (let j in paragraph) {
-        let line = paragraph[j];
-        // Go through func1 of `onepass` plugins
-        if (phase == 1) {
-          for (let k in this.plugins.onepass) {
-            let plugin = this.plugins.onepass[k];
-            line = plugin.func1(line, this.getCounter, this.storage, this.options);
-          }
+      // Go through func1 of `onepass` plugins
+      if (phase == 1) {
+        for (let k in this.plugins.onepass) {
+          let plugin = this.plugins.onepass[k];
+          line = plugin.func1(line, this.getCounter, this.storage, this.options);
         }
-    
-        // Go through func2 of `onepass` plugins
-        if (phase == 2) {
-          for (let k in this.plugins.onepass) {
-            let plugin = this.plugins.onepass[k];
-            line = plugin.func2(line, this.getCounter, this.storage, this.options);
-          }
+      }
+  
+      // Go through func2 of `onepass` plugins
+      if (phase == 2) {
+        for (let k in this.plugins.onepass) {
+          let plugin = this.plugins.onepass[k];
+          line = plugin.func2(line, this.getCounter, this.storage, this.options);
         }
-
-        paragraph[j] = line;
       }
 
-      mds[i] = paragraph;
+      mds[i] = line;
     }
 
     return mds;
