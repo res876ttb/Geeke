@@ -80,14 +80,18 @@ module.exports = {
     seperator: {
       type: 'onepass',
       func1: (mds, count, storage) => {
-        return mds.replace(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/g, (_, p1) => {
+        return mds.replace(/^([\s]*\*[\s]*\*[\s]*\*[\s\*]*|[\s]*-[\s]*-[\s]*-[\s-]*)$/g, (match, p1) => {
           storage.push(p1);
-          return `<span class='md-seperator'>¨sl${count()}´</span>`;
+          if (match.match(/^\s*-+\s*$/)) {
+            return `¨sl${count()}¨´`;
+          } else {
+            return `¨sl${count()}´`;
+          }
         });
       },
       func2: (mds, _, storage) => {
-        return mds = mds.replace(/¨sl(\d+)´/, (_, p1) => {
-          return `<span class='md-seperatorm'>${storage[parseInt(p1)]}</span>`;
+        return mds = mds.replace(/^¨sl(\d+)¨?´$/, (_, p1) => {
+          return `<span class='md-seperator'><span class='md-seperatorm'>${storage[parseInt(p1)]}</span></span>`;
         });
       }
     },
@@ -105,25 +109,50 @@ module.exports = {
 
     header: {
       type: 'recursive',
-      func: mds => {
+      func: (mds, _, storage) => {
+        const stateEnum = {'text': 0, 'match': 1, 'empty': 2};
+        let state = stateEnum.other;
         for (let i = 0; i < mds.length; i++) {
+          let line = mds[i];
 
+          // atx style
+          line = line.replace(/^#\ (\s*)([^#.]+)(#*)/g, `<span class='md-h1'><span class='md-h1m'># </span>$1$2<span class='md-h1m'>$3</span></span>`)
+                     .replace(/^##\ (\s*)([^#.]+)(#*)/g, `<span class='md-h2'><span class='md-h2m'>## </span>$1$2<span class='md-h2m'>$3</span></span>`)
+                     .replace(/^###\ (\s*)([^#.]+)(#*)/g, `<span class='md-h3'><span class='md-h3m'>### </span>$1$2<span class='md-h3m'>$3</span></span>`)
+                     .replace(/^####\ (\s*)([^#.]+)(#*)/g, `<span class='md-h4'><span class='md-h4m'>#### </span>$1$2<span class='md-h4m'>$3</span></span>`)
+                     .replace(/^#####\ (\s*)([^#.]+)(#*)/g, `<span class='md-h5'><span class='md-h5m'>##### </span>$1$2<span class='md-h5m'>$3</span></span>`)
+                     .replace(/^######\ (\s*)([^#.]+)(#*)/g, `<span class='md-h6'><span class='md-h6m'>###### </span>$1$2<span class='md-h6m'>$3</span></span>`);
+
+          // Setext style
+          if (line == '') {
+            state = stateEnum.empty;
+          } else {
+            if (state == stateEnum.text) { // state != stateEnum.empty means that this must not be the first line
+              if (line.match(/^\s*==+\s*$/)) {
+                mds[i - 1] = `<span class='md-h1'>` + mds[i - 1];
+                line = `<span class='md-h1m md-visible'>` + line + '</span></span>';
+                state = stateEnum.match;
+              } else if (line.match(/^\s*--+\s*$/)) {
+                mds[i - 1] = `<span class='md-h2'>` + mds[i - 1];
+                line = `<span class='md-h2m md-visible'>` + line + '</span></span>';
+                state = stateEnum.match;
+              } else if (line.match(/^¨sl(\d+)¨´$/)) {
+                mds[i - 1] = `<span class='md-h2'>` + mds[i - 1];
+                line = line.replace(/^¨sl(\d+)¨´$/, (_, p1) => `<span class='md-h2m md-visible'>${storage[parseInt(p1)]}</span></span>`);
+                state = stateEnum.match;
+              } else {
+                state = stateEnum.text;
+              }
+            } else {
+              state = stateEnum.text;
+            }
+          }
+
+          mds[i] = line;
         }
+
+        return mds;
       }
-      // func1: mds => 
-      //   mds.replace(/^#\ (\s*)(.+$)/g, `<span class='md-h1'>¨h1´$1$2</span>`)
-      //      .replace(/^##\ (\s*)(.+$)/g, `<span class='md-h2'>¨h2´$1$2</span>`)
-      //      .replace(/^###\ (\s*)(.+$)/g, `<span class='md-h3'>¨h3´$1$2</span>`)
-      //      .replace(/^####\ (\s*)(.+$)/g, `<span class='md-h4'>¨h4´$1$2</span>`)
-      //      .replace(/^#####\ (\s*)(.+$)/g, `<span class='md-h5'>¨h5´$1$2</span>`)
-      //      .replace(/^######\ (\s*)(.+$)/g, `<span class='md-h6'>¨h6´$1$2</span>`),
-      // func2: mds => 
-      //   mds.replace(/¨h1´/g, `<span class='md-h1m'># </span>`)
-      //      .replace(/¨h2´/g, `<span class='md-h2m'>## </span>`)
-      //      .replace(/¨h3´/g, `<span class='md-h3m'>### </span>`)
-      //      .replace(/¨h4´/g, `<span class='md-h4m'>#### </span>`)
-      //      .replace(/¨h5´/g, `<span class='md-h5m'>##### </span>`)
-      //      .replace(/¨h6´/g, `<span class='md-h6m'>###### </span>`)
     },
   }
 }

@@ -12,8 +12,9 @@ export class Decorator {
     this.resetCounter();
     this.resetStorage();
 
-    // Bind this to function getCounter
+    // Bind this to functions
     this.getCounter = this.getCounter.bind(this);
+    this.recursiveFunc = this.recursiveFunc.bind(this);
 
     console.log('All plugins loaded');
   }
@@ -118,21 +119,10 @@ export class Decorator {
   // Go through recursive plugins
   // Plugins will process a paragraph at a time
   // 2 return values: parsed result, and whether the content match to the rules in the plugins
-  recursiveFunc(mds, prefixes, range) {
-    // Record whether content is modified
-    // let modified = false;
-
-    // For each paragraph...
-    for (let i in mds) {
-      let paragraph = mds[i];
-
-      for (let j in this.plugins.recursive) {
-        let plugin = this.plugins.recursive[j];
-        // let m;
-        // mds[i], m = plugin.func(paragraph, prefixes, range, this.storage, this.options, this.recursiveFunc.bind(this));
-        // modified |= m;
-        mds[i] = plugin.func(paragraph, prefixes, range, this.storage, this.options, this.recursiveFunc.bind(this));
-      }
+  recursiveFunc(mds) {
+    for (let i in this.plugins.recursive) {
+      let plugin = this.plugins.recursive[i];
+      mds = plugin.func(mds, this.getCounter, this.storage, this.options, this.recursiveFunc.bind(this));
     }
 
     // return mds, modified;
@@ -167,7 +157,7 @@ export class Decorator {
     // 2. Parsing paragraph
     // 3. One pass parsing phase 2
     mds = this.onepassFunc(mds, 1);
-    // mds, _ = this.recursiveFunc(mds);
+    mds = this.recursiveFunc(mds);
     mds = this.onepassFunc(mds, 2);
 
     // Assemble paragraphs

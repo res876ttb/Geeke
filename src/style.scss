@@ -65,6 +65,10 @@ $mdSymbolColor: gray;
     }
   }
 
+  .md-visible {
+    font-size: unset !important;
+  }
+
   // quote style
   .md-quote {
     color: gray;
@@ -182,7 +186,7 @@ $mdSymbolColor: gray;
   }
 
   .md-highlight {
-    background-color: #ffe700;
+    background-color: #fff1a7;
   }
 
   .hide-visible {
