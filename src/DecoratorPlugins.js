@@ -1,3 +1,5 @@
+const { options } = require("marked");
+
 module.exports = {
   plugins: {
     boldItalic: {
@@ -109,7 +111,9 @@ module.exports = {
 
     header: {
       type: 'recursive',
-      func: (mds, _, storage) => {
+      symbol: null,
+      func1: mds => mds,
+      func2: (mds, _, storage) => {
         const stateEnum = {'text': 0, 'match': 1, 'empty': 2};
         let state = stateEnum.other;
         for (let i = 0; i < mds.length; i++) {
@@ -154,6 +158,85 @@ module.exports = {
         return mds;
       }
     },
+
+    ulist: {
+      type: 'recursive',
+      symbolPrefix: `¨ul`,
+      func1: (mds, count, storage, options, prefixes, recursiveFunc, start, end) => {
+        for (let i = start; i < end; i++) {
+          mds[i] = mds[i].replace(/^(\s+)([=\-\*]\s)/, (_, p1, p2) => {
+            storage.push(p2);
+            let res = recursiveFunc(mds, i, i + 1, prefixes, 1);
+            return `${p1}¨ul${count()}¨${res[0]}`;
+          });
+        }
+        return mds;
+      },
+      func2: (mds, count, storage, options, prefixes, recursiveFunc, start, end, regs, depth) => {
+        const stateEnum = {firstLine: 1, secondLine: 2, matchEmpty: 3, secondLevel: 4, normal: 5};
+        let state = normal;
+        let nextStart;
+        let breakFlag = false;
+
+        for (let i = start; i < end; i++) {
+          if (breakFlag) {
+            breakFlag = false;
+          }
+          // Check if current line match any other style
+          // If so, change state back to normal and analyze these lines.
+          // TODO...
+
+          // Check state
+          switch (state) {
+            case normal:
+              // Check if current line match ulist style.
+              // If so, change state to firstLine
+              mds[i] = mds[i].replace(/^(\s*)¨ul\d+¨.*$/, (match, p1) => {
+                if (p1.length < options.tabSize) {
+                  state = stateEnum.firstLine;
+                  nextStart = i;
+                }
+                return match;
+              });
+              break;
+            case firstLine:
+              break;
+            case secondLine:
+              break;
+            case matchEmpty:
+              break;
+            case secondLevel:
+              break;
+            default:
+              console.error('Undefined state', state);
+          }
+        }
+
+        return mds;
+      }
+    },
+
+    olist: {
+      type: 'recursive',
+      symbolPrefix: `¨ol`,
+      func1: () => {
+
+      },
+      func2: () => {
+
+      }
+    },
+
+    checklist: {
+      type: 'recursive',
+      symbolPrefix: `¨cl`,
+      func1: () => {
+
+      },
+      func2: () => {
+
+      }
+    }
   }
 }
 

@@ -19,13 +19,16 @@
 	<script>
 		window.onload = function() {
 			var editor = Geeke.createEditor(document.getElementById('root'), null, "\
-1. a normal list\n\
-> BUG\n\
-+ a normal list\n\
-+ > and a quote inside the list\n\
-  > BUG\n\
-  1. second level list BUG\n\
-     > second quote\n\
+1. item1\n\
+2. item2\n\n\
+1. item1\n\
+	 1. item1.1\n\n\
+1. item1\n\
+	 1. item1.1\n\
+2. item2\n\n\
+1. item1\n\
+text in item1\n\
+2. item2\n\n\
 \n\n\
 # Header1\n\n\
 ## Header2\n\n\
@@ -61,6 +64,13 @@ Also, ~~strikethrough~~ is supported!\n\n\
 And some word after the list,\n\
   Which be recognized as its text.\n\
 * Finally, let's go back to normal.\n\n\
+1. a normal list\n\
+> BUG\n\
++ a normal list\n\
++ > and a quote inside the list\n\
+  > BUG\n\
+  1. second level list BUG\n\
+     > second quote\n\
 ---\n\n\
 > quote\n\
 > second line\n\

@@ -41,15 +41,24 @@ export class Decorator {
     // Sort plugins
     let onepass = [];
     let recursive = [];
+    let prefixes = {}; // Stores regex for each type
     for (let k in this.plugins) {
       let plugin = this.plugins[k];
-      if (plugin.type == 'onepass') onepass.push(plugin);
-      else if (plugin.type == 'recursive') recursive.push(plugin);
-      else (console.error('Unknown plugin type:', plugin.type, k));
+      if (plugin.type == 'onepass') {
+        onepass.push(plugin);
+      } else if (plugin.type == 'recursive') {
+        recursive.push(plugin);
+        if (plugin.reg) {
+          prefixes[k] = plugin.symbolPrefix;
+        } 
+      } else {
+        console.error('Unknown plugin type:', plugin.type, k);
+      }
     }
 
     this.plugins.onepass = onepass;
     this.plugins.recursive = recursive;
+    this.plugins.prefixes = prefixes;
   }
 
   // Analyze paragraphs
@@ -119,10 +128,11 @@ export class Decorator {
   // Go through recursive plugins
   // Plugins will process a paragraph at a time
   // 2 return values: parsed result, and whether the content match to the rules in the plugins
-  recursiveFunc(mds) {
+  recursiveFunc(mds, start, end, prefixes, phase, depth=0) {
     for (let i in this.plugins.recursive) {
       let plugin = this.plugins.recursive[i];
-      mds = plugin.func(mds, this.getCounter, this.storage, this.options, this.recursiveFunc.bind(this));
+      if (phase == 1) mds = plugin.func1(mds, this.getCounter, this.storage, this.options, prefixes, this.recursiveFunc.bind(this), start, end);
+      if (phase == 2) mds = plugin.func2(mds, this.getCounter, this.storage, this.options, prefixes, this.recursiveFunc.bind(this), start, end, this.plugins.prefixes, depth);
     }
 
     // return mds, modified;
@@ -143,7 +153,7 @@ export class Decorator {
   }
 
   parse(mds, level=0) {
-    let _;
+    let _, prefixes = [];
 
     // Reset counter and storage for parsing
     this.resetCounter();
@@ -152,12 +162,15 @@ export class Decorator {
     // Analyze paragraph
     mds = this.analyzeParagraph(mds);
 
+    for (let i in mds) prefixes.push('');
+
     // Parse markdown:
     // 1. One pass parsing phase 1
     // 2. Parsing paragraph
     // 3. One pass parsing phase 2
     mds = this.onepassFunc(mds, 1);
-    mds = this.recursiveFunc(mds);
+    mds = this.recursiveFunc(mds, 0, mds.length, prefixes, 1);
+    mds = this.recursiveFunc(mds, 0, mds.length, prefixes, 2);
     mds = this.onepassFunc(mds, 2);
 
     // Assemble paragraphs
