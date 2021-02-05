@@ -22,6 +22,11 @@ import Geeke from '../components/Geeke.js';
  *************************************************/
 import {editor} from '../states/editor.js';
 
+/*************************************************
+ * TEST CODE
+ *************************************************/
+
+// Example
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(combineReducers({
   editor

@@ -57,7 +57,7 @@ const emptyBlock = {
 }
 
 // Styled string
-// const contentExample = 'This is «sb:bold», and «cr:«sb:«si:bold and italic with color red»»»'
+// const contentExample = 'This is «sb:bold:sb», and «cr:«sb:«si:bold and italic with color red:si»:sb»:cr»'
 
 // Init state
 const initState = {
