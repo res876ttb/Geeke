@@ -69,7 +69,7 @@ export function contentStyler(content, type, start, end, param) {
     case stylerEnum.BACKGROUND:
       break;
     
-    case stylerEnum.MENTION:
+    case stylerEnum.MENTION: // ???
       break;
     
     default:
@@ -86,7 +86,7 @@ export function contentStyler(content, type, start, end, param) {
  * @param {int} end 
  * «sb:bold»
  */
-function stylerBold(content, start, end) {
+export function stylerBold(content, start, end) {
   let boldList = findBold(content); // [{start, end}, {start, end}] <- position of start/end char
 
   /**
@@ -96,7 +96,7 @@ function stylerBold(content, start, end) {
    */
   for (let i = 0; i < boldList.length; i++) {
     // 1. Exactly overlapped
-    if (start == boldList[i].start && start == boldList.end) {
+    if (start == boldList[i].start && end == boldList[i].end) {
       let part1 = content.substring(0, start - stylerConst.PREFIX_LEN);
       let part2 = content.substring(start, end + 1);
       let part3 = content.substring(end + 1 + stylerConst.POSTFIX_LEN);
@@ -104,7 +104,8 @@ function stylerBold(content, start, end) {
     }
 
     // 2. Overlapped by another bigger range
-    if (start <= boldList[i].start && start >= boldList.end) {
+    if (start >= boldList[i].start && end <= boldList[i].end) {
+      console.log('HERE2');
       let res = '', tmp = '';
       // Remove start
       if (boldList[i].start == start) {
@@ -127,25 +128,66 @@ function stylerBold(content, start, end) {
       return res;
     }
   }
+  console.log('HERE3', boldList.length, boldList[0].start, boldList[0].end);
 
   /**
    * Add bold
-   * 1. Find first bold prefix string from the end position.
+   * 1. Find first bold range that overlaps with current range.
+   * 2. Add bold string.
+   * 3. Repeat 1 & 2.
+   * 4. Remove continuous bold prefix/postfix.
+   */
+  let i = boldList.length - 1;
+  let lastEnd = boldList.length - 1;
+  let res = '';
+  for (; i >= 0 && start < lastEnd; i--) {
+    if (boldList[i].end < start) break;
+
+    // Check whether this bold range overlaps with current range.
+    if (boldList[i].end < end) {
+      if (boldList[i].end >= start) {
+        // Add bold string
+        res = stylerConst.PREFIX_BOLD + content.substr(boldList[i].end + stylerConst.POSTFIX_LEN, lastEnd + 1) + stylerConst.POSTFIX_BOLD + res;
+        lastEnd = boldList[i].start - stylerConst.PREFIX_LEN;
+      }
+      end = boldList[i].start - stylerConst.PREFIX_LEN;
+    }
+  }
+
+  // Still have a part of string to bold
+  if (lastEnd > start) {
+    res = stylerConst.PREFIX_BOLD + content.substr(start, lastEnd + 1) + stylerConst.POSTFIX_BOLD + res;
+    res = content.substr(0, start) + res;
+  } else {
+    // Add remaining bold part.
+    res = content.substr(0, lastEnd + 1) + res;
+  }
+
+  /**
+   * Add bold
+   * 1. Find first bold prefix string after the end position.
    * 2. If the end position is less than current start position, bold it. (Done)
    * 3. If the end position is larger than current start position, bold each part.
    * 4. Connect each part.
-   */
-  let i = 0;
-  let lastEnd = -1;
+   * 
+  let i = 0, j = 0;
 
-  // 1. Find first bold prefix string from the end position.
+  // 1. Find first bold prefix string after the end position.
   for (; i < boldList.length; i++) {
     if (boldList[i].end > end) break;
-    lastEnd = boldList[i].end;
   }
-  i--; // Move back to the last position.
+
+  // If right border is overlapped by another bold string, move end before its start
+  if (i < boldList.length && boldList[i].start <= end) end = boldList[i].start - 1;
+
+  // If left border is overlapped by another bold string, move start after its end
+  while (j < boldList.length && boldList[j].end < start) j++;
+  if (j < boldList.length && boldList[j].end > start) start = boldList[j].end + stylerConst.PREFIX_LEN;
+
+  // Move back to the last position.
+  i--;
   
-  if (lastEnd < start) {
+  if (boldList[i].end < start) {
     // 2. If the end position is less than current start position, bold it. (Done)
     let part1 = content.substring(start);
     let part2 = content.substring(start, end + 1);
@@ -155,14 +197,14 @@ function stylerBold(content, start, end) {
 
   // 3. If the end position is larger than current start position, bold each part.
   let res = '';
-  for (; i >= 0; i--) {
+  for (; i >= 0 && end > start; i--) {
     if (boldList[i].end < start) break;
+    res = content.substring(end) + res;
+    res = stylerConst.POSTFIX_BOLD + res;
+    content = content.substring(0, end + 1);
   }
-  
-  /**
-   * Nothing to handle
-   */
-  console.error('Something wrong when doing bold...');
+  */
+
   return content;
 }
 
@@ -187,7 +229,7 @@ export function findBold(content) {
       for (; i < content.length; i++) {
         if (content[i] == stylerConst.POSTMARK) {
         if (content.substr(i, stylerConst.POSTFIX_LEN) == stylerConst.POSTFIX_BOLD) {
-          result.push([start, i - 1]);
+          result.push({start: start, end: i - 1});
           i = i + stylerConst.POSTFIX_LEN - 1;
           break;
         }}
