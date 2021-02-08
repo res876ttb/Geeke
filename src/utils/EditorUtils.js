@@ -26,39 +26,124 @@ export const stylerEnum = {
 }
 
 // Styler style
+const _stylerConst = {
+  PREFIX: '«',
+  POSTFIX: '»',
+  MARK: ':',
+  BOLD: 'sb',
+  ITALIC: 'si',
+  UNDERLINE: 'su',
+  STRIKETHROUGH: 'st',
+  LINK: 'sl',
+  MATH: 'sm',
+  CODE: 'sc',
+
+  COLOR_BLUE: 'cb',
+  COLOR_BROWN: 'cw',
+  COLOR_DEFAULT: 'cd',
+  COLOR_GRAY: 'ca',
+  COLOR_GREEN: 'cg',
+  COLOR_ORANGE: 'co',
+  COLOR_PINK: 'ci',
+  COLOR_PURPLE: 'cp',
+  COLOR_RED: 'cr',
+  COLOR_YELLOW: 'cy',
+
+  BACKGROUND_BLUE: 'bb',
+  BACKGROUND_BROWN: 'bw',
+  BACKGROUND_DEFAULT: 'bd',
+  BACKGROUND_GRAY: 'ba',
+  BACKGROUND_GREEN: 'bg',
+  BACKGROUND_ORANGE: 'bo',
+  BACKGROUND_PINK: 'bi',
+  BACKGROUND_PURPLE: 'bp',
+  BACKGROUND_RED: 'br',
+  BACKGROUND_YELLOW: 'by',
+};
+
 export const stylerConst = {
   PREFIX_LEN: 4,
   POSTFIX_LEN: 4,
 
-  PREFIX: "«",
-  POSTFIX: "»",
-  POSTMARK: ":",
+  PREFIX: _stylerConst.PREFIX,
+  POSTFIX: _stylerConst.POSTFIX,
+  MARK: _stylerConst.MARK,
 
-  PREFIX_BOLD: "«sb:",
-  POSTFIX_BOLD: ":sb»",
+  PREFIX_BOLD: stylerPrefix(_stylerConst.BOLD),
+  POSTFIX_BOLD: stylerPostfix(_stylerConst.BOLD),
 
-  PREFIX_ITALIC: "«si:",
-  POSTFIX_ITALIC: ":si»",
+  PREFIX_ITALIC: stylerPrefix(_stylerConst.ITALIC),
+  POSTFIX_ITALIC: stylerPostfix(_stylerConst.ITALIC),
 
-  PREFIX_UNDERLINE: "«su:",
-  POSTFIX_UNDERLINE: ":su»",
+  PREFIX_UNDERLINE: stylerPrefix(_stylerConst.UNDERLINE),
+  POSTFIX_UNDERLINE: stylerPostfix(_stylerConst.UNDERLINE),
 
-  PREFIX_STRIKETHROUGH: "«st:",
-  POSTFIX_STRIKETHROUGH: ":st»",
+  PREFIX_STRIKETHROUGH: stylerPrefix(_stylerConst.STRIKETHROUGH),
+  POSTFIX_STRIKETHROUGH: stylerPostfix(_stylerConst.STRIKETHROUGH),
 
-  PREFIX_LINK: "«sl:",
-  POSTFIX_LINK: ":sl»",
+  PREFIX_LINK: stylerPrefix(_stylerConst.LINK),
+  POSTFIX_LINK: stylerPostfix(_stylerConst.LINK),
 
-  PREFIX_MATH: "«sm:",
-  POSTFIX_MATH: ":sm»",
+  PREFIX_MATH: stylerPrefix(_stylerConst.MATH),
+  POSTFIX_MATH: stylerPostfix(_stylerConst.MATH),
 
-  PREFIX_CODE: "«sc:",
-  POSTFIX_CODE: ":sc»",
+  PREFIX_CODE: stylerPrefix(_stylerConst.CODE),
+  POSTFIX_CODE: stylerPostfix(_stylerConst.CODE),
+
+  PREFIX_COLOR_BLUE: stylerPrefix(_stylerConst.COLOR_BLUE),
+  PREFIX_COLOR_BROWN: stylerPrefix(_stylerConst.COLOR_BROWN),
+  PREFIX_COLOR_DEFAULT: stylerPrefix(_stylerConst.COLOR_DEFAULT),
+  PREFIX_COLOR_GRAY: stylerPrefix(_stylerConst.COLOR_GRAY),
+  PREFIX_COLOR_GREEN: stylerPrefix(_stylerConst.COLOR_GREEN),
+  PREFIX_COLOR_ORANGE: stylerPrefix(_stylerConst.COLOR_ORANGE),
+  PREFIX_COLOR_PINK: stylerPrefix(_stylerConst.COLOR_PINK),
+  PREFIX_COLOR_PURPLE: stylerPrefix(_stylerConst.COLOR_PURPLE),
+  PREFIX_COLOR_RED: stylerPrefix(_stylerConst.COLOR_RED),
+  PREFIX_COLOR_YELLOW: stylerPrefix(_stylerConst.COLOR_YELLOW),
+  POSTFIX_COLOR_BLUE: stylerPostfix(_stylerConst.COLOR_BLUE),
+  POSTFIX_COLOR_BROWN: stylerPostfix(_stylerConst.COLOR_BROWN),
+  POSTFIX_COLOR_DEFAULT : stylerPostfix(_stylerConst.COLOR_DEFAULT),
+  POSTFIX_COLOR_GRAY : stylerPostfix(_stylerConst.COLOR_GRAY),
+  POSTFIX_COLOR_GREEN : stylerPostfix(_stylerConst.COLOR_GREEN),
+  POSTFIX_COLOR_ORANGE : stylerPostfix(_stylerConst.COLOR_ORANGE),
+  POSTFIX_COLOR_PINK : stylerPostfix(_stylerConst.COLOR_PINK),
+  POSTFIX_COLOR_PURPLE : stylerPostfix(_stylerConst.COLOR_PURPLE),
+  POSTFIX_COLOR_RED : stylerPostfix(_stylerConst.COLOR_RED),
+  POSTFIX_COLOR_YELLOW : stylerPostfix(_stylerConst.COLOR_YELLOW),
+
+  PREFIX_BACKGROUND_BLUE: stylerPrefix(_stylerConst.BACKGROUND_BLUE),
+  PREFIX_BACKGROUND_BROWN: stylerPrefix(_stylerConst.BACKGROUND_BROWN),
+  PREFIX_BACKGROUND_DEFAULT: stylerPrefix(_stylerConst.BACKGROUND_DEFAULT),
+  PREFIX_BACKGROUND_GRAY: stylerPrefix(_stylerConst.BACKGROUND_GRAY),
+  PREFIX_BACKGROUND_GREEN: stylerPrefix(_stylerConst.BACKGROUND_GREEN),
+  PREFIX_BACKGROUND_ORANGE: stylerPrefix(_stylerConst.BACKGROUND_ORANGE),
+  PREFIX_BACKGROUND_PINK: stylerPrefix(_stylerConst.BACKGROUND_PINK),
+  PREFIX_BACKGROUND_PURPLE: stylerPrefix(_stylerConst.BACKGROUND_PURPLE),
+  PREFIX_BACKGROUND_RED: stylerPrefix(_stylerConst.BACKGROUND_RED),
+  PREFIX_BACKGROUND_YELLOW: stylerPrefix(_stylerConst.BACKGROUND_YELLOW),
+  POSTFIX_BACKGROUND_BLUE: stylerPostfix(_stylerConst.BACKGROUND_BLUE),
+  POSTFIX_BACKGROUND_BROWN: stylerPostfix(_stylerConst.BACKGROUND_BROWN),
+  POSTFIX_BACKGROUND_DEFAULT : stylerPostfix(_stylerConst.BACKGROUND_DEFAULT),
+  POSTFIX_BACKGROUND_GRAY : stylerPostfix(_stylerConst.BACKGROUND_GRAY),
+  POSTFIX_BACKGROUND_GREEN : stylerPostfix(_stylerConst.BACKGROUND_GREEN),
+  POSTFIX_BACKGROUND_ORANGE : stylerPostfix(_stylerConst.BACKGROUND_ORANGE),
+  POSTFIX_BACKGROUND_PINK : stylerPostfix(_stylerConst.BACKGROUND_PINK),
+  POSTFIX_BACKGROUND_PURPLE : stylerPostfix(_stylerConst.BACKGROUND_PURPLE),
+  POSTFIX_BACKGROUND_RED : stylerPostfix(_stylerConst.BACKGROUND_RED),
+  POSTFIX_BACKGROUND_YELLOW : stylerPostfix(_stylerConst.BACKGROUND_YELLOW),
 };
 
 /*************************************************
  * FUNCTIONS
  *************************************************/
+function stylerPrefix(type) {
+  return `${_stylerConst.PREFIX}${type}${_stylerConst.MARK}`;
+}
+
+function stylerPostfix(type) {
+  return `${_stylerConst.MARK}${type}${_stylerConst.POSTFIX}`;
+}
+
 export function contentStyler(content, type, start, end, param) {
   let PREFIX, POSTFIX;
 
@@ -98,10 +183,14 @@ export function contentStyler(content, type, start, end, param) {
       POSTFIX = stylerConst.POSTFIX_MATH;
       break;
     
-    case stylerEnum.COLOR:      // TODO
+    case stylerEnum.COLOR:
+      PREFIX = null;
+      POSTFIX = null;
       break;
 
     case stylerEnum.BACKGROUND: // TODO
+      PREFIX = null;
+      POSTFIX = null;
       break;
 
     case stylerEnum.HYPERLINK:  // TODO
@@ -236,7 +325,7 @@ export function findStylerPair(content, PREFIX, POSTFIX) {
       start = i;
 
       for (; i < content.length; i++) {
-        if (content[i] == stylerConst.POSTMARK) {
+        if (content[i] == stylerConst.MARK) {
         if (content.substr(i, stylerConst.POSTFIX_LEN) == POSTFIX) {
           result.push({start: start, end: i - 1});
           i = i + stylerConst.POSTFIX_LEN - 1;
