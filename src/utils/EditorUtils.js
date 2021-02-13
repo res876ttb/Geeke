@@ -11,7 +11,7 @@
  * CONST
  *************************************************/
 // Styler type
-export const stylerEnum = {
+export const styleType = {
   BOLD: 1,
   ITALIC: 2,
   UNDERLINE: 3,
@@ -26,6 +26,24 @@ export const stylerEnum = {
 }
 
 // Styler style
+export const colorConst = {
+  BLUE: 'b',
+  BROWN: 'w',
+  DEFAULT: 'd',
+  GRAY: 'a',
+  GREEN: 'g',
+  ORANGE: 'o',
+  PINK: 'i',
+  PURPLE: 'p',
+  RED: 'r',
+  YELLOW: 'y',
+};
+
+const prepostConst = {
+  PREFIX: 0,
+  POSTFIX: 1,
+};
+
 const _stylerConst = {
   PREFIX: '«',
   POSTFIX: '»',
@@ -144,59 +162,183 @@ function stylerPostfix(type) {
   return `${_stylerConst.MARK}${type}${_stylerConst.POSTFIX}`;
 }
 
+function getColorStyle(type, color, prepost) {
+  switch (type) {
+    case styleType.COLOR:
+      if (prepost == prepostConst.PREFIX) {
+        switch(color) {
+          case colorConst.BLUE:
+            return stylerConst.PREFIX_COLOR_BLUE;
+          case colorConst.BROWN:
+            return stylerConst.PREFIX_COLOR_BROWN;
+          case colorConst.DEFAULT:
+            return stylerConst.PREFIX_COLOR_DEFAULT;
+          case colorConst.GRAY:
+            return stylerConst.PREFIX_COLOR_GRAY;
+          case colorConst.GREEN:
+            return stylerConst.PREFIX_COLOR_GREEN;
+          case colorConst.ORANGE:
+            return stylerConst.PREFIX_COLOR_ORANGE;
+          case colorConst.PINK:
+            return stylerConst.PREFIX_COLOR_PINK;
+          case colorConst.PURPLE:
+            return stylerConst.PREFIX_COLOR_PURPLE;
+          case colorConst.RED:
+            return stylerConst.PREFIX_COLOR_RED;
+          case colorConst.YELLOW:
+            return stylerConst.PREFIX_COLOR_YELLOW;
+          default:
+            console.error(`Unknown color: ${color}.`)
+            return null;
+        }
+      } else if (prepost == prepostConst.POSTFIX) {
+        switch(color) {
+          case colorConst.BLUE:
+            return stylerConst.POSTFIX_COLOR_BLUE;
+          case colorConst.BROWN:
+            return stylerConst.POSTFIX_COLOR_BROWN;
+          case colorConst.DEFAULT:
+            return stylerConst.POSTFIX_COLOR_DEFAULT;
+          case colorConst.GRAY:
+            return stylerConst.POSTFIX_COLOR_GRAY;
+          case colorConst.GREEN:
+            return stylerConst.POSTFIX_COLOR_GREEN;
+          case colorConst.ORANGE:
+            return stylerConst.POSTFIX_COLOR_ORANGE;
+          case colorConst.PINK:
+            return stylerConst.POSTFIX_COLOR_PINK;
+          case colorConst.PURPLE:
+            return stylerConst.POSTFIX_COLOR_PURPLE;
+          case colorConst.RED:
+            return stylerConst.POSTFIX_COLOR_RED;
+          case colorConst.YELLOW:
+            return stylerConst.POSTFIX_COLOR_YELLOW;
+          default:
+            console.error(`Unknown color: ${color}.`)
+            return null;
+        }
+      } else {
+        console.error(`Unknown prepost: ${prepost}.`);
+        return null;
+      }
+    
+    case styleType.BACKGROUND:
+      if (prepost == prepostConst.PREFIX) {
+        switch(color) {
+          case colorConst.BLUE:
+            return stylerConst.PREFIX_BACKGROUND_BLUE;
+          case colorConst.BROWN:
+            return stylerConst.PREFIX_BACKGROUND_BROWN;
+          case colorConst.DEFAULT:
+            return stylerConst.PREFIX_BACKGROUND_DEFAULT;
+          case colorConst.GRAY:
+            return stylerConst.PREFIX_BACKGROUND_GRAY;
+          case colorConst.GREEN:
+            return stylerConst.PREFIX_BACKGROUND_GREEN;
+          case colorConst.ORANGE:
+            return stylerConst.PREFIX_BACKGROUND_ORANGE;
+          case colorConst.PINK:
+            return stylerConst.PREFIX_BACKGROUND_PINK;
+          case colorConst.PURPLE:
+            return stylerConst.PREFIX_BACKGROUND_PURPLE;
+          case colorConst.RED:
+            return stylerConst.PREFIX_BACKGROUND_RED;
+          case colorConst.YELLOW:
+            return stylerConst.PREFIX_BACKGROUND_YELLOW;
+          default:
+            console.error(`Unknown color: ${color}.`)
+            return null;
+        }
+      } else if (prepost == prepostConst.POSTFIX) {
+        switch(color) {
+          case colorConst.BLUE:
+            return stylerConst.POSTFIX_BACKGROUND_BLUE;
+          case colorConst.BROWN:
+            return stylerConst.POSTFIX_BACKGROUND_BROWN;
+          case colorConst.DEFAULT:
+            return stylerConst.POSTFIX_BACKGROUND_DEFAULT;
+          case colorConst.GRAY:
+            return stylerConst.POSTFIX_BACKGROUND_GRAY;
+          case colorConst.GREEN:
+            return stylerConst.POSTFIX_BACKGROUND_GREEN;
+          case colorConst.ORANGE:
+            return stylerConst.POSTFIX_BACKGROUND_ORANGE;
+          case colorConst.PINK:
+            return stylerConst.POSTFIX_BACKGROUND_PINK;
+          case colorConst.PURPLE:
+            return stylerConst.POSTFIX_BACKGROUND_PURPLE;
+          case colorConst.RED:
+            return stylerConst.POSTFIX_BACKGROUND_RED;
+          case colorConst.YELLOW:
+            return stylerConst.POSTFIX_BACKGROUND_YELLOW;
+          default:
+            console.error(`Unknown color: ${color}.`)
+            return null;
+        }
+      } else {
+        console.error(`Unknown prepost: ${prepost}.`);
+        return null;
+      }
+    
+    default:
+      console.error(`Unknown type: ${type}.`);
+      break
+  }
+}
+
 export function contentStyler(content, type, start, end, param) {
   let PREFIX, POSTFIX;
 
   switch(type) {
-    case stylerEnum.BOLD:
+    case styleType.BOLD:
       PREFIX = stylerConst.PREFIX_BOLD;
       POSTFIX = stylerConst.POSTFIX_BOLD;
       break;
     
-    case stylerEnum.ITALIC:
+    case styleType.ITALIC:
       PREFIX = stylerConst.PREFIX_ITALIC;
       POSTFIX = stylerConst.POSTFIX_ITALIC;
       break;
     
-    case stylerEnum.UNDERLINE:
+    case styleType.UNDERLINE:
       PREFIX = stylerConst.PREFIX_UNDERLINE;
       POSTFIX = stylerConst.POSTFIX_UNDERLINE;
       break;
     
-    case stylerEnum.STRIKETHROUGH:
+    case styleType.STRIKETHROUGH:
       PREFIX = stylerConst.PREFIX_STRIKETHROUGH;
       POSTFIX = stylerConst.POSTFIX_STRIKETHROUGH;
       break;
     
-    case stylerEnum.LINK:
+    case styleType.LINK:
       PREFIX = stylerConst.PREFIX_LINK;
       POSTFIX = stylerConst.POSTFIX_LINK;
       break;
       
-    case stylerEnum.CODE:
+    case styleType.CODE:
       PREFIX = stylerConst.PREFIX_CODE;
       POSTFIX = stylerConst.POSTFIX_CODE;
       break;
     
-    case stylerEnum.MATH:
+    case styleType.MATH:
       PREFIX = stylerConst.PREFIX_MATH;
       POSTFIX = stylerConst.POSTFIX_MATH;
       break;
     
-    case stylerEnum.COLOR:
-      PREFIX = null;
-      POSTFIX = null;
+    case styleType.COLOR:
+      PREFIX = getColorStyle(styleType.COLOR, param, prepostConst.PREFIX);
+      POSTFIX = getColorStyle(styleType.COLOR, param, prepostConst.POSTFIX);
       break;
 
-    case stylerEnum.BACKGROUND: // TODO
-      PREFIX = null;
-      POSTFIX = null;
+    case styleType.BACKGROUND:
+      PREFIX = getColorStyle(styleType.BACKGROUND, param, prepostConst.PREFIX);
+      POSTFIX = getColorStyle(styleType.BACKGROUND, param, prepostConst.POSTFIX);
       break;
 
-    case stylerEnum.HYPERLINK:  // TODO
+    case styleType.HYPERLINK:  // TODO
       break;
     
-    case stylerEnum.MENTION:    // TODO: pages, blocks, users, dates
+    case styleType.MENTION:    // TODO: pages, blocks, users, dates
       break;
     
     default:

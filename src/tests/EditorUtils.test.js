@@ -12,8 +12,11 @@
  *************************************************/
 import {
   stylerConst,
+  colorConst,
+  styleType,
   findStylerPair,
   styleToggler,
+  contentStyler,
 } from '../utils/EditorUtils.js';
 
 /*************************************************
@@ -192,5 +195,135 @@ test(`Toggle bold, italic, underline, strikethrough, link, math, code`, () => {
   POST = stylerConst.POSTFIX_CODE;
   PRE = stylerConst.PREFIX_CODE;
   testResult = styleToggler(`0123${PRE}456${POST}789`, 4 + PRE_LEN, 6 + PRE_LEN, PRE, POST);
+  expect(testResult).toStrictEqual(`0123456789`);
+});
+
+// Test contentStyler
+test('Test contentStyler', () => {
+  let testResult;
+  const PRE_LEN = stylerConst.PREFIX_LEN;
+  const POST_LEN = stylerConst.POSTFIX_LEN;
+  let POST, PRE;
+
+  // 1. Color
+  // 1.1 BLUE
+  POST = stylerConst.POSTFIX_COLOR_BLUE;
+  PRE = stylerConst.PREFIX_COLOR_BLUE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.BLUE);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.2 BROWN
+  POST = stylerConst.POSTFIX_COLOR_BROWN;
+  PRE = stylerConst.PREFIX_COLOR_BROWN;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.BROWN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.3 DEFAULT
+  POST = stylerConst.POSTFIX_COLOR_DEFAULT;
+  PRE = stylerConst.PREFIX_COLOR_DEFAULT;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.DEFAULT);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.4 GRAY
+  POST = stylerConst.POSTFIX_COLOR_GRAY;
+  PRE = stylerConst.PREFIX_COLOR_GRAY;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.GRAY);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.5 GREEN
+  POST = stylerConst.POSTFIX_COLOR_GREEN;
+  PRE = stylerConst.PREFIX_COLOR_GREEN;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.GREEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.6 ORANGE
+  POST = stylerConst.POSTFIX_COLOR_ORANGE;
+  PRE = stylerConst.PREFIX_COLOR_ORANGE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.ORANGE);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.7 PINK
+  POST = stylerConst.POSTFIX_COLOR_PINK;
+  PRE = stylerConst.PREFIX_COLOR_PINK;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.PINK);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.8 PURPLE
+  POST = stylerConst.POSTFIX_COLOR_PURPLE;
+  PRE = stylerConst.PREFIX_COLOR_PURPLE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.PURPLE);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.9 RED
+  POST = stylerConst.POSTFIX_COLOR_RED;
+  PRE = stylerConst.PREFIX_COLOR_RED;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.RED);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 1.10 YELLOW
+  POST = stylerConst.POSTFIX_COLOR_YELLOW;
+  PRE = stylerConst.PREFIX_COLOR_YELLOW;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.COLOR, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.YELLOW);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2. Background
+  // 2.1 BLUE
+  POST = stylerConst.POSTFIX_BACKGROUND_BLUE;
+  PRE = stylerConst.PREFIX_BACKGROUND_BLUE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.BLUE);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.2 BROWN
+  POST = stylerConst.POSTFIX_BACKGROUND_BROWN;
+  PRE = stylerConst.PREFIX_BACKGROUND_BROWN;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.BROWN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.3 DEFAULT
+  POST = stylerConst.POSTFIX_BACKGROUND_DEFAULT;
+  PRE = stylerConst.PREFIX_BACKGROUND_DEFAULT;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.DEFAULT);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.4 GRAY
+  POST = stylerConst.POSTFIX_BACKGROUND_GRAY;
+  PRE = stylerConst.PREFIX_BACKGROUND_GRAY;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.GRAY);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.5 GREEN
+  POST = stylerConst.POSTFIX_BACKGROUND_GREEN;
+  PRE = stylerConst.PREFIX_BACKGROUND_GREEN;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.GREEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.6 ORANGE
+  POST = stylerConst.POSTFIX_BACKGROUND_ORANGE;
+  PRE = stylerConst.PREFIX_BACKGROUND_ORANGE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.ORANGE);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.7 PINK
+  POST = stylerConst.POSTFIX_BACKGROUND_PINK;
+  PRE = stylerConst.PREFIX_BACKGROUND_PINK;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.PINK);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.8 PURPLE
+  POST = stylerConst.POSTFIX_BACKGROUND_PURPLE;
+  PRE = stylerConst.PREFIX_BACKGROUND_PURPLE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.PURPLE);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.9 RED
+  POST = stylerConst.POSTFIX_BACKGROUND_RED;
+  PRE = stylerConst.PREFIX_BACKGROUND_RED;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.RED);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 2.10 YELLOW
+  POST = stylerConst.POSTFIX_BACKGROUND_YELLOW;
+  PRE = stylerConst.PREFIX_BACKGROUND_YELLOW;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.YELLOW);
   expect(testResult).toStrictEqual(`0123456789`);
 });
