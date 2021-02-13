@@ -162,6 +162,13 @@ function stylerPostfix(type) {
   return `${_stylerConst.MARK}${type}${_stylerConst.POSTFIX}`;
 }
 
+/**
+ * @function getColorStyle
+ * @description Get color prefix/postfix constant.
+ * @param {styleType} type
+ * @param {colorConst} color
+ * @param {prepostConst} prepost
+ */
 function getColorStyle(type, color, prepost) {
   switch (type) {
     case styleType.COLOR:

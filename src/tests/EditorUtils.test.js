@@ -326,4 +326,46 @@ test('Test contentStyler', () => {
   PRE = stylerConst.PREFIX_BACKGROUND_YELLOW;
   testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BACKGROUND, 4 + PRE_LEN, 6 + PRE_LEN, colorConst.YELLOW);
   expect(testResult).toStrictEqual(`0123456789`);
+ 
+  // 3. BOLD
+  POST = stylerConst.POSTFIX_BOLD;
+  PRE = stylerConst.PREFIX_BOLD;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.BOLD, 4 + PRE_LEN, 6 + PRE_LEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 4. ITALIC
+  POST = stylerConst.POSTFIX_ITALIC;
+  PRE = stylerConst.PREFIX_ITALIC;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.ITALIC, 4 + PRE_LEN, 6 + PRE_LEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 5. UNDERLINE
+  POST = stylerConst.POSTFIX_UNDERLINE;
+  PRE = stylerConst.PREFIX_UNDERLINE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.UNDERLINE, 4 + PRE_LEN, 6 + PRE_LEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 6. STRIKETHROUGH
+  POST = stylerConst.POSTFIX_STRIKETHROUGH;
+  PRE = stylerConst.PREFIX_STRIKETHROUGH;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.STRIKETHROUGH, 4 + PRE_LEN, 6 + PRE_LEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 7. LINK
+  POST = stylerConst.POSTFIX_LINK;
+  PRE = stylerConst.PREFIX_LINK;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.LINK, 4 + PRE_LEN, 6 + PRE_LEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 8. MATH
+  POST = stylerConst.POSTFIX_MATH;
+  PRE = stylerConst.PREFIX_MATH;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.MATH, 4 + PRE_LEN, 6 + PRE_LEN);
+  expect(testResult).toStrictEqual(`0123456789`);
+
+  // 9. CODE
+  POST = stylerConst.POSTFIX_CODE;
+  PRE = stylerConst.PREFIX_CODE;
+  testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.CODE, 4 + PRE_LEN, 6 + PRE_LEN);
+  expect(testResult).toStrictEqual(`0123456789`);
 });
