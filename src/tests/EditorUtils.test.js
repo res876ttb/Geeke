@@ -461,4 +461,12 @@ test('Test splitStyle', () => {
   // 6. 2 partial overlappings with 2 totally overlapping
   testResult = splitStyle(`0${PRE_BOLD}12${PRE_ITALIC}34${POST_BOLD}5${PRE_BOLD}A${POST_BOLD}B${PRE_BOLD}C${POST_BOLD}6${PRE_BOLD}78${POST_ITALIC}90${POST_BOLD}12`);
   expect(testResult).toStrictEqual(`0${PRE_BOLD}12${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}34${POST_BOLD}5${PRE_BOLD}A${POST_BOLD}B${PRE_BOLD}C${POST_BOLD}6${POST_ITALIC}${PRE_BOLD}${PRE_ITALIC}78${POST_ITALIC}90${POST_BOLD}12`);
+
+  // 7. Most left
+  testResult = splitStyle(`${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}78${POST_ITALIC}9`);
+  expect(testResult).toStrictEqual(`${PRE_BOLD}34${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}56${POST_BOLD}78${POST_ITALIC}9`);
+
+  // 8. Most right
+  testResult = splitStyle(`012${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}78${POST_ITALIC}`);
+  expect(testResult).toStrictEqual(`012${PRE_BOLD}34${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}56${POST_BOLD}78${POST_ITALIC}`);
 });
