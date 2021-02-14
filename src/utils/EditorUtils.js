@@ -354,7 +354,9 @@ export function contentStyler(content, type, start, end, param) {
       break;
   }
 
-  return styleToggler(content, start, end, PREFIX, POSTFIX);
+  content = styleToggler(content, start, end, PREFIX, POSTFIX);
+  content = splitStyle(content);
+  return content;
 }
 
 /**
@@ -518,12 +520,6 @@ export function splitStyle(content) {
         let PREPAIR_POSTFIX = content.substr(prePair.end + 1, stylerConst.POSTFIX_LEN);
         let PREPAIR_PREFIX = content.substr(prePair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN);
         let CURPAIR_PREFIX = content.substr(curPair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN);
-        // console.log(content);
-        // console.log(content.substring(0, curPair.start - stylerConst.PREFIX_LEN));
-        // console.log(PREPAIR_POSTFIX);
-        // console.log(CURPAIR_PREFIX);
-        // console.log(PREPAIR_PREFIX);
-        // console.log(content.substring(curPair.start));
         content = content.substring(0, curPair.start - stylerConst.PREFIX_LEN) + 
                   PREPAIR_POSTFIX + CURPAIR_PREFIX + PREPAIR_PREFIX +
                   content.substring(curPair.start);
