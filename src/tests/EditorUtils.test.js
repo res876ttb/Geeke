@@ -469,4 +469,10 @@ test('Test splitStyle', () => {
   // 8. Most right
   testResult = splitStyle(`012${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}78${POST_ITALIC}`);
   expect(testResult).toStrictEqual(`012${PRE_BOLD}34${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}56${POST_BOLD}78${POST_ITALIC}`);
+
+  // 9. Normal text
+  testResult = splitStyle(testResult);
+  expect(testResult).toStrictEqual(`012${PRE_BOLD}34${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}56${POST_BOLD}78${POST_ITALIC}`);
+  testResult = splitStyle(`0123456789`);
+  expect(testResult).toStrictEqual(`0123456789`);
 });

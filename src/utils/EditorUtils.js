@@ -294,6 +294,15 @@ function getColorStyle(type, color, prepost) {
   }
 }
 
+/**
+ * @function contentStyler
+ * @description Add/remove style to a range of text.
+ * @param {string} content
+ * @param {styleType} type
+ * @param {integer} start
+ * @param {integer} end
+ * @param {any} param
+ */
 export function contentStyler(content, type, start, end, param) {
   let PREFIX, POSTFIX;
 
