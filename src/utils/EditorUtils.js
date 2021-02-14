@@ -82,6 +82,7 @@ const _stylerConst = {
 export const stylerConst = {
   PREFIX_LEN: 4,
   POSTFIX_LEN: 4,
+  TYPE_LEN: 2,
 
   PREFIX: _stylerConst.PREFIX,
   POSTFIX: _stylerConst.POSTFIX,
@@ -413,7 +414,6 @@ export function styleToggler(content, start, end, PREFIX, POSTFIX) {
    * 3. Repeat 1 & 2.
    * 4. Remove continuous bold prefix/postfix.
    */
-  // console.log(content, start, end);
   let i = pairList.length - 1;
   let lastEnd = end;
   let res = '';
@@ -485,4 +485,98 @@ export function findStylerPair(content, PREFIX, POSTFIX) {
   }
 
   return result;
+}
+
+/**
+ * @function splitStyle
+ * @description Split 2 overlapped styles.
+ * @param {string} content 
+ */
+export function splitStyle(content) {
+  let stylePairs = findAllStylerPair(content);
+  if (stylePairs.length < 2) return content;
+
+  let i = stylePairs.length - 2;
+  let curPair = stylePairs[i + 1], prePair;
+  
+  /**
+   * 1. Check pairs from the end.
+   * 1.1. If the previous pair does not partially overlap with the current one, move to the previous pairs and repelat step 1.
+   * 1.2. Else, go to step 2.
+   * 2. Split the previous pairs. Then, move to the previous pair and repeat step 1.
+   */
+  while (i >= 0) {
+    prePair = stylePairs[i];
+
+    // 1. Check pairs from the end.
+    if (prePair.end > curPair.start && prePair.end <= curPair.end) {
+      if (prePair.start < curPair.start) {
+        // 1.2. Partially overlapped.
+        // 2. Split the previous pairs.
+        //    xxxAxxxCxxxBxxxDxxx <- Before. AB is a pair, CD is a pair
+        //    xxxAxxBCAxxBxxxDxxx <- After.
+        let PREPAIR_POSTFIX = content.substr(prePair.end + 1, stylerConst.POSTFIX_LEN);
+        let PREPAIR_PREFIX = content.substr(prePair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN);
+        let CURPAIR_PREFIX = content.substr(curPair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN);
+        // console.log(content);
+        // console.log(content.substring(0, curPair.start - stylerConst.PREFIX_LEN));
+        // console.log(PREPAIR_POSTFIX);
+        // console.log(CURPAIR_PREFIX);
+        // console.log(PREPAIR_PREFIX);
+        // console.log(content.substring(curPair.start));
+        content = content.substring(0, curPair.start - stylerConst.PREFIX_LEN) + 
+                  PREPAIR_POSTFIX + CURPAIR_PREFIX + PREPAIR_PREFIX +
+                  content.substring(curPair.start);
+
+        // 2. Move to the previous pair and repeat step 1.
+        curPair = prePair;
+      }
+    } else {
+      // 1.1. Move to the previous pair.
+      curPair = prePair;
+    }
+
+    i--;
+  }
+
+  return content;
+}
+
+/**
+ * @function findAllStylerPair
+ * @description Find all kinds of style pairs.
+ * @param {string} content
+ * @returns A list sorted by end position.
+ */
+export function findAllStylerPair(content) {
+  let i = 0;
+  let pairs = [];
+  let prefixes = [];
+
+  for (; i < content.length; i++) {
+    if (content[i] == stylerConst.PREFIX) {
+      let prefix = content.substr(i, stylerConst.PREFIX_LEN);
+      if (Object.values(stylerConst).indexOf(prefix) == -1) continue;
+
+      prefixes.push(i + stylerConst.PREFIX_LEN);
+    } else if (content[i] == stylerConst.POSTFIX) {
+      let postfix = content.substr(i - stylerConst.POSTFIX_LEN + 1, stylerConst.POSTFIX_LEN);
+      if (Object.values(stylerConst).indexOf(postfix) == -1) continue;
+
+      let type = postfix.substr(1, stylerConst.TYPE_LEN);
+      for (let j = 0; j < prefixes.length; j++) {
+        if (type == content.substr(prefixes[j] - stylerConst.PREFIX_LEN + 1, stylerConst.TYPE_LEN)) {
+          pairs.push({start: prefixes[j], end: i - stylerConst.POSTFIX_LEN});
+          prefixes.splice(j, 1);
+          break;
+        }
+      }
+    }
+  }
+
+  if (prefixes.length > 0) {
+    console.error(`Something went wrong in findAllStylerPair. Prefixes: ${prefixes}`);
+  }
+
+  return pairs;
 }

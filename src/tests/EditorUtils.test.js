@@ -17,6 +17,8 @@ import {
   findStylerPair,
   styleToggler,
   contentStyler,
+  findAllStylerPair,
+  splitStyle,
 } from '../utils/EditorUtils.js';
 
 /*************************************************
@@ -368,4 +370,95 @@ test('Test contentStyler', () => {
   PRE = stylerConst.PREFIX_CODE;
   testResult = contentStyler(`0123${PRE}456${POST}789`, styleType.CODE, 4 + PRE_LEN, 6 + PRE_LEN);
   expect(testResult).toStrictEqual(`0123456789`);
+});
+
+test('Complex test on styleToggler', () => {
+  let testResult;
+  const PRE_LEN = stylerConst.PREFIX_LEN;
+  const POST_LEN = stylerConst.POSTFIX_LEN;
+  let PRE_BOLD = stylerConst.PREFIX_BOLD;
+  let POST_BOLD = stylerConst.POSTFIX_BOLD;
+  let PRE_ITALIC = stylerConst.PREFIX_ITALIC;
+  let POST_ITALIC = stylerConst.POSTFIX_ITALIC;
+
+  // 1. Overlap on prefix
+  testResult = styleToggler(`01234567890`, 2, 8, PRE_BOLD, POST_BOLD);
+  testResult = styleToggler(testResult, 0, 4 + PRE_LEN, PRE_ITALIC, POST_ITALIC);
+  expect(testResult).toStrictEqual(`${PRE_ITALIC}01${PRE_BOLD}234${POST_ITALIC}5678${POST_BOLD}90`);
+
+  // 2. Overlap on postfix
+  testResult = styleToggler(`01234567890`, 2, 8, PRE_BOLD, POST_BOLD);
+  testResult = styleToggler(testResult, 4 + PRE_LEN, 9 + PRE_LEN + POST_LEN, PRE_ITALIC, POST_ITALIC);
+  expect(testResult).toStrictEqual(`01${PRE_BOLD}23${PRE_ITALIC}45678${POST_BOLD}9${POST_ITALIC}0`);
+});
+
+// Test findAllStylerPair
+test('Test findAllStylerPair', () => {
+  let testResult;
+  const PRE_LEN = stylerConst.PREFIX_LEN;
+  const POST_LEN = stylerConst.POSTFIX_LEN;
+  let PRE_BOLD = stylerConst.PREFIX_BOLD;
+  let POST_BOLD = stylerConst.POSTFIX_BOLD;
+  let PRE_ITALIC = stylerConst.PREFIX_ITALIC;
+  let POST_ITALIC = stylerConst.POSTFIX_ITALIC;
+
+  // 1. 1 bold
+  testResult = findAllStylerPair(`012${PRE_BOLD}3456${POST_BOLD}789`);
+  expect(testResult).toStrictEqual([{start: 3 + PRE_LEN, end: 6 + PRE_LEN}]);
+  testResult = findAllStylerPair(`${PRE_BOLD}0123456${POST_BOLD}789`);
+  expect(testResult).toStrictEqual([{start: 0 + PRE_LEN, end: 6 + PRE_LEN}]);
+  testResult = findAllStylerPair(`012${PRE_BOLD}3456789${POST_BOLD}`);
+  expect(testResult).toStrictEqual([{start: 3 + PRE_LEN, end: 9 + PRE_LEN}]);
+
+  // 2. 1 bold & 1 italic
+  // 2.1 Right partial
+  testResult = findAllStylerPair(`012${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}78${POST_ITALIC}9`);
+  expect(testResult).toStrictEqual([{start: 3 + PRE_LEN, end: 6 + PRE_LEN + POST_LEN}, {start: 5 + PRE_LEN * 2, end: 8 + PRE_LEN * 2 + POST_LEN}]);
+  testResult = findAllStylerPair(`${PRE_BOLD}01234${PRE_ITALIC}56${POST_BOLD}78${POST_ITALIC}9`);
+  expect(testResult).toStrictEqual([{start: 0 + PRE_LEN, end: 6 + PRE_LEN + POST_LEN}, {start: 5 + PRE_LEN * 2, end: 8 + PRE_LEN * 2 + POST_LEN}]);
+  testResult = findAllStylerPair(`012${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}789${POST_ITALIC}`);
+  expect(testResult).toStrictEqual([{start: 3 + PRE_LEN, end: 6 + PRE_LEN + POST_LEN}, {start: 5 + PRE_LEN * 2, end: 9 + PRE_LEN * 2 + POST_LEN}]);
+
+  // 2.2 Left partial
+  testResult = findAllStylerPair(`0${PRE_ITALIC}12${PRE_BOLD}34${POST_ITALIC}56${POST_BOLD}789`);
+  expect(testResult).toStrictEqual([{start: 1 + PRE_LEN, end: 4 + PRE_LEN + POST_LEN}, {start: 3 + PRE_LEN * 2, end: 6 + PRE_LEN * 2 + POST_LEN}]);
+  testResult = findAllStylerPair(`${PRE_ITALIC}012${PRE_BOLD}34${POST_ITALIC}56${POST_BOLD}789`);
+  expect(testResult).toStrictEqual([{start: 0 + PRE_LEN, end: 4 + PRE_LEN + POST_LEN}, {start: 3 + PRE_LEN * 2, end: 6 + PRE_LEN * 2 + POST_LEN}]);
+  testResult = findAllStylerPair(`0${PRE_ITALIC}12${PRE_BOLD}34${POST_ITALIC}56789${POST_BOLD}`);
+  expect(testResult).toStrictEqual([{start: 1 + PRE_LEN, end: 4 + PRE_LEN + POST_LEN}, {start: 3 + PRE_LEN * 2, end: 9 + PRE_LEN * 2 + POST_LEN}]);
+});
+
+// Test splitStyle
+test('Test splitStyle', () => {
+  let testResult;
+  const PRE_LEN = stylerConst.PREFIX_LEN;
+  const POST_LEN = stylerConst.POSTFIX_LEN;
+  let PRE_BOLD = stylerConst.PREFIX_BOLD;
+  let POST_BOLD = stylerConst.POSTFIX_BOLD;
+  let PRE_ITALIC = stylerConst.PREFIX_ITALIC;
+  let POST_ITALIC = stylerConst.POSTFIX_ITALIC;
+
+  // 1. 1 partial overlapping
+  testResult = splitStyle(`012${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}78${POST_ITALIC}9`);
+  expect(testResult).toStrictEqual(`012${PRE_BOLD}34${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}56${POST_BOLD}78${POST_ITALIC}9`);
+
+  // 2. 1 partial overlapping with 1 totally overlapping
+  testResult = splitStyle(`012${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}7${PRE_BOLD}8${POST_BOLD}${POST_ITALIC}9`);
+  expect(testResult).toStrictEqual(`012${PRE_BOLD}34${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}56${POST_BOLD}7${PRE_BOLD}8${POST_BOLD}${POST_ITALIC}9`);
+
+  // 3. 1 partial overlapping with 2 totally overlapping
+  testResult = splitStyle(`012${PRE_BOLD}34${PRE_ITALIC}56${POST_BOLD}7${PRE_BOLD}8${POST_BOLD}9${PRE_BOLD}0${POST_BOLD}1${POST_ITALIC}2`);
+  expect(testResult).toStrictEqual(`012${PRE_BOLD}34${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}56${POST_BOLD}7${PRE_BOLD}8${POST_BOLD}9${PRE_BOLD}0${POST_BOLD}1${POST_ITALIC}2`);
+
+  // 4. 2 partial overlappings
+  testResult = splitStyle(`0${PRE_BOLD}12${PRE_ITALIC}34${POST_BOLD}56${PRE_BOLD}78${POST_ITALIC}90${POST_BOLD}12`);
+  expect(testResult).toStrictEqual(`0${PRE_BOLD}12${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}34${POST_BOLD}56${POST_ITALIC}${PRE_BOLD}${PRE_ITALIC}78${POST_ITALIC}90${POST_BOLD}12`);
+
+  // 5. 2 partial overlappings with 1 totally overlapping
+  testResult = splitStyle(`0${PRE_BOLD}12${PRE_ITALIC}34${POST_BOLD}5${PRE_BOLD}A${POST_BOLD}6${PRE_BOLD}78${POST_ITALIC}90${POST_BOLD}12`);
+  expect(testResult).toStrictEqual(`0${PRE_BOLD}12${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}34${POST_BOLD}5${PRE_BOLD}A${POST_BOLD}6${POST_ITALIC}${PRE_BOLD}${PRE_ITALIC}78${POST_ITALIC}90${POST_BOLD}12`);
+
+  // 6. 2 partial overlappings with 2 totally overlapping
+  testResult = splitStyle(`0${PRE_BOLD}12${PRE_ITALIC}34${POST_BOLD}5${PRE_BOLD}A${POST_BOLD}B${PRE_BOLD}C${POST_BOLD}6${PRE_BOLD}78${POST_ITALIC}90${POST_BOLD}12`);
+  expect(testResult).toStrictEqual(`0${PRE_BOLD}12${POST_BOLD}${PRE_ITALIC}${PRE_BOLD}34${POST_BOLD}5${PRE_BOLD}A${POST_BOLD}B${PRE_BOLD}C${POST_BOLD}6${POST_ITALIC}${PRE_BOLD}${PRE_ITALIC}78${POST_ITALIC}90${POST_BOLD}12`);
 });
