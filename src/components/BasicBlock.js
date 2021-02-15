@@ -32,32 +32,20 @@ const debouceTimeout = 3000;
 /*************************************************
  * Main components
  *************************************************/
-
-// https://stackoverflow.com/a/61127960/6868122
-const useDebouncedEffect = (effect, delay, deps) => {
-  // useCallback will return a memoized version of the callback that only changes if one of the inputs has changed.
-  const callback = useCallback(effect, deps);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      callback();
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [callback, delay]);
-}
-
 const BasicBlock = () => {
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
-  useDebouncedEffect(() => {
-    console.log('debounceTimeout fired!');
-  }, debouceTimeout, [editorState]);
+  // Debounce method from https://stackoverflow.com/a/61127960/6868122
+  const callback = useCallback(() => {
+    console.log('debounceTimeout fired!', editorState != null);
+  }, [editorState]);
+  useEffect(() => {
+    const handler = setTimeout(() => callback(), debouceTimeout);
+    return () => clearTimeout(handler);
+  }, [callback]);
 
   return (
-    <div style={{border: 'solid 2px gray', margin: '1rem', padding: '0.5rem'}}>
+    <div className='test-outline'>
       <Editor editorState={editorState} onChange={setEditorState} />
     </div>
   )
