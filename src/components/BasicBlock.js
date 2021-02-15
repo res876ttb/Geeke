@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Editor, EditorState} from 'draft-js';
 
 /*************************************************
@@ -35,14 +35,12 @@ const debouceTimeout = 3000;
 const BasicBlock = () => {
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
-  // Debounce method from https://stackoverflow.com/a/61127960/6868122
-  const callback = useCallback(() => {
-    console.log('debounceTimeout fired!', editorState != null);
-  }, [editorState]);
   useEffect(() => {
-    const handler = setTimeout(() => callback(), debouceTimeout);
+    const handler = setTimeout(() => {
+      console.log('debounceTimeout fired!');
+    }, debouceTimeout);
     return () => clearTimeout(handler);
-  }, [callback]);
+  }, [editorState]);
 
   return (
     <div className='test-outline'>
