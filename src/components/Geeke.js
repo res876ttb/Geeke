@@ -7,8 +7,6 @@
  * React Components
  *************************************************/
 import React from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
 
 /*************************************************
  * Utils & States
@@ -17,6 +15,7 @@ import {connect} from 'react-redux';
 /*************************************************
  * Import Components
  *************************************************/
+import BasicBlock from './BasicBlock.js';
 
 /*************************************************
  * Styles
@@ -26,24 +25,13 @@ import '../styles/Geeke.css';
 /*************************************************
  * Main components
  *************************************************/
-class Geeke extends React.Component {
-  static propTypes = {
-    dispatch: PropTypes.func,
-  }
-
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <div>
-        hihi
-      </div>
-    );
-  }
+const Geeke = () => {
+  return (
+    <>
+      hihi
+      <BasicBlock />
+    </>
+  )
 }
 
-export default connect(state => ({
-  
-}))(Geeke);
+export default Geeke;

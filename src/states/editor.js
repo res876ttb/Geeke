@@ -7,6 +7,7 @@
  * IMPORT
  *************************************************/
 import produce from 'immer';
+import {newBlockId} from '../utils/Misc.js';
 
 /*************************************************
  * CONST
@@ -64,20 +65,43 @@ const initState = {
   cachedPages: {},
   cachedBlock: {},
   pageTree: {},
+  dirtyItem: [],
+  dirtyAction: [],
 }
 
 // Types
 const UPDATE_CONTENT = 'EDITOR_UPDATE_CONTENT';
+const ADD_PAGE = 'EDITOR_ADD_PAGE';
+const ADD_BLOCK = 'EDITOR_ADD_BLOCK';
 
 /*************************************************
  * ACTOR
  *************************************************/
-export function updateContent(uuid, content) {
-  return {
+export function updateContent(dispatch, uuid, content) {
+  _updateContent(dispatch, uuid, content);
+}
+
+export function addPage(dispatch) {
+  _addPage(dispatch, newBlockId(), newBlockId());
+}
+
+/*************************************************
+ * MIDDLE FUNCTION
+ *************************************************/
+export function _addPage(dispatch, pageUuid, blockUuid) {
+  dispatch({
+    type: ADD_PAGE,
+    pageUuid: pageUuid,
+    blockUuid: blockUuid,
+  });
+}
+
+export function _updateContent(dispatch, uuid, content) {
+  dispatch({
     type: UPDATE_CONTENT,
     content: content,
     uuid: uuid,
-  };
+  });
 }
 
 /*************************************************
@@ -87,6 +111,26 @@ export let editor = (oldState=initState, action) => produce(oldState, state => {
   switch(action.type) {
     case UPDATE_CONTENT:
       state.cachedBlock[action.uuid].content = action.content;
+
+      state.dirtyItem.push(action.uuid);
+      break;
+    
+    case ADD_PAGE:
+      let newPage = emptyPage;
+      let newBlock = emptyBlock;
+      newPage.uuid = action.pageUuid;
+      newBlock.uuid = action.blockUuid;
+      newPage.blocks.push(newBlock);
+      state.cachedPages[action.pageUuid] = newPage;
+
+      state.dirtyAction.push({
+        uuid: newPage.uuid,
+        type: ADD_PAGE,
+      });
+      state.dirtyAction.push({
+        uuid: newBlock.uuid,
+        type: ADD_BLOCK,
+      });
       break;
 
     default:
