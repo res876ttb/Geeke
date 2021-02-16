@@ -9,7 +9,12 @@
  * React Components
  *************************************************/
 import React, {useEffect, useState} from 'react';
-import {Editor, EditorState} from 'draft-js';
+import {
+  Editor, 
+  EditorState,
+  getDefaultKeyBinding,
+  RichUtils,
+} from 'draft-js';
 
 /*************************************************
  * Utils & States
@@ -42,9 +47,27 @@ const BasicBlock = () => {
     return () => clearTimeout(handler);
   }, [editorState]);
 
+  const mapKeyToEditorCommand = e => {
+    return getDefaultKeyBinding(e);
+  };
+
+  const handleKeyCommand = (command, editorState) => {
+    const newState = RichUtils.handleKeyCommand(editorState, command);
+    if (newState) {
+      setEditorState(newState);
+      return true;
+    }
+    return false;
+  }
+
   return (
     <div className='test-outline'>
-      <Editor editorState={editorState} onChange={setEditorState} />
+      <Editor 
+        editorState={editorState}
+        onChange={setEditorState}
+        keyBindingFn={mapKeyToEditorCommand}
+        handleKeyCommand={handleKeyCommand}
+      />
     </div>
   )
 }
