@@ -14,11 +14,14 @@ import {
   EditorState,
   getDefaultKeyBinding,
   RichUtils,
+  KeyBindingUtil,
 } from 'draft-js';
+import {useDispatch} from 'react-redux';
 
 /*************************************************
  * Utils & States
  *************************************************/
+import {setSavintState} from '../states/editor.js';
 
 /*************************************************
  * Import Components
@@ -38,17 +41,40 @@ const debouceTimeout = 3000;
  * Main components
  *************************************************/
 const BasicBlock = () => {
+  const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
+  // TODO: Need a better solution
   useEffect(() => {
+    setSavintState(dispatch, true);
     const handler = setTimeout(() => {
+      setSavintState(dispatch, false); // TODO: Need to be moved after saving done event fired.
       console.log('debounceTimeout fired!');
     }, debouceTimeout);
     return () => clearTimeout(handler);
   }, [editorState]);
 
   const mapKeyToEditorCommand = e => {
-    return getDefaultKeyBinding(e);
+    const preventDefault = null; // Prevent default action.
+    let res = null;
+    switch (e.keyCode) {
+      case 13: // Enter
+        if (e.shiftKey) {
+        } else {
+          e.preventDefault();
+          return preventDefault;
+        }
+        break;
+      case 76: // L
+        res = (KeyBindingUtil.hasCommandModifier(e) && e.shiftKey) ? 'inline-latex' : null;
+        break;
+    }
+
+    if (res != null) {
+      return res;
+    } else {
+      return getDefaultKeyBinding(e);
+    }
   };
 
   const handleKeyCommand = (command, editorState) => {

@@ -33,6 +33,8 @@ const emptyPage = {
   tags: [],
   // Background
   background: '',
+  // Back links
+  backLinks: [], // {page: pageUuid, block: blockUuid}
   // Page Comment
   comments: [],
   // Permision
@@ -67,12 +69,16 @@ const initState = {
   pageTree: {},
   dirtyItem: [],
   dirtyAction: [],
+  editorState: {
+    saving: false,
+  },
 }
 
 // Types
 const UPDATE_CONTENT = 'EDITOR_UPDATE_CONTENT';
 const ADD_PAGE = 'EDITOR_ADD_PAGE';
 const ADD_BLOCK = 'EDITOR_ADD_BLOCK';
+const SET_SAVING_STATE = 'EDITOR_SET_SAVING_STATE';
 
 /*************************************************
  * ACTOR
@@ -83,6 +89,10 @@ export function updateContent(dispatch, uuid, content) {
 
 export function addPage(dispatch) {
   _addPage(dispatch, newBlockId(), newBlockId());
+}
+
+export function setSavintState(dispatch, state) {
+  _setSavintState(dispatch, state);
 }
 
 /*************************************************
@@ -101,6 +111,13 @@ export function _updateContent(dispatch, uuid, content) {
     type: UPDATE_CONTENT,
     content: content,
     uuid: uuid,
+  });
+}
+
+export function _setSavintState(dispatch, state) {
+  dispatch({
+    type: SET_SAVING_STATE,
+    state: state,
   });
 }
 
@@ -131,6 +148,10 @@ export let editor = (oldState=initState, action) => produce(oldState, state => {
         uuid: newBlock.uuid,
         type: ADD_BLOCK,
       });
+      break;
+    
+    case SET_SAVING_STATE:
+      state.editorState.saving = action.state;
       break;
 
     default:
