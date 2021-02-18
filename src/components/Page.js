@@ -1,6 +1,6 @@
 /*************************************************
- * @file Geeke.js
- * @description Framework component of Geeke.
+ * @file Page.js
+ * @description Page component.
  *************************************************/
 
 /*************************************************
@@ -15,23 +15,23 @@ import React from 'react';
 /*************************************************
  * Import Components
  *************************************************/
-import Page from './Page';
+import BasicBlock from './BasicBlock';
 
 /*************************************************
  * Styles
  *************************************************/
-import '../styles/Geeke.css';
 
 /*************************************************
  * Main components
  *************************************************/
-const Geeke = () => {
+const Page = props => {
+  const blockUuid = props['data-id'];
+
   return (
     <>
-      hihi
-      <Page data-id={'123'} />
+      This is page
     </>
   )
 }
 
-export default Geeke;
+export default Page;

@@ -15,12 +15,12 @@ import reportWebVitals from './reportWebVitals';
 /*************************************************
  * Redux Reducers
  *************************************************/
-import {editor} from './states/editor.js';
+import {editor} from './states/editor';
 
 /*************************************************
  * Components
  *************************************************/
-import Geeke from './components/Geeke.js';
+import Geeke from './components/Geeke';
 
 /*************************************************
  * Styles

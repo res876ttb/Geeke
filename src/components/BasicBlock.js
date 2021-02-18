@@ -21,7 +21,7 @@ import {useDispatch} from 'react-redux';
 /*************************************************
  * Utils & States
  *************************************************/
-import {setSavintState} from '../states/editor.js';
+import {setSavintState} from '../states/editor';
 
 /*************************************************
  * Import Components
@@ -59,12 +59,12 @@ const BasicBlock = () => {
     let res = null;
     switch (e.keyCode) {
       case 13: // Enter
-        if (e.shiftKey) {
-        } else {
+        if (!e.shiftKey) {
           e.preventDefault();
           return preventDefault;
         }
         break;
+
       case 76: // L
         res = (KeyBindingUtil.hasCommandModifier(e) && e.shiftKey) ? 'inline-latex' : null;
         break;
