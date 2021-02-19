@@ -21,23 +21,24 @@ import {_updateContent} from '../states/editor';
  * TEST CODE
  *************************************************/
 
-// Test _updateContent
-test('Test addPage', () => {
-  const content = '321';
-  const blockUuid = '123';
+describe('Test _updateContent', () => {
+  test('Change content', () => {
+    const content = '321';
+    const blockUuid = '123';
 
-  let state = {
-    cachedBlock: {},
-    dirtyItem: [],
-  };
+    let state = {
+      cachedBlock: {},
+      dirtyItem: [],
+    };
 
-  state.cachedBlock[blockUuid] = {
-    uuid: blockUuid,
-    content: 'test',
-  };
+    state.cachedBlock[blockUuid] = {
+      uuid: blockUuid,
+      content: 'test',
+    };
 
-  _updateContent(action => {
-    state = action.callback(state);
-    expect(state.cachedBlock[blockUuid].content).toStrictEqual(content);
-  }, blockUuid, content);
+    _updateContent(action => {
+      state = action.callback(state);
+      expect(state.cachedBlock[blockUuid].content).toStrictEqual(content);
+    }, blockUuid, content);
+  });
 });
