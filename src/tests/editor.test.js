@@ -15,7 +15,14 @@ import * as redux from 'react-redux';
 /*************************************************
  * REDUX REDUCER
  *************************************************/
-import {_updateContent} from '../states/editor';
+import {
+  getInitState,
+  newPage,
+  newBlock,
+  _updateContent,
+  _setSavintState,
+  _addPage,
+} from '../states/editor';
 
 /*************************************************
  * TEST CODE
@@ -23,22 +30,64 @@ import {_updateContent} from '../states/editor';
 
 describe('Test _updateContent', () => {
   test('Change content', () => {
-    const content = '321';
-    const blockUuid = '123';
+    const content = '1';
+    const blockUuid = '2';
+    let state = getInitState();
 
-    let state = {
-      cachedBlock: {},
-      dirtyItem: [],
-    };
-
-    state.cachedBlock[blockUuid] = {
-      uuid: blockUuid,
-      content: 'test',
-    };
+    state.cachedBlocks[blockUuid] = newBlock();
+    state.cachedBlocks[blockUuid].content = content;
+    state.cachedBlocks[blockUuid].uuid = blockUuid;
 
     _updateContent(action => {
       state = action.callback(state);
-      expect(state.cachedBlock[blockUuid].content).toStrictEqual(content);
+      expect(state.cachedBlocks[blockUuid].content).toStrictEqual(content);
     }, blockUuid, content);
+  });
+});
+
+describe('Test _setSavintState', () => {
+  test('Change saving setting', () => {
+    let state = getInitState();
+
+    state.editorState.saving = false;
+
+    _setSavintState(action => {
+      state = action.callback(state);
+      expect(state.editorState.saving).toBeTruthy();
+    }, true);
+  });
+});
+
+describe('Test _addPage', () => {
+  test('Add a page to root', () => {
+    let state = getInitState();
+    const pageUuid = '1';
+    const blockUuid = '2';
+    const parentUuid = null;
+
+    _addPage(action => {
+      state = action.callback(state);
+      expect(state.cachedPages[pageUuid].uuid).toEqual(pageUuid);
+      expect(state.cachedBlocks[blockUuid].uuid).toEqual(blockUuid);
+      expect(state.pageTree.root[pageUuid]).not.toBeUndefined();
+    }, pageUuid, blockUuid, parentUuid);
+  });
+
+  test('Add a page to another page', () => {
+    let state = getInitState();
+    const pageUuid1 = '1';
+    const pageUuid2 = '2';
+    const blockUuid1 = '3';
+    const blockUuid2 = '4';
+
+    _addPage(action1 => {
+      state = action1.callback(state);
+      _addPage(action => {
+        state = action.callback(state);
+        expect(state.cachedPages[pageUuid2].uuid).toEqual(pageUuid2);
+        expect(state.cachedBlocks[blockUuid2].uuid).toEqual(blockUuid2);
+        expect(state.pageTree.root[pageUuid1][pageUuid2]).not.toBeUndefined();
+      }, pageUuid2, blockUuid2, pageUuid1);
+    }, pageUuid1, blockUuid1, null);
   });
 });

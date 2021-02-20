@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
-import {createStore} from 'redux';
+import {createStore, combineReducers} from 'redux';
 import reportWebVitals from './reportWebVitals';
 
 /*************************************************
@@ -30,7 +30,9 @@ import './styles/index.css';
 /*************************************************
  * Renderer
  *************************************************/
-const store = createStore(editor);
+const store = createStore(combineReducers({
+  editor
+}));
 
 ReactDOM.render(
   <Provider store={store}>
