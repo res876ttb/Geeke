@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
  *************************************************/
 import { 
   blockType,
+  addBlock,
 } from '../states/editor';
 
 /*************************************************
@@ -35,6 +36,12 @@ const Page = props => {
   const page = useSelector(state => state.editor.cachedPages[uuid]);
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
 
+  // Handle create new block
+  const handleNewBlock = curUuid => {
+    console.log(curUuid);
+    addBlock(dispatch, uuid, curUuid);
+  };
+
   // Get child blocks
   const blocks = 
   <div>
@@ -44,6 +51,7 @@ const Page = props => {
           return (
             <BasicBlock key={blockUuid}
               dataId={blockUuid}
+              handleNewBlock={handleNewBlock}
             />
           );
       }

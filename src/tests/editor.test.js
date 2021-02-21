@@ -10,7 +10,6 @@
 /*************************************************
  * FUNCTIONS TO TEST
  *************************************************/
-import * as redux from 'react-redux';
 
 /*************************************************
  * REDUX REDUCER
@@ -22,6 +21,7 @@ import {
   _updatePageTitle,
   _setSavintState,
   _addPage,
+  _addBlock,
 } from '../states/editor';
 
 /*************************************************
@@ -106,5 +106,64 @@ describe('Test _updatePageTitle', () => {
         expect(state.cachedPages[pageUuid].title).toEqual(newTitle);
       }, pageUuid, newTitle);
     }, pageUuid, blockUuid, null);
+  });
+});
+
+describe('Test _addBlock', () => {
+  test('Add a block under a page', () => {
+    let state = getInitState();
+    const pageUuid = '1';
+    const blockUuid = '2';
+    const newUuid = '3';
+
+    _addPage(action1 => {
+      state = action1.callback(state);
+      _addBlock(action2 => {
+        state = action2.callback(state);
+        expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
+        expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid)).toBe(0);
+        expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(1);
+      }, pageUuid, blockUuid, newUuid);
+    }, pageUuid, blockUuid, null);
+  });
+
+  test('Add a block under another block', () => {
+    let state = getInitState();
+    const pageUuid = '1';
+    const blockUuid = '2';
+    const newUuid = '3';
+
+    _addPage(action1 => {
+      state = action1.callback(state);
+      _addBlock(action2 => {
+        state = action2.callback(state);
+        expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
+        expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid)).toBe(0);
+        expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(-1);
+        expect(state.cachedBlocks[blockUuid].blocks.indexOf(newUuid)).toBe(0);
+      }, blockUuid, null, newUuid);
+    }, pageUuid, blockUuid, null);
+  });
+
+  test('Add a block in the middle of blocks', () => {
+    let state = getInitState();
+    const pageUuid = '1';
+    const blockUuid1 = '2';
+    const blockUuid2 = '3';
+    const newUuid = '4';
+
+    _addPage(action1 => {
+      state = action1.callback(state);
+      _addBlock(action2 => {
+        state = action2.callback(state);
+        _addBlock(action3 => {
+          state = action3.callback(state);
+          expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
+          expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid1)).toBe(0);
+          expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid2)).toBe(2);
+          expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(1);
+        }, pageUuid, blockUuid1, newUuid);
+      }, pageUuid, blockUuid1, blockUuid2);
+    }, pageUuid, blockUuid1, null);
   });
 });

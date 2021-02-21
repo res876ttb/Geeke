@@ -166,7 +166,7 @@ export function setSavintState(dispatch, state) {
 }
 
 export function addBlock(dispatch, parentUuid, aboveUuid) {
-  _addBlock(dispatch, parentUuid, aboveUuid);
+  _addBlock(dispatch, parentUuid, aboveUuid, newBlockId());
 }
 
 export function moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid) {
@@ -225,15 +225,34 @@ export function _setSavintState(dispatch, savingState) {
   dispatch({type,
     callback: state => {
       state.editorState.saving = savingState;
-      
+
       return state;
     }
   });
 }
 
-export function _addBlock(dispatch, parentUuid, aboveUuid) {
+export function _addBlock(dispatch, parentUuid, aboveUuid, newUuid) {
   dispatch({type,
     callback: state => {
+      let newBlock = getNewBlock();
+      let block = state.cachedBlocks[parentUuid] ? state.cachedBlocks[parentUuid] : state.cachedPages[parentUuid];
+
+      if (!block) {
+        console.error(`Block with uuid ${parentUuid} not found!`);
+        return state;
+      }
+
+      newBlock.uuid = newUuid;
+      let newBlockIndex = aboveUuid ? block.blocks.indexOf(aboveUuid) : 0;
+
+      if (newBlockIndex === -1) {
+        console.error(`Block with uuid ${aboveUuid} cannot be found in block ${parentUuid}`);
+        return state;
+      }
+
+      block.blocks.splice(newBlockIndex + 1, 0, newBlock.uuid);
+      state.cachedBlocks[newBlock.uuid] = newBlock;
+
       return state;
     }
   });

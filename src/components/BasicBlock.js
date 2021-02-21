@@ -40,7 +40,8 @@ const debouceTimeout = 3000;
 /*************************************************
  * Main components
  *************************************************/
-const BasicBlock = () => {
+const BasicBlock = props => {
+  const uuid = props.dataId;
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
@@ -61,6 +62,7 @@ const BasicBlock = () => {
       case 13: // Enter
         if (!e.shiftKey) {
           e.preventDefault();
+          props.handleNewBlock(uuid)
           return preventDefault;
         }
         break;
