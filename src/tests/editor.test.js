@@ -44,10 +44,9 @@ describe('Test _updateContent', () => {
     state.cachedBlocks[blockUuid].content = content;
     state.cachedBlocks[blockUuid].uuid = blockUuid;
 
-    _updateContent(action => {
-      state = action.callback(state);
+    run(state, _updateContent, [blockUuid, content], state => {
       expect(state.cachedBlocks[blockUuid].content).toStrictEqual(content);
-    }, blockUuid, content);
+    });
   });
 });
 
