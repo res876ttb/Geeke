@@ -27,6 +27,12 @@ import {
 /*************************************************
  * TEST CODE
  *************************************************/
+const run = (state, testFunc, args, callback) => {
+  testFunc(action => {
+    state = action.callback(state);
+    callback(state);
+  }, ...args);
+};
 
 describe('Test _updateContent', () => {
   test('Change content', () => {
@@ -51,10 +57,9 @@ describe('Test _setSavintState', () => {
 
     state.editorState.saving = false;
 
-    _setSavintState(action => {
-      state = action.callback(state);
+    run(state, _setSavintState, [true], state => {
       expect(state.editorState.saving).toBeTruthy();
-    }, true);
+    });
   });
 });
 
@@ -65,12 +70,11 @@ describe('Test _addPage', () => {
     const blockUuid = '2';
     const parentUuid = null;
 
-    _addPage(action => {
-      state = action.callback(state);
+    run(state, _addPage, [pageUuid, blockUuid, parentUuid], state => {
       expect(state.cachedPages[pageUuid].uuid).toEqual(pageUuid);
       expect(state.cachedBlocks[blockUuid].uuid).toEqual(blockUuid);
       expect(state.pageTree.root[pageUuid]).not.toBeUndefined();
-    }, pageUuid, blockUuid, parentUuid);
+    });
   });
 
   test('Add a page to another page', () => {
@@ -80,15 +84,12 @@ describe('Test _addPage', () => {
     const blockUuid1 = '3';
     const blockUuid2 = '4';
 
-    _addPage(action1 => {
-      state = action1.callback(state);
-      _addPage(action => {
-        state = action.callback(state);
-        expect(state.cachedPages[pageUuid2].uuid).toEqual(pageUuid2);
-        expect(state.cachedBlocks[blockUuid2].uuid).toEqual(blockUuid2);
-        expect(state.pageTree.root[pageUuid1][pageUuid2]).not.toBeUndefined();
-      }, pageUuid2, blockUuid2, pageUuid1);
-    }, pageUuid1, blockUuid1, null);
+    run(state, _addPage, [pageUuid1, blockUuid1, null], state => {
+    run(state, _addPage, [pageUuid2, blockUuid2, pageUuid1], state => {
+      expect(state.cachedPages[pageUuid2].uuid).toEqual(pageUuid2);
+      expect(state.cachedBlocks[blockUuid2].uuid).toEqual(blockUuid2);
+      expect(state.pageTree.root[pageUuid1][pageUuid2]).not.toBeUndefined();  
+    })});
   });
 });
 
@@ -99,13 +100,10 @@ describe('Test _updatePageTitle', () => {
     const blockUuid = '2';
     const newTitle = 'Regression test';
 
-    _addPage(action1 => {
-      state = action1.callback(state);
-      _updatePageTitle(action2 => {
-        state = action2.callback(state);
-        expect(state.cachedPages[pageUuid].title).toEqual(newTitle);
-      }, pageUuid, newTitle);
-    }, pageUuid, blockUuid, null);
+    run(state, _addPage, [pageUuid, blockUuid, null], state => {
+    run(state, _updatePageTitle, [pageUuid, newTitle], state => {
+      expect(state.cachedPages[pageUuid].title).toEqual(newTitle);
+    })});
   });
 });
 
@@ -116,15 +114,12 @@ describe('Test _addBlock', () => {
     const blockUuid = '2';
     const newUuid = '3';
 
-    _addPage(action1 => {
-      state = action1.callback(state);
-      _addBlock(action2 => {
-        state = action2.callback(state);
-        expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
-        expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid)).toBe(0);
-        expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(1);
-      }, pageUuid, blockUuid, newUuid);
-    }, pageUuid, blockUuid, null);
+    run(state, _addPage, [pageUuid, blockUuid, null], state => {
+    run(state, _addBlock, [pageUuid, blockUuid, newUuid], state => {
+      expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
+      expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid)).toBe(0);
+      expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(1);
+    })});
   });
 
   test('Add a block under another block', () => {
@@ -133,16 +128,13 @@ describe('Test _addBlock', () => {
     const blockUuid = '2';
     const newUuid = '3';
 
-    _addPage(action1 => {
-      state = action1.callback(state);
-      _addBlock(action2 => {
-        state = action2.callback(state);
-        expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
-        expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid)).toBe(0);
-        expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(-1);
-        expect(state.cachedBlocks[blockUuid].blocks.indexOf(newUuid)).toBe(0);
-      }, blockUuid, null, newUuid);
-    }, pageUuid, blockUuid, null);
+    run(state, _addPage, [pageUuid, blockUuid, null], state => {
+    run(state, _addBlock, [blockUuid, null, newUuid], state => {
+      expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
+      expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid)).toBe(0);
+      expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(-1);
+      expect(state.cachedBlocks[blockUuid].blocks.indexOf(newUuid)).toBe(0);
+    })});
   });
 
   test('Add a block in the middle of blocks', () => {
