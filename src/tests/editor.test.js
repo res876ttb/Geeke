@@ -144,18 +144,13 @@ describe('Test _addBlock', () => {
     const blockUuid2 = '3';
     const newUuid = '4';
 
-    _addPage(action1 => {
-      state = action1.callback(state);
-      _addBlock(action2 => {
-        state = action2.callback(state);
-        _addBlock(action3 => {
-          state = action3.callback(state);
-          expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
-          expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid1)).toBe(0);
-          expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid2)).toBe(2);
-          expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(1);
-        }, pageUuid, blockUuid1, newUuid);
-      }, pageUuid, blockUuid1, blockUuid2);
-    }, pageUuid, blockUuid1, null);
+    run(state, _addPage, [pageUuid, blockUuid1, null], state => {
+    run(state, _addBlock, [pageUuid, blockUuid1, blockUuid2], state => {
+    run(state, _addBlock, [pageUuid, blockUuid1, newUuid], state => {
+      expect(state.cachedBlocks[newUuid]).not.toBeUndefined();
+      expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid1)).toBe(0);
+      expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid2)).toBe(2);
+      expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(1);
+    })})});
   });
 });
