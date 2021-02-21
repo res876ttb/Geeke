@@ -17,9 +17,9 @@ import * as redux from 'react-redux';
  *************************************************/
 import {
   getInitState,
-  newPage,
-  newBlock,
+  getNewBlock,
   _updateContent,
+  _updatePageTitle,
   _setSavintState,
   _addPage,
 } from '../states/editor';
@@ -34,7 +34,7 @@ describe('Test _updateContent', () => {
     const blockUuid = '2';
     let state = getInitState();
 
-    state.cachedBlocks[blockUuid] = newBlock();
+    state.cachedBlocks[blockUuid] = getNewBlock();
     state.cachedBlocks[blockUuid].content = content;
     state.cachedBlocks[blockUuid].uuid = blockUuid;
 
@@ -89,5 +89,22 @@ describe('Test _addPage', () => {
         expect(state.pageTree.root[pageUuid1][pageUuid2]).not.toBeUndefined();
       }, pageUuid2, blockUuid2, pageUuid1);
     }, pageUuid1, blockUuid1, null);
+  });
+});
+
+describe('Test _updatePageTitle', () => {
+  test('Change title', () => {
+    let state = getInitState();
+    const pageUuid = '1';
+    const blockUuid = '2';
+    const newTitle = 'Regression test';
+
+    _addPage(action1 => {
+      state = action1.callback(state);
+      _updatePageTitle(action2 => {
+        state = action2.callback(state);
+        expect(state.cachedPages[pageUuid].title).toEqual(newTitle);
+      }, pageUuid, newTitle);
+    }, pageUuid, blockUuid, null);
   });
 });

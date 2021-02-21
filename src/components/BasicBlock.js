@@ -45,14 +45,14 @@ const BasicBlock = () => {
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
   // TODO: Need a better solution
-  useEffect(() => {
-    setSavintState(dispatch, true);
-    const handler = setTimeout(() => {
-      setSavintState(dispatch, false); // TODO: Need to be moved after saving done event fired.
-      console.log('debounceTimeout fired!');
-    }, debouceTimeout);
-    return () => clearTimeout(handler);
-  }, [editorState]);
+  // useEffect(() => {
+  //   setSavintState(dispatch, true);
+  //   const handler = setTimeout(() => {
+  //     setSavintState(dispatch, false); // TODO: Need to be moved after saving done event fired.
+  //     console.log('debounceTimeout fired!');
+  //   }, debouceTimeout);
+  //   return () => clearTimeout(handler);
+  // }, [editorState]);
 
   const mapKeyToEditorCommand = e => {
     const preventDefault = null; // Prevent default action.

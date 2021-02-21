@@ -22,6 +22,11 @@ const permissionConst = {
   invitee: 3,
 };
 
+// Block types
+export const blockType = {
+  basic: 0,
+}
+
 const type = null;
 const rootPage = null;
 
@@ -53,15 +58,24 @@ const emptyPage = {
   // Page Comment
   comments: [],
   // Permision
-  Permision: 0,
+  Permision: {
+    read: permissionConst.members,
+    write: permissionConst.members,
+  },
   // Icon
   icon: '',
+  // Readonly
+  readonly: false,
+  // Public: be able to be searched by search engine
+  public: false,
 };
 
 // Empty Block
 const emptyBlock = {
   // Block ID
   uuid: '66666666-7777-8888-9999-000000000000',
+  // Type
+  type: blockType.basic,
   // Author
   author: '',
   // Space
@@ -92,11 +106,15 @@ const emptyWorkspace = {
   members: [],
   // Administrators
   administrators: [],
+  // Root pages
+  rootPages: [],
   // Permission: default permission
   permission: {
     read: permissionConst.members,
     write: permissionConst.members,
-  }
+  },
+  // Theme
+  theme: 'default',
 }
 
 // Init state
@@ -114,10 +132,29 @@ const initState = {
 }
 
 /*************************************************
+ * TEST HELPER
+ *************************************************/
+export function getInitState() {
+  return _.cloneDeep(initState);
+}
+
+export function getNewPage() {
+  return _.cloneDeep(emptyPage);
+}
+
+export function getNewBlock() {
+  return _.cloneDeep(emptyBlock);
+}
+
+/*************************************************
  * ACTOR
  *************************************************/
 export function updateContent(dispatch, uuid, content) {
   _updateContent(dispatch, uuid, content);
+}
+
+export function updatePageTitle(dispatch, pageUuid, newTitle) {
+  _updatePageTitle(dispatch, pageUuid, newTitle);
 }
 
 export function addPage(dispatch, parentUuid) {
@@ -136,14 +173,18 @@ export function moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid) {
   _moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid);
 }
 
+export function fetchRootPages() {
+  // TODO
+}
+
 /*************************************************
  * MIDDLE FUNCTION
  *************************************************/
 export function _addPage(dispatch, pageUuid, blockUuid, parentUuid) {
   dispatch({type,
     callback: state => {
-      let newPage = emptyPage;
-      let newBlock = emptyBlock;
+      let newPage = getNewPage();
+      let newBlock = getNewBlock();
       newPage.uuid = pageUuid;
       newBlock.uuid = blockUuid;
       newPage.blocks.push(blockUuid);
@@ -160,10 +201,21 @@ export function _addPage(dispatch, pageUuid, blockUuid, parentUuid) {
   });
 }
 
+export function _updatePageTitle(dispatch, pageUuid, newTitle) {
+  dispatch({type, 
+    callback: state => {
+      state.cachedPages[pageUuid].title = newTitle;
+
+      return state;
+    }
+  });
+}
+
 export function _updateContent(dispatch, uuid, content) {
   dispatch({type,
     callback: state => {
       state.cachedBlocks[uuid].content = content;
+
       return state;
     }
   });
@@ -173,6 +225,7 @@ export function _setSavintState(dispatch, savingState) {
   dispatch({type,
     callback: state => {
       state.editorState.saving = savingState;
+      
       return state;
     }
   });
@@ -229,18 +282,3 @@ export function _pageTreeAddPage(dispatch, parentUuid, uuid) {
  * @brief Use immer to perform deep udpate of state.
  *************************************************/
 export let editor = (oldState=initState, action) => produce(oldState, state => action.callback ? action.callback(state) : state);
-
-/*************************************************
- * TEST HELPER
- *************************************************/
-export function getInitState() {
-  return _.cloneDeep(initState);
-}
-
-export function newPage() {
-  return _.cloneDeep(emptyPage);
-}
-
-export function newBlock() {
-  return _.cloneDeep(emptyBlock);
-}
