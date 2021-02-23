@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Editor, 
   EditorState,
@@ -21,7 +21,7 @@ import {useDispatch} from 'react-redux';
 /*************************************************
  * Utils & States
  *************************************************/
-import {setSavintState} from '../states/editor';
+import {cursorDirection} from '../states/editor';
 
 /*************************************************
  * Import Components
@@ -42,8 +42,10 @@ const debouceTimeout = 3000;
  *************************************************/
 const BasicBlock = props => {
   const uuid = props.dataId;
+  const focus = props.focus;
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+  const editor = useRef(null);
 
   // TODO: Need a better solution
   // useEffect(() => {
@@ -55,6 +57,14 @@ const BasicBlock = props => {
   //   return () => clearTimeout(handler);
   // }, [editorState]);
 
+  useEffect(() => {
+    if (focus) {
+      editor.current.focus();
+    } else {
+      editor.current.blur();
+    }
+  }, [focus]);
+
   const mapKeyToEditorCommand = e => {
     const preventDefault = null; // Prevent default action.
     let res = null;
@@ -63,12 +73,22 @@ const BasicBlock = props => {
         if (!e.shiftKey) {
           e.preventDefault();
           props.handleNewBlock(uuid)
+          props.handleMoveCursor(uuid, cursorDirection.down);
           return preventDefault;
         }
         break;
 
       case 76: // L
         res = (KeyBindingUtil.hasCommandModifier(e) && e.shiftKey) ? 'inline-latex' : null;
+        break;
+      
+      case 38: // Arrow key Up
+      case 40: // Arrow key Down
+        if (e.shiftKey) {
+          return preventDefault;
+        } else {
+          props.handleMoveCursor(uuid, e.keyCode === 38 ? cursorDirection.up : cursorDirection.down);
+        }
         break;
     }
 
@@ -91,6 +111,7 @@ const BasicBlock = props => {
   return (
     <div className='test-outline'>
       <Editor 
+        ref={editor}
         editorState={editorState}
         onChange={setEditorState}
         keyBindingFn={mapKeyToEditorCommand}

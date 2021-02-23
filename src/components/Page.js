@@ -6,7 +6,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 /*************************************************
@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   blockType,
   addBlock,
+  cursorDirection,
 } from '../states/editor';
 
 /*************************************************
@@ -35,25 +36,46 @@ const Page = props => {
   const dispatch = useDispatch();
   const page = useSelector(state => state.editor.cachedPages[uuid]);
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
+  const [focusedBlock, setFocusBlock] = useState({});
+
+  // Handle move cursor
+  const handleMoveCursor = (curUuid, dir) => {
+    let blocks = page.blocks;
+    let index = blocks.indexOf(curUuid);
+    if (dir === cursorDirection.up) {
+      setFocusBlock(Math.max(0, index - 1));
+    } else if (dir === cursorDirection.down) {
+      setFocusBlock(Math.min(index + 1, blocks.length));
+    }
+  };
 
   // Handle create new block
   const handleNewBlock = curUuid => {
-    console.log(curUuid);
     addBlock(dispatch, uuid, curUuid);
   };
+
+  
 
   // Get child blocks
   const blocks = 
   <div>
-    {page.blocks.map(blockUuid => {
+    {page.blocks.map((blockUuid, index) => {
+      let focus = index === focusedBlock || index === focusedBlock;
+        
       switch(cachedBlocks[blockUuid].type) {
         case blockType.basic:
           return (
             <BasicBlock key={blockUuid}
               dataId={blockUuid}
               handleNewBlock={handleNewBlock}
+              focus={focus}
+              handleMoveCursor={handleMoveCursor}
             />
           );
+        
+        default:
+          console.error(`Unknown block type: ${cachedBlocks[blockUuid].type}`);
+          return null;
       }
     })}
   </div>;

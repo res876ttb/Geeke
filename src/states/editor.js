@@ -27,6 +27,12 @@ export const blockType = {
   basic: 0,
 }
 
+// Cursor move direction
+export const cursorDirection = {
+  up: 0,
+  down: 1,
+};
+
 const type = null;
 const rootPage = null;
 
