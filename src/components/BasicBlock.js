@@ -22,9 +22,9 @@ import {useDispatch, useSelector} from 'react-redux';
  * Utils & States
  *************************************************/
 import {
-  cursorDirection,
   setFocusedBlock,
   getPreviousBlock,
+  getNextBlock,
 } from '../states/editor';
 
 /*************************************************
@@ -81,8 +81,9 @@ const BasicBlock = props => {
       case 13: // Enter
         if (!e.shiftKey) {
           e.preventDefault();
-          props.handleNewBlock(uuid)
-          props.handleMoveCursor(uuid, cursorDirection.down);
+          
+          let newBlockId = props.handleNewBlock(uuid)
+          setFocusedBlock(dispatch, pageUuid, newBlockId);
           return preventDefault;
         }
         break;
@@ -104,7 +105,8 @@ const BasicBlock = props => {
         if (e.shiftKey) {
           return preventDefault;
         } else {
-          
+          let nextUuid = getNextBlock(state, pageUuid, uuid);
+          setFocusedBlock(dispatch, pageUuid, nextUuid);
         }
         break;
 

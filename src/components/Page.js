@@ -55,7 +55,7 @@ const Page = props => {
 
   // Handle create new block
   const handleNewBlock = curUuid => {
-    addBlock(dispatch, uuid, uuid, curUuid);
+    return addBlock(dispatch, uuid, uuid, curUuid);
   };
 
   // Handle load all blocks

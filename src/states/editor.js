@@ -217,8 +217,10 @@ export function setSavingState(dispatch, state) {
  * @param {string} aboveUuid UUID of the previous block.
  */
 export function addBlock(dispatch, pageUuid, parentUuid, aboveUuid) {
-  _addBlock(dispatch, parentUuid, aboveUuid, newBlockId());
+  let blockId = newBlockId();
+  _addBlock(dispatch, parentUuid, aboveUuid, blockId);
   _parseBlockParents(dispatch, pageUuid); // Need optimization
+  return blockId;
 }
 
 /**
@@ -236,6 +238,10 @@ export function moveBlock(dispatch, pageUuid, parentUuid, originParentUuid, abov
 }
 
 export function fetchRootPages() {
+  // TODO
+}
+
+export function fetchWorkspace() {
   // TODO
 }
 
