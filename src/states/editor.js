@@ -135,6 +135,7 @@ const initState = {
   cachedPages: {},
   cachedBlocks: {},
   blockParents: {},
+  focusedBlock: {},
   pageTree: {
     root: {},
     rLink: {}, // reverse link
@@ -162,26 +163,68 @@ export function getNewBlock() {
 /*************************************************
  * ACTOR
  *************************************************/
+
+/**
+ * @function updateContent
+ * @description Update content of a block.
+ * @param {func} dispatch 
+ * @param {string} uuid UUID of the block to update
+ * @param {EditorState} content Draftjs state object.
+ */
 export function updateContent(dispatch, uuid, content) {
   _updateContent(dispatch, uuid, content);
 }
 
+/**
+ * @function updatePageTitle
+ * @description Update title of a page.
+ * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the page to update title
+ * @param {String} newTitle Title of the target page.
+ */
 export function updatePageTitle(dispatch, pageUuid, newTitle) {
   _updatePageTitle(dispatch, pageUuid, newTitle);
 }
 
+/**
+ * @function addPage
+ * @description Add a child page under a page.
+ * @param {func} dispatch 
+ * @param {string} parentUuid UUID of the parent.
+ */
 export function addPage(dispatch, parentUuid) {
   _addPage(dispatch, newBlockId(), newBlockId(), parentUuid);
 }
 
-export function setSavintState(dispatch, state) {
-  _setSavintState(dispatch, state);
+/**
+ * @function setSavingState
+ * @description Set saving state. If true, editor is synchornizing between client and server.
+ * @param {func} dispatch 
+ * @param {boolean} state Saving state.
+ */
+export function setSavingState(dispatch, state) {
+  _setSavingState(dispatch, state);
 }
 
+/**
+ * @function addBlock
+ * @description Add a block under a page/block.
+ * @param {func} dispatch 
+ * @param {string} parentUuid UUID of the parent page/block to add a block. If this uuid is null, then the new block will be the first one.
+ * @param {string} aboveUuid UUID of the previous block.
+ */
 export function addBlock(dispatch, parentUuid, aboveUuid) {
   _addBlock(dispatch, parentUuid, aboveUuid, newBlockId());
 }
 
+/**
+ * @function moveBlock
+ * @description Move block from `originalParentUuid` to `parentUuid` after `aboveUuid`.
+ * @param {func} dispatch 
+ * @param {string} parentUuid UUID of the new parent block/page.
+ * @param {string} originParentUuid UUID of the original parent block/page.
+ * @param {string} aboveUuid UUID of the previous block.
+ */
 export function moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid) {
   _moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid);
 }
@@ -190,12 +233,78 @@ export function fetchRootPages() {
   // TODO
 }
 
+/**
+ * @function loadAllBlocks
+ * @description Load all blocks of a page from server.
+ * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the page to load all blocks.
+ */
 export function loadAllBlocks(dispatch, pageUuid) {
   _loadAllBlocks(dispatch, pageUuid);
 }
 
+/**
+ * @function parseBlockParents
+ * @description Create a map from blocks to their parent block/page. This map will be used for moving cursor.
+ * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the page to parse parent blocks.
+ */
 export function parseBlockParents(dispatch, pageUuid) {
   _parseBlockParents(dispatch, pageUuid);
+}
+
+/**
+ * @function setFocusedBlock
+ * @description Mark a block as focused.
+ * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the focused page.
+ * @param {string} blockUuid UUID of the focused block.
+ */
+export function setFocusedBlock(dispatch, pageUuid, blockUuid) {
+  _setFocusedBlock(dispatch, pageUuid, blockUuid);
+}
+
+/**
+ * @function getPreviousBlock
+ * @description Find the previous block of current block. NOTE: This function is not an action function.
+ * @param {state} state Redux State, which should be state.editor.
+ * @param {string} pageUuid UUID of the focused page.
+ * @param {string} blockUuid UUID of the block to find the previous block.
+ */
+export function getPreviousBlock(state, pageUuid, blockUuid) {
+  let parentUuid = state.blockParents[blockUuid];
+
+  if (!state.cachedBlocks[parentUuid] && !state.cachedPages[parentUuid]) {
+    console.error(`Unable to get previous block because block ${parentUuid} has not been fetched!`);
+    return undefined;
+  }
+
+  if (parentUuid === pageUuid) {
+    let curIndex = state.cachedPages[pageUuid].blocks.indexOf(blockUuid);
+    if (curIndex < 0) {
+      console.error(`Unable to find current block ${blockUuid} from page ${pageUuid}.`);
+      return undefined;
+    }
+
+    if (curIndex > 0) {
+      return state.cachedPages[pageUuid].blocks[curIndex - 1];
+    } else {
+      return state.cachedPages[pageUuid].blocks[0];
+    }
+  } else {
+    let parentBlock = state.cachedBlocks[parentUuid];
+    let curIndex = parentBlock.blocks.indexOf(blockUuid);
+    if (curIndex === -1) {
+      console.error(`Unable to find block ${blockUuid} in page/block ${parentBlock}`);
+      return undefined;
+    }
+
+    if (curIndex === 0) {
+      return parentUuid;
+    } else {
+      return parentBlock.blocks[curIndex - 1];
+    }
+  }
 }
 
 /*************************************************
@@ -242,7 +351,7 @@ export function _updateContent(dispatch, uuid, content) {
   });
 }
 
-export function _setSavintState(dispatch, savingState) {
+export function _setSavingState(dispatch, savingState) {
   dispatch({type,
     callback: state => {
       state.editorState.saving = savingState;
@@ -354,6 +463,15 @@ export function _parseBlockParents(dispatch, pageUuid) {
         parseBlocks(blockUuid);
       }
       
+      return state;
+    }
+  });
+}
+
+export function _setFocusedBlock(dispatch, pageUuid, blockUuid) {
+  dispatch({type, 
+    callback: state => {
+      state.focusedBlock[pageUuid] = blockUuid;
       return state;
     }
   });

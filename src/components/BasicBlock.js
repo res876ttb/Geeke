@@ -16,12 +16,15 @@ import {
   RichUtils,
   KeyBindingUtil,
 } from 'draft-js';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
 /*************************************************
  * Utils & States
  *************************************************/
-import {cursorDirection} from '../states/editor';
+import {
+  cursorDirection,
+  setFocusedBlock,
+} from '../states/editor';
 
 /*************************************************
  * Import Components
@@ -42,10 +45,15 @@ const debouceTimeout = 3000;
  *************************************************/
 const BasicBlock = props => {
   const uuid = props.dataId;
-  const focus = props.focus;
+  const pageUuid = props.pageId;
+  
+  const state = useSelector(state => state.editor);
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
   const editor = useRef(null);
+
+  const focusedBlock = state.focusedBlock[pageUuid];
+  const focus = uuid === focusedBlock;
 
   // TODO: Need a better solution
   // useEffect(() => {
@@ -89,6 +97,9 @@ const BasicBlock = props => {
         } else {
           props.handleMoveCursor(uuid, e.keyCode === 38 ? cursorDirection.up : cursorDirection.down);
         }
+        break;
+
+      default:
         break;
     }
 

@@ -37,7 +37,7 @@ const Geeke = () => {
     if (rootPages.length > 0) {
       console.log(rootPages);
       fetchRootPages(dispatch, rootPages);
-    } 
+    }
     
     // For debug convenience
     else {

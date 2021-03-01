@@ -13,9 +13,11 @@ import { useDispatch, useSelector } from 'react-redux';
  * Utils & States
  *************************************************/
 import { 
-  blockType,
   addBlock,
+  blockType,
   cursorDirection,
+  loadAllBlocks,
+  parseBlockParents
 } from '../states/editor';
 
 /*************************************************
@@ -38,6 +40,8 @@ const Page = props => {
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
   const [focusedBlock, setFocusBlock] = useState({});
 
+  // Synchornize current page with server every 3 seconds.
+
   // Handle move cursor
   const handleMoveCursor = (curUuid, dir) => {
     let blocks = page.blocks;
@@ -54,7 +58,11 @@ const Page = props => {
     addBlock(dispatch, uuid, curUuid);
   };
 
-  
+  // Handle load all blocks
+  useEffect(() => {
+    loadAllBlocks(dispatch, uuid);
+    parseBlockParents(dispatch, uuid);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get child blocks
   const blocks = 
@@ -67,8 +75,8 @@ const Page = props => {
           return (
             <BasicBlock key={blockUuid}
               dataId={blockUuid}
+              pageId={uuid}
               handleNewBlock={handleNewBlock}
-              focus={focus}
               handleMoveCursor={handleMoveCursor}
             />
           );
