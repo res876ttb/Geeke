@@ -24,6 +24,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
   cursorDirection,
   setFocusedBlock,
+  getPreviousBlock,
 } from '../states/editor';
 
 /*************************************************
@@ -46,7 +47,7 @@ const debouceTimeout = 3000;
 const BasicBlock = props => {
   const uuid = props.dataId;
   const pageUuid = props.pageId;
-  
+
   const state = useSelector(state => state.editor);
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
@@ -91,11 +92,19 @@ const BasicBlock = props => {
         break;
       
       case 38: // Arrow key Up
+        if (e.shiftKey) {
+          return preventDefault;
+        } else {
+          let previousUuid = getPreviousBlock(state, pageUuid, uuid);
+          setFocusedBlock(dispatch, pageUuid, previousUuid);
+        }
+        break;
+
       case 40: // Arrow key Down
         if (e.shiftKey) {
           return preventDefault;
         } else {
-          props.handleMoveCursor(uuid, e.keyCode === 38 ? cursorDirection.up : cursorDirection.down);
+          
         }
         break;
 

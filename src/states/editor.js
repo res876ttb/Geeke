@@ -193,7 +193,9 @@ export function updatePageTitle(dispatch, pageUuid, newTitle) {
  * @param {string} parentUuid UUID of the parent.
  */
 export function addPage(dispatch, parentUuid) {
-  _addPage(dispatch, newBlockId(), newBlockId(), parentUuid);
+  let newPageId = newBlockId();
+  _addPage(dispatch, newPageId, newBlockId(), parentUuid);
+  _parseBlockParents(dispatch, newPageId);
 }
 
 /**
@@ -210,23 +212,27 @@ export function setSavingState(dispatch, state) {
  * @function addBlock
  * @description Add a block under a page/block.
  * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the page to add a block.
  * @param {string} parentUuid UUID of the parent page/block to add a block. If this uuid is null, then the new block will be the first one.
  * @param {string} aboveUuid UUID of the previous block.
  */
-export function addBlock(dispatch, parentUuid, aboveUuid) {
+export function addBlock(dispatch, pageUuid, parentUuid, aboveUuid) {
   _addBlock(dispatch, parentUuid, aboveUuid, newBlockId());
+  _parseBlockParents(dispatch, pageUuid); // Need optimization
 }
 
 /**
  * @function moveBlock
  * @description Move block from `originalParentUuid` to `parentUuid` after `aboveUuid`.
  * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the page to add a block.
  * @param {string} parentUuid UUID of the new parent block/page.
  * @param {string} originParentUuid UUID of the original parent block/page.
  * @param {string} aboveUuid UUID of the previous block.
  */
-export function moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid) {
+export function moveBlock(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid) {
   _moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid);
+  _parseBlockParents(dispatch, pageUuid); // Need optimization
 }
 
 export function fetchRootPages() {
@@ -275,7 +281,7 @@ export function getPreviousBlock(state, pageUuid, blockUuid) {
   let parentUuid = state.blockParents[blockUuid];
 
   if (!state.cachedBlocks[parentUuid] && !state.cachedPages[parentUuid]) {
-    console.error(`Unable to get previous block because block ${parentUuid} has not been fetched!`);
+    console.error(`Unable to get previous block because parent block ${parentUuid} has not been fetched!`);
     return undefined;
   }
 
