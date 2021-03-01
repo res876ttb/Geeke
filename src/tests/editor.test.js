@@ -22,6 +22,7 @@ import {
   _setSavintState,
   _addPage,
   _addBlock,
+  _parseBlockParents,
 } from '../states/editor';
 
 /*************************************************
@@ -151,5 +152,65 @@ describe('Test _addBlock', () => {
       expect(state.cachedPages[pageUuid].blocks.indexOf(blockUuid2)).toBe(2);
       expect(state.cachedPages[pageUuid].blocks.indexOf(newUuid)).toBe(1);
     })})});
+  });
+});
+
+describe('Parse blocks parents', () => {
+  test('1 level', () => {
+    let state = getInitState();
+    const pageUuid = '1';
+    const blockUuid1 = '2';
+    const blockUuid2 = '3';
+    const blockUuid3 = '4';
+
+    run(state, _addPage, [pageUuid, blockUuid1, null], state => {
+    run(state, _addBlock, [pageUuid, blockUuid1, blockUuid2], state => {
+    run(state, _addBlock, [pageUuid, blockUuid2, blockUuid3], state => {
+    run(state, _parseBlockParents, [pageUuid], state => {
+      /**
+       * root
+       * > 1
+       * > 2
+       * > 3
+       */
+      expect(state.blockParents[blockUuid1]).toBe(pageUuid);
+      expect(state.blockParents[blockUuid2]).toBe(pageUuid);
+      expect(state.blockParents[blockUuid3]).toBe(pageUuid);
+    })})})});
+  });
+
+  test('Multiple levels', () => {
+    let state = getInitState();
+    const pageUuid = '1';
+    const blockUuid1 = '2';
+    const blockUuid2 = '3';
+    const blockUuid3 = '4';
+    const blockUuid4 = '5';
+    const blockUuid5 = '6';
+    const blockUuid6 = '7';
+
+    run(state, _addPage, [pageUuid, blockUuid1, null], state => {
+    run(state, _addBlock, [pageUuid, blockUuid1, blockUuid2], state => {
+    run(state, _addBlock, [blockUuid2, null, blockUuid3], state => {
+    run(state, _addBlock, [blockUuid3, null, blockUuid4], state => {
+    run(state, _addBlock, [blockUuid2, blockUuid3, blockUuid5], state => {
+    run(state, _addBlock, [blockUuid5, null, blockUuid6], state => {
+    run(state, _parseBlockParents, [pageUuid], state => {
+      /**
+       * root
+       * > 1
+       * > 2
+       *   > 3
+       *     > 4
+       *   > 5
+       *     > 6
+       */
+      expect(state.blockParents[blockUuid1]).toBe(pageUuid);
+      expect(state.blockParents[blockUuid2]).toBe(pageUuid);
+      expect(state.blockParents[blockUuid3]).toBe(blockUuid2);
+      expect(state.blockParents[blockUuid4]).toBe(blockUuid3);
+      expect(state.blockParents[blockUuid5]).toBe(blockUuid2);
+      expect(state.blockParents[blockUuid6]).toBe(blockUuid5);
+    })})})})})})});
   });
 });

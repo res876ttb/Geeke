@@ -74,6 +74,10 @@ const emptyPage = {
   readonly: false,
   // Public: be able to be searched by search engine
   public: false,
+  // Create date
+  createDate: 0.0,
+  // Last modified date
+  lastModifiedDate: 0.0,
 };
 
 // Empty Block
@@ -94,6 +98,8 @@ const emptyBlock = {
   comments: [],
   // Inline comment
   inlineComments: [],
+  // Last modified date
+  lastModifiedDate: 0.0,
 }
 
 // Empty Workspace
@@ -128,6 +134,7 @@ const initState = {
   workspace: {},
   cachedPages: {},
   cachedBlocks: {},
+  blockParents: {},
   pageTree: {
     root: {},
     rLink: {}, // reverse link
@@ -181,6 +188,14 @@ export function moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid) {
 
 export function fetchRootPages() {
   // TODO
+}
+
+export function loadAllBlocks(dispatch, pageUuid) {
+  _loadAllBlocks(dispatch, pageUuid);
+}
+
+export function parseBlockParents(dispatch, pageUuid) {
+  _parseBlockParents(dispatch, pageUuid);
 }
 
 /*************************************************
@@ -300,6 +315,48 @@ export function _pageTreeAddPage(dispatch, parentUuid, uuid) {
       return state;
     }
   })
+}
+
+export function _loadAllBlocks(dispatch, pageUuid) {
+  dispatch({type, 
+    callback: state => {
+      // To be implemented
+      return state;
+    }
+  });
+}
+
+export function _parseBlockParents(dispatch, pageUuid) {
+  dispatch({type,
+    callback: state => {
+      if (!state.cachedPages[pageUuid]) {
+        console.error(`Page ${pageUuid} has not been fetched!`);
+        return state;
+      }
+      
+      let parseBlocks = blockUuid => {
+        if (!state.cachedBlocks[blockUuid]) {
+          console.error(`Block ${blockUuid} has not been fetched!`);
+          return;
+        }
+
+        let childBlocks = state.cachedBlocks[blockUuid].blocks;
+
+        for (let i in childBlocks) {
+          state.blockParents[childBlocks[i]] = blockUuid;
+          parseBlocks(childBlocks[i]);
+        }
+      };
+
+      for (let i in state.cachedPages[pageUuid].blocks) {
+        let blockUuid = state.cachedPages[pageUuid].blocks[i];
+        state.blockParents[blockUuid] = pageUuid;
+        parseBlocks(blockUuid);
+      }
+      
+      return state;
+    }
+  });
 }
 
 /*************************************************
