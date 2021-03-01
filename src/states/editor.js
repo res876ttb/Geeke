@@ -161,7 +161,7 @@ export function getNewBlock() {
 }
 
 /*************************************************
- * ACTOR
+ * ACTION
  *************************************************/
 
 /**
@@ -309,6 +309,57 @@ export function getPreviousBlock(state, pageUuid, blockUuid) {
       return parentUuid;
     } else {
       return parentBlock.blocks[curIndex - 1];
+    }
+  }
+}
+
+/**
+ * @function getNextBlock
+ * @description Find the next block of current block. NOTE: This function is not an action function.
+ * @param {state} state Redux State, which should be state.editor.
+ * @param {string} pageUuid UUID of the focused page.
+ * @param {string} blockUuid UUID of the block to find the next block.
+ * @param {boolean} canChild Whether the next block can be the child of this block. Default value is true.
+ */
+export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
+  let parentUuid = state.blockParents[blockUuid];
+
+  if (!state.cachedBlocks[parentUuid] && !state.cachedPages[parentUuid]) {
+    console.error(`Unable to get previous block because parent block ${parentUuid} has not been fetched!`);
+    return undefined;
+  }
+
+  if (canChild && state.cachedBlocks[blockUuid].blocks.length > 0) {
+    return state.cachedBlocks[blockUuid].blocks[0];
+  }
+
+  if (parentUuid === pageUuid) {
+    let curIndex = state.cachedPages[pageUuid].blocks.indexOf(blockUuid);
+    if (curIndex < 0) {
+      console.error(`Unable to find current block ${blockUuid} from page ${pageUuid}.`);
+      return undefined;
+    }
+
+    if (curIndex + 1 < state.cachedPages[pageUuid].blocks.length) {
+      return state.cachedPages[pageUuid].blocks[curIndex + 1];
+    } else {
+      return state.cachedPages[pageUuid].blocks[state.cachedPages[pageUuid].blocks.length - 1];
+    }
+  } else {
+    let parentBlock = state.cachedBlocks[parentUuid];
+    let curIndex = parentBlock.blocks.indexOf(blockUuid);
+    if (curIndex === -1) {
+      console.error(`Unable to find block ${blockUuid} in page/block ${parentBlock}`);
+      return undefined;
+    }
+
+    if (curIndex + 1 === parentBlock.blocks.length) {
+      // It is able to return the result of getNewBlock() because the next block will always carry some content.
+      let result = getNextBlock(state, pageUuid, parentUuid, false);
+      if (result === parentUuid) return blockUuid;
+      else return result;
+    } else {
+      return parentBlock.blocks[curIndex + 1];
     }
   }
 }

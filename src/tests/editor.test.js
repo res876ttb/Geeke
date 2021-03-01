@@ -24,7 +24,8 @@ import {
   _addBlock,
   _parseBlockParents,
   _setFocusedBlock,
-  getPreviousBlock
+  getPreviousBlock,
+  getNextBlock,
 } from '../states/editor';
 
 /*************************************************
@@ -234,5 +235,79 @@ describe('Test getPreviousBlock', () => {
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(2));
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(4))).toBe(blockUuids(2));
     })})})})});
+  });
+});
+
+describe('Test getNextBlock', () => {
+  test('Root page only', () => {
+    let state = getInitState();
+    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
+    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
+    run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
+    run(state, _parseBlockParents, [pageUuids(1)], state => {
+      /**
+       * root
+       * > 1
+       * > 2
+       * > 3
+       */
+      expect(getNextBlock(state, pageUuids(1), blockUuids(1))).toBe(blockUuids(2));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(2))).toBe(blockUuids(3));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(3));
+    })})})});
+  });
+
+  test('Multiple layers: type general', () => {
+    let state = getInitState();
+    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
+    run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
+    run(state, _addBlock, [blockUuids(2), null, blockUuids(3)], state => {
+    run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(4)], state => {
+    run(state, _addBlock, [blockUuids(1), blockUuids(4), blockUuids(5)], state => {
+    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(6)], state => {
+    run(state, _parseBlockParents, [pageUuids(1)], state => {
+      /**
+       * root
+       * > 1
+       *   > 2
+       *     > 3
+       *   > 4
+       *   > 5
+       * > 6
+       */
+      expect(getNextBlock(state, pageUuids(1), blockUuids(1))).toBe(blockUuids(2));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(2))).toBe(blockUuids(3));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(4));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(4))).toBe(blockUuids(5));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(5))).toBe(blockUuids(6));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(6))).toBe(blockUuids(6));
+    })})})})})})});
+  });
+
+  test('Multiple layers: type skew', () => {
+    let state = getInitState();
+    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
+    run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
+    run(state, _addBlock, [blockUuids(2), null, blockUuids(3)], state => {
+    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(4)], state => {
+    run(state, _addBlock, [blockUuids(4), null, blockUuids(5)], state => {
+    run(state, _addBlock, [blockUuids(5), null, blockUuids(6)], state => {
+    run(state, _parseBlockParents, [pageUuids(1)], state => {
+      /**
+       * root
+       * > 1
+       *   > 2
+       *     > 3
+       * > 4
+       *   > 5
+       *     > 6
+       */
+      expect(getNextBlock(state, pageUuids(1), blockUuids(1))).toBe(blockUuids(2));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(2))).toBe(blockUuids(3));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(4));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(4))).toBe(blockUuids(5));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(5))).toBe(blockUuids(6));
+      expect(getNextBlock(state, pageUuids(1), blockUuids(6))).toBe(blockUuids(6));
+    })})})})})})});
   });
 });
