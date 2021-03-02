@@ -470,5 +470,61 @@ describe('Indent block', () => {
         expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
       })})})})})});
     });
+
+    test('Indent block with multiple blocks, type 1', () => {
+      let state = getInitState();
+      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
+      run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
+      run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(3)], state => {
+      run(state, _addBlock, [blockUuids(3), null, blockUuids(4)], state => {
+      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      run(state, _setMoreIndent, [pageUuids(1), [blockUuids(1), blockUuids(2), blockUuids(3), blockUuids(4)]], state => {
+        /**
+         * root
+         * > 1
+         *   > 2
+         *   > 3
+         *     > 4
+         * VVVV
+         * root
+         * > 1
+         *   > 2
+         *     > 3
+         *       > 4
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
+      })})})})})});
+    });
+
+    test('Indent block with multiple blocks, type 2', () => {
+      let state = getInitState();
+      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
+      run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
+      run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
+      run(state, _addBlock, [blockUuids(3), null, blockUuids(4)], state => {
+      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      run(state, _setMoreIndent, [pageUuids(1), [blockUuids(2), blockUuids(3), blockUuids(4)]], state => {
+        /**
+         * root
+         * > 1
+         * > 2
+         * > 3
+         *   > 4
+         * VVVV
+         * root
+         * > 1
+         *   > 2
+         *   > 3
+         *     > 4
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+        expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
+      })})})})})});
+    });
   });
 });

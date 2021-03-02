@@ -379,6 +379,7 @@ export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
  */
 export function setMoreIndent(dispatch, pageUuid, blockUuids) {
   _setMoreIndent(dispatch, pageUuid, blockUuids);
+  _parseBlockParents(dispatch, pageUuid); // Need optimization
 }
 
 /*************************************************
@@ -554,7 +555,7 @@ export function _setFocusedBlock(dispatch, pageUuid, blockUuid) {
 export function _setMoreIndent(dispatch, pageUuid, blockUuids) {
   dispatch({type,
     callback: state => {
-      for (let i = blockUuids.length - 1; i >= 0; i--) {
+      for (let i = 0; i < blockUuids.length; i++) {
         let blockUuid = blockUuids[i];
         let parentUuid = state.blockParents[blockUuid];
 
