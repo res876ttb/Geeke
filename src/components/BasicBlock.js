@@ -25,6 +25,9 @@ import {
   setFocusedBlock,
   getPreviousBlock,
   getNextBlock,
+  setMoreIndent,
+  setLessIndent,
+  blockType,
 } from '../states/editor';
 
 /*************************************************
@@ -49,6 +52,8 @@ const BasicBlock = props => {
   const pageUuid = props.pageId;
 
   const state = useSelector(state => state.editor);
+  const block = useSelector(state => state.editor.cachedBlocks[uuid]);
+  const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
   const editor = useRef(null);
@@ -87,6 +92,14 @@ const BasicBlock = props => {
           return preventDefault;
         }
         break;
+      
+      case 9: // Tab
+        if (e.shiftKey) {
+          // 1 less indent level
+        } else {
+          // 1 more indent level
+          setMoreIndent(dispatch, pageUuid, [uuid]);
+        }
 
       case 76: // L
         res = (KeyBindingUtil.hasCommandModifier(e) && e.shiftKey) ? 'inline-latex' : null;
@@ -130,6 +143,22 @@ const BasicBlock = props => {
     return false;
   }
 
+  const blocks = 
+  <div>
+    {block.blocks.map(blockUuid => {
+      switch(cachedBlocks[blockUuid].type) {
+        case blockType.basic:
+          return (
+            <BasicBlock key={blockUuid}
+              dataId={blockUuid}
+              pageId={pageUuid}
+              handleNewBlock={props.handleNewBlock}
+            />
+          );
+      };
+    })}
+  </div>;
+
   return (
     <div className='test-outline'>
       <Editor 
@@ -139,6 +168,7 @@ const BasicBlock = props => {
         keyBindingFn={mapKeyToEditorCommand}
         handleKeyCommand={handleKeyCommand}
       />
+      {blocks}
     </div>
   )
 }

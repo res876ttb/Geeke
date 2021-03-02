@@ -372,13 +372,25 @@ export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
 
 /**
  * @function setMoreIndent
- * @description Make a block have 1 more indent level.
+ * @description Make blocks have 1 more indent level.
  * @param {func} dispatch 
  * @param {string} pageUuid UUID of the page where the block belongs to.
  * @param {string} blockUuid Array of UUIDs of the blocks to indent.
  */
 export function setMoreIndent(dispatch, pageUuid, blockUuids) {
   _setMoreIndent(dispatch, pageUuid, blockUuids);
+  _parseBlockParents(dispatch, pageUuid); // Need optimization
+}
+
+/**
+ * @function setLessIndent
+ * @description Make blocks have 1 less indent level.
+ * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the page where the block belongs to.
+ * @param {string} blockUuids Array of UUIDs of the blocks to less indent.
+ */
+export function setLessIndent(dispatch, pageUuid, blockUuids) {
+  _setLessIndent(dispatch, pageUuid, blockUuids);
   _parseBlockParents(dispatch, pageUuid); // Need optimization
 }
 
@@ -581,6 +593,18 @@ export function _setMoreIndent(dispatch, pageUuid, blockUuids) {
       return state;
     }
   });
+}
+
+export function _setLessIndent(dispatch, pageUuid, blockUuids) {
+  dispatch({type,
+    callback: state => {
+      for (let i = blockUuids.length - 1; i >= 0; i--) {
+
+      }
+
+      return state;
+    }
+  })
 }
 
 /*************************************************

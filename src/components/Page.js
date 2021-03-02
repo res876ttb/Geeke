@@ -42,17 +42,6 @@ const Page = props => {
 
   // Synchornize current page with server every 3 seconds.
 
-  // Handle move cursor
-  const handleMoveCursor = (curUuid, dir) => {
-    let blocks = page.blocks;
-    let index = blocks.indexOf(curUuid);
-    if (dir === cursorDirection.up) {
-      setFocusBlock(Math.max(0, index - 1));
-    } else if (dir === cursorDirection.down) {
-      setFocusBlock(Math.min(index + 1, blocks.length));
-    }
-  };
-
   // Handle create new block
   const handleNewBlock = curUuid => {
     return addBlock(dispatch, uuid, uuid, curUuid);
@@ -67,9 +56,7 @@ const Page = props => {
   // Get child blocks
   const blocks = 
   <div>
-    {page.blocks.map((blockUuid, index) => {
-      let focus = index === focusedBlock || index === focusedBlock;
-        
+    {page.blocks.map(blockUuid => {
       switch(cachedBlocks[blockUuid].type) {
         case blockType.basic:
           return (
@@ -77,7 +64,6 @@ const Page = props => {
               dataId={blockUuid}
               pageId={uuid}
               handleNewBlock={handleNewBlock}
-              handleMoveCursor={handleMoveCursor}
             />
           );
         
