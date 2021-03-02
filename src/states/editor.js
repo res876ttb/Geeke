@@ -370,6 +370,17 @@ export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
   }
 }
 
+/**
+ * @function setMoreIndent
+ * @description Make a block have 1 more indent level.
+ * @param {func} dispatch 
+ * @param {string} pageUuid UUID of the page where the block belongs to.
+ * @param {string} blockUuid Array of UUIDs of the blocks to indent.
+ */
+export function setMoreIndent(dispatch, pageUuid, blockUuids) {
+  _setMoreIndent(dispatch, pageUuid, blockUuids);
+}
+
 /*************************************************
  * MIDDLE FUNCTION
  *************************************************/
@@ -535,6 +546,37 @@ export function _setFocusedBlock(dispatch, pageUuid, blockUuid) {
   dispatch({type, 
     callback: state => {
       state.focusedBlock[pageUuid] = blockUuid;
+      return state;
+    }
+  });
+}
+
+export function _setMoreIndent(dispatch, pageUuid, blockUuids) {
+  dispatch({type,
+    callback: state => {
+      for (let i = blockUuids.length - 1; i >= 0; i--) {
+        let blockUuid = blockUuids[i];
+        let parentUuid = state.blockParents[blockUuid];
+
+        if (pageUuid === parentUuid) {
+          let curIndex = state.cachedPages[pageUuid].blocks.indexOf(blockUuid);
+          if (curIndex === 0) continue;
+  
+          let previousBlockUuid = state.cachedPages[pageUuid].blocks[curIndex - 1];
+          state.cachedBlocks[previousBlockUuid].blocks.push(blockUuid);
+  
+          state.cachedPages[pageUuid].blocks.splice(curIndex, 1);
+        } else {
+          let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
+          if (curIndex === 0) continue;
+  
+          let previousBlockUuid = state.cachedBlocks[parentUuid].blocks[curIndex - 1];
+          state.cachedBlocks[previousBlockUuid].blocks.push(blockUuid);
+  
+          state.cachedBlocks[parentUuid].blocks.splice(curIndex, 1);
+        }
+      }
+
       return state;
     }
   });
