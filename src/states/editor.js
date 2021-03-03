@@ -286,6 +286,20 @@ export function setFocusedBlock(dispatch, pageUuid, blockUuid) {
 export function getPreviousBlock(state, pageUuid, blockUuid) {
   let parentUuid = state.blockParents[blockUuid];
 
+  let getLastBlock = blockUuid => {
+    if (!blockUuid) {
+      console.error(`Invalid blockUuid: ${blockUuid}`);
+      return blockUuid;
+    }
+
+    let blocksLength = state.cachedBlocks[blockUuid].blocks.length;
+    if (blocksLength > 0) {
+      return getLastBlock(state.cachedBlocks[blockUuid].blocks[blocksLength - 1]);
+    } else {
+      return blockUuid;
+    }
+  };
+
   if (!state.cachedBlocks[parentUuid] && !state.cachedPages[parentUuid]) {
     console.error(`Unable to get previous block because parent block ${parentUuid} has not been fetched!`);
     return undefined;
@@ -299,7 +313,7 @@ export function getPreviousBlock(state, pageUuid, blockUuid) {
     }
 
     if (curIndex > 0) {
-      return state.cachedPages[pageUuid].blocks[curIndex - 1];
+      return getLastBlock(state.cachedPages[pageUuid].blocks[curIndex - 1]);
     } else {
       return state.cachedPages[pageUuid].blocks[0];
     }
@@ -314,7 +328,7 @@ export function getPreviousBlock(state, pageUuid, blockUuid) {
     if (curIndex === 0) {
       return parentUuid;
     } else {
-      return parentBlock.blocks[curIndex - 1];
+      return getLastBlock(parentBlock.blocks[curIndex - 1]);
     }
   }
 }
@@ -574,7 +588,7 @@ export function _setMoreIndent(dispatch, pageUuid, blockUuids) {
         if (pageUuid === parentUuid) {
           let curIndex = state.cachedPages[pageUuid].blocks.indexOf(blockUuid);
           if (curIndex === 0) continue;
-  
+
           let previousBlockUuid = state.cachedPages[pageUuid].blocks[curIndex - 1];
           state.cachedBlocks[previousBlockUuid].blocks.push(blockUuid);
   

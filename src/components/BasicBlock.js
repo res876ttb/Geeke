@@ -96,9 +96,11 @@ const BasicBlock = props => {
       case 9: // Tab
         if (e.shiftKey) {
           // 1 less indent level
+          e.preventDefault();
         } else {
           // 1 more indent level
           setMoreIndent(dispatch, pageUuid, [uuid]);
+          e.preventDefault();
         }
 
       case 76: // L

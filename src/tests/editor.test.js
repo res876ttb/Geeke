@@ -233,7 +233,7 @@ describe('Test getPreviousBlock', () => {
        */
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(1))).toBe(blockUuids(1));
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(2))).toBe(blockUuids(1));
-      expect(getPreviousBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(2));
+      expect(getPreviousBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(4));
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(4))).toBe(blockUuids(2));
     })})})})});
   });
