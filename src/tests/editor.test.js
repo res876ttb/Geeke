@@ -30,7 +30,7 @@ import {
 } from '../states/editor';
 
 /*************************************************
- * TEST CODE
+ * TEST HELPER FUNCTION
  *************************************************/
 const run = (state, testFunc, args, callback) => {
   testFunc(action => {
@@ -43,9 +43,51 @@ const pageUuids = index => {
   return index.toString();
 }
 
+const createPageWithBlocks = (state, pageUuid, blockStructure, callback) => {
+  const gvbi = (obj, i) => obj[Object.keys(obj)[i]]; // get value by index
+  const gkbi = (obj, i) => Object.keys(obj)[i];      // get key by index
+  const gl = obj => Object.keys(obj).length;         // get length
+
+  const createBlockUnderBlock = (i, state, parentUuid, partialStructure, callback) => {
+    if (i >= gl(partialStructure)) {
+      callback(state);
+      return;
+    }
+
+    run(state, _addBlock, [parentUuid, i === 0 ? null : gkbi(partialStructure, i - 1), gkbi(partialStructure, i)], state => {
+      createBlockUnderBlock(0, state, gkbi(partialStructure, i), gvbi(partialStructure, i), state => {
+        createBlockUnderBlock(i + 1, state, parentUuid, partialStructure, callback);
+      });
+    })
+  };
+
+  const createBlockAtRoot = (i, state, callback) => {
+    if (i >= gl(blockStructure)) {
+      callback(state);
+      return;
+    }
+
+    run(state, _addBlock, [pageUuid, gkbi(blockStructure, i - 1), gkbi(blockStructure, i)], state => {
+      createBlockUnderBlock(0, state, gkbi(blockStructure, i), gvbi(blockStructure, i), state => {
+        createBlockAtRoot(i + 1, state, callback);
+      });
+    });
+  };
+
+  run(state, _addPage, [pageUuid, gkbi(blockStructure, 0), null], state => {
+    createBlockUnderBlock(0, state, gkbi(blockStructure, 0), gvbi(blockStructure, 0), state => {
+      createBlockAtRoot(1, state, callback);
+    });
+  });
+}
+
 const blockUuids = index => {
   return (100 + index).toString();
 }
+
+/*************************************************
+ * TEST CODE
+ *************************************************/
 
 describe('Test _updateContent', () => {
   test('Change content', () => {
@@ -94,18 +136,6 @@ describe('Test _addPage', () => {
   });
 });
 
-describe('Test _updatePageTitle', () => {
-  test('Change title', () => {
-    let state = getInitState();
-    const newTitle = 'Regression test';
-
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _updatePageTitle, [pageUuids(1), newTitle], state => {
-      expect(state.cachedPages[pageUuids(1)].title).toEqual(newTitle);
-    })});
-  });
-});
-
 describe('Test _addBlock', () => {
   test('Add a block under a page', () => {
     let state = getInitState();
@@ -138,6 +168,74 @@ describe('Test _addBlock', () => {
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(2);
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
     })})});
+  });
+});
+
+describe('Test test helper function createPageWithBlocks', () => {
+  test('Root page only', () => {
+    createPageWithBlocks(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {}
+    }, state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.length).toBe(3);
+      expect(state.cachedBlocks[blockUuids(1)]).not.toBe(undefined);
+      expect(state.cachedBlocks[blockUuids(2)]).not.toBe(undefined);
+      expect(state.cachedBlocks[blockUuids(3)]).not.toBe(undefined);
+      expect(state.cachedPages[pageUuids(1)].blocks[0]).toBe(blockUuids(1));
+      expect(state.cachedPages[pageUuids(1)].blocks[1]).toBe(blockUuids(2));
+      expect(state.cachedPages[pageUuids(1)].blocks[2]).toBe(blockUuids(3));
+    });
+  });
+
+  test('2 levels page', () => {
+    createPageWithBlocks(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {}
+      },
+      [blockUuids(3)]: {}
+    }, state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.length).toBe(2);
+      expect(state.cachedBlocks[blockUuids(1)]).not.toBe(undefined);
+      expect(state.cachedBlocks[blockUuids(2)]).not.toBe(undefined);
+      expect(state.cachedBlocks[blockUuids(3)]).not.toBe(undefined);
+      expect(state.cachedPages[pageUuids(1)].blocks[0]).toBe(blockUuids(1));
+      expect(state.cachedPages[pageUuids(1)].blocks[1]).toBe(blockUuids(3));
+      expect(state.cachedBlocks[blockUuids(1)].blocks[0]).toBe(blockUuids(2));
+    });
+  });
+
+  test('3 levels page', () => {
+    createPageWithBlocks(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {
+          [blockUuids(3)]: {}
+        },
+      },
+      [blockUuids(4)]: {},
+    }, state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.length).toBe(2);
+      expect(state.cachedBlocks[blockUuids(1)]).not.toBe(undefined);
+      expect(state.cachedBlocks[blockUuids(2)]).not.toBe(undefined);
+      expect(state.cachedBlocks[blockUuids(3)]).not.toBe(undefined);
+      expect(state.cachedBlocks[blockUuids(4)]).not.toBe(undefined);
+      expect(state.cachedPages[pageUuids(1)].blocks[0]).toBe(blockUuids(1));
+      expect(state.cachedPages[pageUuids(1)].blocks[1]).toBe(blockUuids(4));
+      expect(state.cachedBlocks[blockUuids(1)].blocks[0]).toBe(blockUuids(2));
+      expect(state.cachedBlocks[blockUuids(2)].blocks[0]).toBe(blockUuids(3));
+    });
+  });
+});
+
+describe('Test _updatePageTitle', () => {
+  test('Change title', () => {
+    let state = getInitState();
+    const newTitle = 'Regression test';
+
+    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
+    run(state, _updatePageTitle, [pageUuids(1), newTitle], state => {
+      expect(state.cachedPages[pageUuids(1)].title).toEqual(newTitle);
+    })});
   });
 });
 

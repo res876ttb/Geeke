@@ -102,6 +102,7 @@ const BasicBlock = props => {
           setMoreIndent(dispatch, pageUuid, [uuid]);
           e.preventDefault();
         }
+        break;
 
       case 76: // L
         res = (KeyBindingUtil.hasCommandModifier(e) && e.shiftKey) ? 'inline-latex' : null;
@@ -157,6 +158,9 @@ const BasicBlock = props => {
               handleNewBlock={props.handleNewBlock}
             />
           );
+
+        default:
+          return <></>
       };
     })}
   </div>;

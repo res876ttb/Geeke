@@ -613,7 +613,25 @@ export function _setLessIndent(dispatch, pageUuid, blockUuids) {
   dispatch({type,
     callback: state => {
       for (let i = blockUuids.length - 1; i >= 0; i--) {
+        let blockUuid = blockUuids[i];
+        let parentUuid = state.blockParents[blockUuid];
 
+        if (pageUuid === parentUuid) {
+          continue;
+        } else {
+          let parentOfParentUuid = state.blockParents[parentUuid];
+          if (pageUuid === parentOfParentUuid) {
+            let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
+            let parentIndex = state.cachedPages[pageUuid].blocks.indexOf(parentUuid);
+            state.cachedPages[pageUuid].blocks.splice(parentIndex, 0, blockUuids);
+            state.cachedBlocks[parentUuid].blocks.splice(curIndex, 1);
+          } else {
+            let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
+            let parentIndex = state.cachedBlocks[parentOfParentUuid].blocks.indexOf(parentUuid);
+            state.cachedPages[parentOfParentUuid].blocks.splice(parentIndex, 0, blockUuids);
+            state.cachedBlocks[parentUuid].blocks.splice(curIndex, 1);
+          }
+        }
       }
 
       return state;
