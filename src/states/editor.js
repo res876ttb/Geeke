@@ -623,13 +623,21 @@ export function _setLessIndent(dispatch, pageUuid, blockUuids) {
           if (pageUuid === parentOfParentUuid) {
             let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
             let parentIndex = state.cachedPages[pageUuid].blocks.indexOf(parentUuid);
-            state.cachedPages[pageUuid].blocks.splice(parentIndex, 0, blockUuids);
-            state.cachedBlocks[parentUuid].blocks.splice(curIndex, 1);
+            let restChildOfParent = state.cachedBlocks[parentUuid].blocks.splice(curIndex);
+            
+            state.cachedPages[pageUuid].blocks.splice(parentIndex + 1, 0, blockUuid);
+            for (let i = 1; i < restChildOfParent.length; i++) {
+              state.cachedBlocks[blockUuid].blocks.push(restChildOfParent[i]);
+            }
           } else {
             let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
             let parentIndex = state.cachedBlocks[parentOfParentUuid].blocks.indexOf(parentUuid);
-            state.cachedPages[parentOfParentUuid].blocks.splice(parentIndex, 0, blockUuids);
-            state.cachedBlocks[parentUuid].blocks.splice(curIndex, 1);
+            let restChildOfParent = state.cachedBlocks[parentUuid].blocks.splice(curIndex);
+
+            state.cachedBlocks[parentOfParentUuid].blocks.splice(parentIndex + 1, 0, blockUuid);
+            for (let i = 1; i < restChildOfParent.length; i++) {
+              state.cachedBlocks[blockUuid].blocks.push(restChildOfParent[i]);
+            }
           }
         }
       }

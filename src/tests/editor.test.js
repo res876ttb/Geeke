@@ -27,6 +27,7 @@ import {
   getPreviousBlock,
   getNextBlock,
   _setMoreIndent,
+  _setLessIndent,
 } from '../states/editor';
 
 /*************************************************
@@ -627,28 +628,241 @@ describe('Indent block', () => {
       createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
         [blockUuids(1)]: {},
         [blockUuids(2)]: {},
-        [blockUuids(3)]: {
-          [blockUuids(4)]: {},
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {
+          [blockUuids(5)]: {},
         },
       }, state => {
-      run(state, _setMoreIndent, [pageUuids(1), [blockUuids(2), blockUuids(3), blockUuids(4)]], state => {
+      run(state, _setMoreIndent, [pageUuids(1), [blockUuids(2), blockUuids(3)]], state => {
         /**
          * root
          * > 1
          * > 2
          * > 3
+         * > 4
+         *   > 5
+         * VVVV
+         * root
+         * > 1
+         *   > 2
+         *   > 3
+         * > 4
+         *   > 5
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(4))).toBe(1);
+        expect(state.cachedBlocks[blockUuids(4)].blocks.indexOf(blockUuids(5))).toBe(0);
+      })});
+    });
+  });
+
+  describe('Less indent', () => {
+    test('Indent block to root type 1', () => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {},
+          [blockUuids(3)]: {},
+          [blockUuids(4)]: {},
+        },
+      }, state => {
+      run(state, _setLessIndent, [pageUuids(1), [blockUuids(4)]], state => {
+        /**
+         * root
+         * > 1
+         *   > 2
+         *   > 3
          *   > 4
          * VVVV
          * root
          * > 1
          *   > 2
          *   > 3
-         *     > 4
+         * > 4
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(-1);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(4))).toBe(1);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+      })});
+    });
+
+    test('Indent block to root type 2', () => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {},
+          [blockUuids(3)]: {},
+          [blockUuids(4)]: {},
+        },
+      }, state => {
+      run(state, _setLessIndent, [pageUuids(1), [blockUuids(3)]], state => {
+        /**
+         * root
+         * > 1
+         *   > 2
+         *   > 3
+         *   > 4
+         * VVVV
+         * root
+         * > 1
+         *   > 2
+         * > 3
+         *   > 4
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(4))).toBe(-1);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
+      })});
+    });
+
+    test('Indent first block at root', () => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {},
+          [blockUuids(3)]: {},
+        },
+      }, state => {
+      run(state, _setLessIndent, [pageUuids(1), [blockUuids(1)]], state => {
+        /**
+         * root
+         * > 1
+         *   > 2
+         *   > 3
+         * VVVV
+         * root
+         * > 1
+         *   > 2
+         *   > 3
          */
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+      })});
+    });
+
+    test('Indent second block at root', () => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {},
+        [blockUuids(2)]: {
+          [blockUuids(3)]: {},
+        },
+      }, state => {
+      run(state, _setLessIndent, [pageUuids(1), [blockUuids(2)]], state => {
+        /**
+         * root
+         * > 1
+         * > 2
+         *   > 3
+         * VVVV
+         * root
+         * > 1
+         * > 2
+         *   > 3
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
+        expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
+      })});
+    });
+
+    test('Indent block with child to root', () => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {
+            [blockUuids(3)]: {},
+          },
+        },
+      }, state => {
+      run(state, _setLessIndent, [pageUuids(1), [blockUuids(2)]], state => {
+        /**
+         * root
+         * > 1
+         *   > 2
+         *     > 3
+         * VVVV
+         * root
+         * > 1
+         * > 2
+         *   > 3
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
+        expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
+      })});
+    });
+
+    test('Indent block not at root', () => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {
+            [blockUuids(3)]: {},
+          },
+          [blockUuids(4)]: {},
+        },
+      }, state => {
+      run(state, _setLessIndent, [pageUuids(1), [blockUuids(3)]], state => {
+        /**
+         * root
+         * > 1
+         *   > 2
+         *     > 3
+         *   > 4
+         * VVVV
+         * root
+         * > 1
+         *   > 2
+         *   > 3
+         *   > 4
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(4))).toBe(2);
+        expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(-1);
+      })});
+    });
+
+    test('Indent block with child not at root', () => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {
+            [blockUuids(3)]: {
+              [blockUuids(4)]: {},
+            },
+            [blockUuids(5)]: {},
+          },
+        },
+      }, state => {
+      run(state, _setLessIndent, [pageUuids(1), [blockUuids(3)]], state => {
+        /**
+         * root
+         * > 1
+         *   > 2
+         *     > 3
+         *       > 4
+         *     > 5
+         * VVVV
+         * root
+         * > 1
+         *   > 2
+         *   > 3
+         *     > 4
+         *     > 5
+         */
+        expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+        expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(-1);
+        expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(5))).toBe(-1);
         expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
+        expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(5))).toBe(1);
       })});
     });
   });
