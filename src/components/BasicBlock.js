@@ -96,6 +96,7 @@ const BasicBlock = props => {
       case 9: // Tab
         if (e.shiftKey) {
           // 1 less indent level
+          setLessIndent(dispatch, pageUuid, [uuid]);
           e.preventDefault();
         } else {
           // 1 more indent level
@@ -166,16 +167,20 @@ const BasicBlock = props => {
   </div>;
 
   return (
-    <div className='test-outline'>
-      <Editor 
-        ref={editor}
-        editorState={editorState}
-        onChange={setEditorState}
-        keyBindingFn={mapKeyToEditorCommand}
-        handleKeyCommand={handleKeyCommand}
-      />
-      {blocks}
-    </div>
+    <>
+      <div className='test-outline'>
+        <Editor 
+          ref={editor}
+          editorState={editorState}
+          onChange={setEditorState}
+          keyBindingFn={mapKeyToEditorCommand}
+          handleKeyCommand={handleKeyCommand}
+        />
+      </div>
+      <div className='geeke-indent'>
+        {blocks}
+      </div>
+    </>
   )
 }
 
