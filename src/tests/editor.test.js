@@ -81,6 +81,14 @@ const createPageWithBlocks = (state, pageUuid, blockStructure, callback) => {
   });
 }
 
+const createPageWithBlocksAndParseParent = (state, pageUuid, blockStructure, callback) => {
+  createPageWithBlocks(state, pageUuid, blockStructure, state => {
+    run(state, _parseBlockParents, [pageUuids(1)], state => {
+      callback(state);
+    })
+  });
+};
+
 const blockUuids = index => {
   return (100 + index).toString();
 }
@@ -241,11 +249,11 @@ describe('Test _updatePageTitle', () => {
 
 describe('Parse blocks parents', () => {
   test('1 level', () => {
-    let state = getInitState();
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+    }, state => {
       /**
        * root
        * > 1
@@ -255,18 +263,21 @@ describe('Parse blocks parents', () => {
       expect(state.blockParents[blockUuids(1)]).toBe(pageUuids(1));
       expect(state.blockParents[blockUuids(2)]).toBe(pageUuids(1));
       expect(state.blockParents[blockUuids(3)]).toBe(pageUuids(1));
-    })})})});
+    });
   });
 
   test('Multiple levels', () => {
-    let state = getInitState();
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-    run(state, _addBlock, [blockUuids(2), null, blockUuids(3)], state => {
-    run(state, _addBlock, [blockUuids(3), null, blockUuids(4)], state => {
-    run(state, _addBlock, [blockUuids(2), blockUuids(3), blockUuids(5)], state => {
-    run(state, _addBlock, [blockUuids(5), null, blockUuids(6)], state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {
+        [blockUuids(3)]: {
+          [blockUuids(4)]: {},
+        },
+        [blockUuids(5)]: {
+          [blockUuids(6)]: {},
+        },
+      },
+    }, state => {
       /**
        * root
        * > 1
@@ -282,7 +293,7 @@ describe('Parse blocks parents', () => {
       expect(state.blockParents[blockUuids(4)]).toBe(blockUuids(3));
       expect(state.blockParents[blockUuids(5)]).toBe(blockUuids(2));
       expect(state.blockParents[blockUuids(6)]).toBe(blockUuids(5));
-    })})})})})})});
+    });
   });
 });
 
@@ -298,11 +309,11 @@ describe('Test setFocusedBlock', () => {
 
 describe('Test getPreviousBlock', () => {
   test('Root page only', () => {
-    let state = getInitState();
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+    }, state => {
       /**
        * root
        * > 1
@@ -312,16 +323,18 @@ describe('Test getPreviousBlock', () => {
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(1))).toBe(blockUuids(1));
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(2))).toBe(blockUuids(1));
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(2));
-    })})})});
+    });
   });
 
   test('Multiple layers', () => {
-    let state = getInitState();
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
-    run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(3)], state => {
-    run(state, _addBlock, [blockUuids(2), null, blockUuids(4)], state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {
+          [blockUuids(4)]: {},
+        },
+        [blockUuids(3)]: {},
+      },
+    }, state => {
       /**
        * root
        * > 1
@@ -333,17 +346,17 @@ describe('Test getPreviousBlock', () => {
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(2))).toBe(blockUuids(1));
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(4));
       expect(getPreviousBlock(state, pageUuids(1), blockUuids(4))).toBe(blockUuids(2));
-    })})})})});
+    });
   });
 });
 
 describe('Test getNextBlock', () => {
   test('Root page only', () => {
-    let state = getInitState();
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+    }, state => {
       /**
        * root
        * > 1
@@ -353,18 +366,20 @@ describe('Test getNextBlock', () => {
       expect(getNextBlock(state, pageUuids(1), blockUuids(1))).toBe(blockUuids(2));
       expect(getNextBlock(state, pageUuids(1), blockUuids(2))).toBe(blockUuids(3));
       expect(getNextBlock(state, pageUuids(1), blockUuids(3))).toBe(blockUuids(3));
-    })})})});
+    });
   });
 
   test('Multiple layers: type general', () => {
-    let state = getInitState();
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
-    run(state, _addBlock, [blockUuids(2), null, blockUuids(3)], state => {
-    run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(4)], state => {
-    run(state, _addBlock, [blockUuids(1), blockUuids(4), blockUuids(5)], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(6)], state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {
+          [blockUuids(3)]: {},
+        },
+        [blockUuids(4)]: {},
+        [blockUuids(5)]: {},
+      },
+      [blockUuids(6)]: {},
+    }, state => {
       /**
        * root
        * > 1
@@ -380,18 +395,22 @@ describe('Test getNextBlock', () => {
       expect(getNextBlock(state, pageUuids(1), blockUuids(4))).toBe(blockUuids(5));
       expect(getNextBlock(state, pageUuids(1), blockUuids(5))).toBe(blockUuids(6));
       expect(getNextBlock(state, pageUuids(1), blockUuids(6))).toBe(blockUuids(6));
-    })})})})})})});
+    });
   });
 
   test('Multiple layers: type skew', () => {
-    let state = getInitState();
-    run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-    run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
-    run(state, _addBlock, [blockUuids(2), null, blockUuids(3)], state => {
-    run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(4)], state => {
-    run(state, _addBlock, [blockUuids(4), null, blockUuids(5)], state => {
-    run(state, _addBlock, [blockUuids(5), null, blockUuids(6)], state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {
+          [blockUuids(3)]: {},
+        },
+      },
+      [blockUuids(4)]: {
+        [blockUuids(5)]: {
+          [blockUuids(6)]: {},
+        },
+      },
+    }, state => {
       /**
        * root
        * > 1
@@ -407,18 +426,18 @@ describe('Test getNextBlock', () => {
       expect(getNextBlock(state, pageUuids(1), blockUuids(4))).toBe(blockUuids(5));
       expect(getNextBlock(state, pageUuids(1), blockUuids(5))).toBe(blockUuids(6));
       expect(getNextBlock(state, pageUuids(1), blockUuids(6))).toBe(blockUuids(6));
-    })})})})})})});
+    });
   });
 });
 
 describe('Indent block', () => {
   describe('More indent', () => {
     test('Indent block at root', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-      run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {},
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(2)]], state => {
         /**
          * root
@@ -435,15 +454,15 @@ describe('Indent block', () => {
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
-      })})})})});
+      })});
     });
 
     test('Indent first block at root', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-      run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {},
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(1)]], state => {
         /**
          * root
@@ -459,15 +478,16 @@ describe('Indent block', () => {
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(2);
-      })})})})});
+      })});
     });
 
     test('Indent block with child at root', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-      run(state, _addBlock, [blockUuids(2), null, blockUuids(3)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {},
+        [blockUuids(2)]: {
+          [blockUuids(3)]: {},
+        },
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(2)]], state => {
         /**
          * root
@@ -484,16 +504,17 @@ describe('Indent block', () => {
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
         expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
-      })})})})});
+      })});
     });
 
     test('Indent block not at root', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
-      run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(3)], state => {
-      run(state, _addBlock, [blockUuids(1), blockUuids(3), blockUuids(4)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {},
+          [blockUuids(3)]: {},
+          [blockUuids(4)]: {},
+        },
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(3)]], state => {
         /**
          * root
@@ -514,15 +535,16 @@ describe('Indent block', () => {
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(-1);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(4))).toBe(1);
         expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
-      })})})})})});
+      })});
     });
 
     test('Indent first block not at root', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
-      run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(3)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {},
+          [blockUuids(3)]: {},
+        },
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(2)]], state => {
         /**
          * root
@@ -538,16 +560,18 @@ describe('Indent block', () => {
         expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
-      })})})})});
+      })});
     });
 
     test('Indent block with child not at root', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
-      run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(3)], state => {
-      run(state, _addBlock, [blockUuids(3), null, blockUuids(4)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {},
+          [blockUuids(3)]: {
+            [blockUuids(4)]: {},
+          },
+        },
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(3)]], state => {
         /**
          * root
@@ -566,16 +590,18 @@ describe('Indent block', () => {
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
         expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
         expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
-      })})})})})});
+      })});
     });
 
     test('Indent block with multiple blocks, type 1', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
-      run(state, _addBlock, [blockUuids(1), blockUuids(2), blockUuids(3)], state => {
-      run(state, _addBlock, [blockUuids(3), null, blockUuids(4)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {
+          [blockUuids(2)]: {},
+          [blockUuids(3)]: {
+            [blockUuids(4)]: {},
+          },
+        },
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(1), blockUuids(2), blockUuids(3), blockUuids(4)]], state => {
         /**
          * root
@@ -594,16 +620,17 @@ describe('Indent block', () => {
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
         expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
         expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
-      })})})})})});
+      })});
     });
 
     test('Indent block with multiple blocks, type 2', () => {
-      let state = getInitState();
-      run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
-      run(state, _addBlock, [pageUuids(1), blockUuids(1), blockUuids(2)], state => {
-      run(state, _addBlock, [pageUuids(1), blockUuids(2), blockUuids(3)], state => {
-      run(state, _addBlock, [blockUuids(3), null, blockUuids(4)], state => {
-      run(state, _parseBlockParents, [pageUuids(1)], state => {
+      createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+        [blockUuids(1)]: {},
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {
+          [blockUuids(4)]: {},
+        },
+      }, state => {
       run(state, _setMoreIndent, [pageUuids(1), [blockUuids(2), blockUuids(3), blockUuids(4)]], state => {
         /**
          * root
@@ -622,7 +649,7 @@ describe('Indent block', () => {
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
         expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
         expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(4))).toBe(0);
-      })})})})})});
+      })});
     });
   });
 });
