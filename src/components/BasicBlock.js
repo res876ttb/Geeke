@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   Editor, 
   EditorState,
@@ -28,6 +28,7 @@ import {
   setMoreIndent,
   setLessIndent,
   blockType,
+  updateContent,
 } from '../states/editor';
 
 /*************************************************
@@ -42,7 +43,6 @@ import '../styles/BasicBlock.css';
 /*************************************************
  * Constant
  *************************************************/
-const debouceTimeout = 3000;
 
 /*************************************************
  * Main components
@@ -53,29 +53,34 @@ const BasicBlock = props => {
 
   const state = useSelector(state => state.editor);
   const block = useSelector(state => state.editor.cachedBlocks[uuid]);
+  const editorState = useSelector(state => state.editor.cachedBlocks[uuid].content);
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
   const dispatch = useDispatch();
-  const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
   const editor = useRef(null);
 
   const focusedBlock = state.focusedBlock[pageUuid];
   const focus = uuid === focusedBlock;
 
-  // TODO: Need a better solution
-  // useEffect(() => {
-  //   setSavintState(dispatch, true);
-  //   const handler = setTimeout(() => {
-  //     setSavintState(dispatch, false); // TODO: Need to be moved after saving done event fired.
-  //     console.log('debounceTimeout fired!');
-  //   }, debouceTimeout);
-  //   return () => clearTimeout(handler);
-  // }, [editorState]);
+  const updateEditorState = newState => {
+    updateContent(dispatch, uuid, newState);
+  }
+
+  useEffect(() => { // TODO: fix continues pression of enter cause incorrect position
+    if (editorState === '') {
+      updateEditorState(EditorState.createEmpty());
+      setTimeout(() => {
+        editor.current.focus();
+      }, 0.1);
+    }
+  }, []);
 
   useEffect(() => {
-    if (focus) {
-      editor.current.focus();
-    } else {
-      editor.current.blur();
+    if (editor.current) {
+      if (focus) {
+        editor.current.focus();
+      } else {
+        editor.current.blur();
+      }
     }
   }, [focus]);
 
@@ -95,11 +100,11 @@ const BasicBlock = props => {
       
       case 9: // Tab
         if (e.shiftKey) {
-          // 1 less indent level
+          // 1 LESS indent level
           setLessIndent(dispatch, pageUuid, [uuid]);
           e.preventDefault();
         } else {
-          // 1 more indent level
+          // 1 MORE indent level
           setMoreIndent(dispatch, pageUuid, [uuid]);
           e.preventDefault();
         }
@@ -141,7 +146,7 @@ const BasicBlock = props => {
   const handleKeyCommand = (command, editorState) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
-      setEditorState(newState);
+      updateEditorState(newState);
       return true;
     }
     return false;
@@ -169,17 +174,23 @@ const BasicBlock = props => {
   return (
     <>
       <div className='test-outline'>
-        <Editor 
-          ref={editor}
-          editorState={editorState}
-          onChange={setEditorState}
-          keyBindingFn={mapKeyToEditorCommand}
-          handleKeyCommand={handleKeyCommand}
-        />
+        {
+          editorState === '' ? null :
+          <Editor 
+            ref={editor}
+            editorState={editorState}
+            onChange={newEditorState => updateEditorState(newEditorState)}
+            keyBindingFn={mapKeyToEditorCommand}
+            handleKeyCommand={handleKeyCommand}
+          />
+        }
       </div>
-      <div className='geeke-indent'>
-        {blocks}
-      </div>
+      {
+        block.blocks.length > 0 ?
+        <div className='geeke-indent'>
+          {blocks}
+        </div> : null
+      }
     </>
   )
 }
