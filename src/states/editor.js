@@ -412,243 +412,219 @@ export function setLessIndent(dispatch, pageUuid, blockUuids) {
  * MIDDLE FUNCTION
  *************************************************/
 export function _addPage(dispatch, pageUuid, blockUuid, parentUuid) {
-  dispatch({type,
-    callback: state => {
-      let newPage = getNewPage();
-      let newBlock = getNewBlock();
-      newPage.uuid = pageUuid;
-      newBlock.uuid = blockUuid;
-      newPage.blocks.push(blockUuid);
-      state.cachedPages[pageUuid] = newPage;
-      state.cachedBlocks[blockUuid] = newBlock;
+  dispatch({type, callback: state => {
+    let newPage = getNewPage();
+    let newBlock = getNewBlock();
+    newPage.uuid = pageUuid;
+    newBlock.uuid = blockUuid;
+    newPage.blocks.push(blockUuid);
+    state.cachedPages[pageUuid] = newPage;
+    state.cachedBlocks[blockUuid] = newBlock;
 
-      // Update page tree structure
-      _pageTreeAddPage(action => {
-        state = action.callback(state);
-      }, parentUuid, pageUuid);
+    // Update page tree structure
+    _pageTreeAddPage(action => {
+      state = action.callback(state);
+    }, parentUuid, pageUuid);
 
-      return state;
-    }
-  });
+    return state;
+  }});
 }
 
 export function _updatePageTitle(dispatch, pageUuid, newTitle) {
-  dispatch({type, 
-    callback: state => {
-      state.cachedPages[pageUuid].title = newTitle;
+  dispatch({type, callback: state => {
+    state.cachedPages[pageUuid].title = newTitle;
 
-      return state;
-    }
-  });
+    return state;
+  }});
 }
 
 export function _updateContent(dispatch, uuid, content) {
-  dispatch({type,
-    callback: state => {
-      state.cachedBlocks[uuid].content = content;
+  dispatch({type, callback: state => {
+    state.cachedBlocks[uuid].content = content;
 
-      return state;
-    }
-  });
+    return state;
+  }});
 }
 
 export function _setSavingState(dispatch, savingState) {
-  dispatch({type,
-    callback: state => {
-      state.editorState.saving = savingState;
+  dispatch({type, callback: state => {
+    state.editorState.saving = savingState;
 
-      return state;
-    }
-  });
+    return state;
+  }});
 }
 
 export function _addBlock(dispatch, parentUuid, aboveUuid, newUuid) {
-  dispatch({type,
-    callback: state => {
-      let newBlock = getNewBlock();
-      let block = state.cachedBlocks[parentUuid] ? state.cachedBlocks[parentUuid] : state.cachedPages[parentUuid];
+  dispatch({type, callback: state => {
+    let newBlock = getNewBlock();
+    let block = state.cachedBlocks[parentUuid] ? state.cachedBlocks[parentUuid] : state.cachedPages[parentUuid];
 
-      if (!block) {
-        console.error(`Block with uuid ${parentUuid} not found!`);
-        return state;
-      }
-
-      newBlock.uuid = newUuid;
-      let newBlockIndex = aboveUuid ? block.blocks.indexOf(aboveUuid) : 0;
-
-      if (newBlockIndex === -1) {
-        console.error(`Block with uuid ${aboveUuid} cannot be found in block ${parentUuid}`);
-        return state;
-      }
-
-      block.blocks.splice(newBlockIndex + 1, 0, newBlock.uuid);
-      state.cachedBlocks[newBlock.uuid] = newBlock;
-
+    if (!block) {
+      console.error(`Block with uuid ${parentUuid} not found!`);
       return state;
     }
-  });
+
+    newBlock.uuid = newUuid;
+    let newBlockIndex = aboveUuid ? block.blocks.indexOf(aboveUuid) : 0;
+
+    if (newBlockIndex === -1) {
+      console.error(`Block with uuid ${aboveUuid} cannot be found in block ${parentUuid}`);
+      return state;
+    }
+
+    block.blocks.splice(newBlockIndex + 1, 0, newBlock.uuid);
+    state.cachedBlocks[newBlock.uuid] = newBlock;
+
+    return state;
+  }});
 }
 
 export function _moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid) {
-  dispatch({type,
-    callback: state => {
-      return state;
-    }
-  });
+  dispatch({type, callback: state => {
+    return state;
+  }});
 }
 
 export function _pageTreeAddPage(dispatch, parentUuid, uuid) {
-  dispatch({type,
-    callback: state => {
-      // 1. Update tree structure
-      let getAncestors = cuuid => {
-        if (cuuid === undefined || cuuid === null) return [];
-        let ancestors = getAncestors(state.pageTree.rLink[cuuid]);
-        ancestors.push(cuuid);
-        return ancestors;
-      };
+  dispatch({type, callback: state => {
+    // 1. Update tree structure
+    let getAncestors = cuuid => {
+      if (cuuid === undefined || cuuid === null) return [];
+      let ancestors = getAncestors(state.pageTree.rLink[cuuid]);
+      ancestors.push(cuuid);
+      return ancestors;
+    };
 
-      let ancestors = getAncestors(parentUuid);
-      if (ancestors.length === 0) {
-        state.pageTree.root[uuid] = {}
-      } else {
-        let curNode = state.pageTree.root;
-        for (let i in ancestors) {
-          curNode = curNode[ancestors[i]];
-        }
-        curNode[uuid] = {};
+    let ancestors = getAncestors(parentUuid);
+    if (ancestors.length === 0) {
+      state.pageTree.root[uuid] = {}
+    } else {
+      let curNode = state.pageTree.root;
+      for (let i in ancestors) {
+        curNode = curNode[ancestors[i]];
       }
-
-      // 2. Update reverse link
-      state.pageTree.rLink[uuid] = parentUuid;
-
-      return state;
+      curNode[uuid] = {};
     }
-  })
+
+    // 2. Update reverse link
+    state.pageTree.rLink[uuid] = parentUuid;
+
+    return state;
+  }});
 }
 
 export function _loadAllBlocks(dispatch, pageUuid) {
-  dispatch({type, 
-    callback: state => {
-      // To be implemented
-      return state;
-    }
-  });
+  dispatch({type, callback: state => {
+    // To be implemented
+    return state;
+  }});
 }
 
 export function _parseBlockParents(dispatch, pageUuid) {
-  dispatch({type,
-    callback: state => {
-      if (!state.cachedPages[pageUuid]) {
-        console.error(`Page ${pageUuid} has not been fetched!`);
-        return state;
-      }
-      
-      let parseBlocks = blockUuid => {
-        if (!state.cachedBlocks[blockUuid]) {
-          console.error(`Block ${blockUuid} has not been fetched!`);
-          return;
-        }
-
-        let childBlocks = state.cachedBlocks[blockUuid].blocks;
-
-        for (let i in childBlocks) {
-          state.blockParents[childBlocks[i]] = blockUuid;
-          parseBlocks(childBlocks[i]);
-        }
-      };
-
-      for (let i in state.cachedPages[pageUuid].blocks) {
-        let blockUuid = state.cachedPages[pageUuid].blocks[i];
-        state.blockParents[blockUuid] = pageUuid;
-        parseBlocks(blockUuid);
-      }
-      
+  dispatch({type, callback: state => {
+    if (!state.cachedPages[pageUuid]) {
+      console.error(`Page ${pageUuid} has not been fetched!`);
       return state;
     }
-  });
+    
+    let parseBlocks = blockUuid => {
+      if (!state.cachedBlocks[blockUuid]) {
+        console.error(`Block ${blockUuid} has not been fetched!`);
+        return;
+      }
+
+      let childBlocks = state.cachedBlocks[blockUuid].blocks;
+
+      for (let i in childBlocks) {
+        state.blockParents[childBlocks[i]] = blockUuid;
+        parseBlocks(childBlocks[i]);
+      }
+    };
+
+    for (let i in state.cachedPages[pageUuid].blocks) {
+      let blockUuid = state.cachedPages[pageUuid].blocks[i];
+      state.blockParents[blockUuid] = pageUuid;
+      parseBlocks(blockUuid);
+    }
+    
+    return state;
+  }});
 }
 
 export function _setFocusedBlock(dispatch, pageUuid, blockUuid) {
-  dispatch({type, 
-    callback: state => {
-      state.focusedBlock[pageUuid] = blockUuid;
-      return state;
-    }
-  });
+  dispatch({type, callback: state => {
+    state.focusedBlock[pageUuid] = blockUuid;
+    return state;
+  }});
 }
 
 export function _setMoreIndent(dispatch, pageUuid, blockUuids) {
-  dispatch({type,
-    callback: state => {
-      for (let i = 0; i < blockUuids.length; i++) {
-        let blockUuid = blockUuids[i];
-        let parentUuid = state.blockParents[blockUuid];
+  dispatch({type, callback: state => {
+    for (let i = 0; i < blockUuids.length; i++) {
+      let blockUuid = blockUuids[i];
+      let parentUuid = state.blockParents[blockUuid];
 
-        if (pageUuid === parentUuid) {
-          let curIndex = state.cachedPages[pageUuid].blocks.indexOf(blockUuid);
-          if (curIndex === 0) continue;
+      if (pageUuid === parentUuid) {
+        let curIndex = state.cachedPages[pageUuid].blocks.indexOf(blockUuid);
+        if (curIndex === 0) continue;
 
-          let previousBlockUuid = state.cachedPages[pageUuid].blocks[curIndex - 1];
-          state.cachedBlocks[previousBlockUuid].blocks.push(blockUuid);
-  
-          state.cachedPages[pageUuid].blocks.splice(curIndex, 1);
-        } else {
-          let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
-          if (curIndex === 0) continue;
-  
-          let previousBlockUuid = state.cachedBlocks[parentUuid].blocks[curIndex - 1];
-          state.cachedBlocks[previousBlockUuid].blocks.push(blockUuid);
-  
-          state.cachedBlocks[parentUuid].blocks.splice(curIndex, 1);
-        }
+        let previousBlockUuid = state.cachedPages[pageUuid].blocks[curIndex - 1];
+        state.cachedBlocks[previousBlockUuid].blocks.push(blockUuid);
+
+        state.cachedPages[pageUuid].blocks.splice(curIndex, 1);
+      } else {
+        let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
+        if (curIndex === 0) continue;
+
+        let previousBlockUuid = state.cachedBlocks[parentUuid].blocks[curIndex - 1];
+        state.cachedBlocks[previousBlockUuid].blocks.push(blockUuid);
+
+        state.cachedBlocks[parentUuid].blocks.splice(curIndex, 1);
       }
-
-      return state;
     }
-  });
+
+    return state;
+  }});
 }
 
 export function _setLessIndent(dispatch, pageUuid, blockUuids) {
-  dispatch({type,
-    callback: state => {
-      for (let i = blockUuids.length - 1; i >= 0; i--) {
-        let blockUuid = blockUuids[i];
-        let parentUuid = state.blockParents[blockUuid];
+  dispatch({type, callback: state => {
+    for (let i = blockUuids.length - 1; i >= 0; i--) {
+      let blockUuid = blockUuids[i];
+      let parentUuid = state.blockParents[blockUuid];
 
-        if (pageUuid === parentUuid) {
-          continue;
+      if (pageUuid === parentUuid) {
+        continue;
+      } else {
+        let parentOfParentUuid = state.blockParents[parentUuid];
+        if (pageUuid === parentOfParentUuid) {
+          let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
+          let parentIndex = state.cachedPages[pageUuid].blocks.indexOf(parentUuid);
+          let restChildOfParent = state.cachedBlocks[parentUuid].blocks.splice(curIndex);
+
+          state.cachedPages[pageUuid].blocks.splice(parentIndex + 1, 0, blockUuid);
+          for (let i = 1; i < restChildOfParent.length; i++) {
+            state.cachedBlocks[blockUuid].blocks.push(restChildOfParent[i]);
+          }
         } else {
-          let parentOfParentUuid = state.blockParents[parentUuid];
-          if (pageUuid === parentOfParentUuid) {
-            let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
-            let parentIndex = state.cachedPages[pageUuid].blocks.indexOf(parentUuid);
-            let restChildOfParent = state.cachedBlocks[parentUuid].blocks.splice(curIndex);
-            
-            state.cachedPages[pageUuid].blocks.splice(parentIndex + 1, 0, blockUuid);
-            for (let i = 1; i < restChildOfParent.length; i++) {
-              state.cachedBlocks[blockUuid].blocks.push(restChildOfParent[i]);
-            }
-          } else {
-            let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
-            let parentIndex = state.cachedBlocks[parentOfParentUuid].blocks.indexOf(parentUuid);
-            let restChildOfParent = state.cachedBlocks[parentUuid].blocks.splice(curIndex);
+          let curIndex = state.cachedBlocks[parentUuid].blocks.indexOf(blockUuid);
+          let parentIndex = state.cachedBlocks[parentOfParentUuid].blocks.indexOf(parentUuid);
+          let restChildOfParent = state.cachedBlocks[parentUuid].blocks.splice(curIndex);
 
-            state.cachedBlocks[parentOfParentUuid].blocks.splice(parentIndex + 1, 0, blockUuid);
-            for (let i = 1; i < restChildOfParent.length; i++) {
-              state.cachedBlocks[blockUuid].blocks.push(restChildOfParent[i]);
-            }
+          state.cachedBlocks[parentOfParentUuid].blocks.splice(parentIndex + 1, 0, blockUuid);
+          for (let i = 1; i < restChildOfParent.length; i++) {
+            state.cachedBlocks[blockUuid].blocks.push(restChildOfParent[i]);
           }
         }
       }
-
-      return state;
     }
-  })
+
+    return state;
+  }});
 }
 
 /*************************************************
  * REDUCER
  * @brief Use immer to perform deep udpate of state.
  *************************************************/
-export let editor = (oldState=initState, action) => produce(oldState, state => action.callback ? action.callback(state) : state);
+export const editor = (oldState=initState, action) => produce(oldState, state => action.callback ? action.callback(state) : state);

@@ -65,7 +65,7 @@ const BasicBlock = props => {
     updateContent(dispatch, uuid, newState);
   }
 
-  useEffect(() => { // TODO: fix continues pression of enter cause incorrect position
+  useEffect(() => { // TODO: Keep pressing enter key may cause wrong cursor position
     if (editorState === '') {
       updateEditorState(EditorState.createEmpty());
       setTimeout(() => {
