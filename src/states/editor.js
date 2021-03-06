@@ -6,7 +6,7 @@
 /*************************************************
  * IMPORT
  *************************************************/
-import produce from 'immer';
+import produce, { original } from 'immer';
 import {newBlockId} from '../utils/Misc';
 const _ = require('lodash');
 
@@ -230,10 +230,11 @@ export function addBlock(dispatch, pageUuid, parentUuid, aboveUuid) {
  * @param {string} pageUuid UUID of the page to add a block.
  * @param {string} parentUuid UUID of the new parent block/page.
  * @param {string} originParentUuid UUID of the original parent block/page.
- * @param {string} aboveUuid UUID of the previous block.
+ * @param {string} aboveUuid UUID of the block at target position.
+ * @param {string} blokUuid UUID of the block to move.
  */
-export function moveBlock(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid) {
-  _moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid);
+export function moveBlock(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuid) {
+  _moveBlock(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuid);
   _parseBlockParents(dispatch, pageUuid); // Need optimization
 }
 
@@ -479,8 +480,16 @@ export function _addBlock(dispatch, parentUuid, aboveUuid, newUuid) {
   }});
 }
 
-export function _moveBlock(dispatch, parentUuid, originParentUuid, aboveUuid) {
+export function _moveBlock(dispatch, pageUuid, newParentUuid, originParentUuid, aboveUuid, blockUuid) {
   dispatch({type, callback: state => {
+    let newParentBlock = newParentUuid === pageUuid ? state.cachedPages[newParentUuid] : state.cachedBlocks[newParentUuid];
+    let originParentBlock = originParentUuid === pageUuid ? state.cachedPages[originParentUuid] : state.cachedBlocks[originParentUuid];
+    let curIndex = originParentBlock.blocks.indexOf(blockUuid);
+    let aboveBlockIndex = aboveUuid ? newParentBlock.indexOf(aboveUuid) : -1;
+
+    originParentBlock.blocks.splice(curIndex, 1);
+    newParentBlock.blocks.splice(aboveBlockIndex + 1, 0, blockUuid);
+
     return state;
   }});
 }

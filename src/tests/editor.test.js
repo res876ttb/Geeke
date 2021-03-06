@@ -28,6 +28,7 @@ import {
   getNextBlock,
   _setMoreIndent,
   _setLessIndent,
+  _moveBlock,
 } from '../states/editor';
 
 /*************************************************
@@ -865,5 +866,35 @@ describe('Indent block', () => {
         expect(state.cachedBlocks[blockUuids(3)].blocks.indexOf(blockUuids(5))).toBe(1);
       })});
     });
+  });
+});
+
+describe('Test move block', () => {
+  test('Move to first (from root)', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+    }, state => {
+    run(state, _moveBlock, [pageUuids(1), pageUuids(1), pageUuids(1), null, blockUuids(2)], state => {
+    run(state, _moveBlock, [pageUuids(1), pageUuids(1), pageUuids(1), null, blockUuids(3)], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(2);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(0);
+    })})});
+  });
+
+  test('Move to first (from non root)', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+      },
+    }, state => {
+    run(state, _moveBlock, [pageUuids(1), pageUuids(1), blockUuids(1), null, blockUuids(2)], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(1);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(0);
+    })});
   });
 });
