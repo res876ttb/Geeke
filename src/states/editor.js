@@ -167,7 +167,7 @@ export function getNewBlock() {
 /**
  * @function updateContent
  * @description Update content of a block.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} uuid UUID of the block to update
  * @param {EditorState} content Draftjs state object.
  */
@@ -178,7 +178,7 @@ export function updateContent(dispatch, uuid, content) {
 /**
  * @function updatePageTitle
  * @description Update title of a page.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page to update title
  * @param {String} newTitle Title of the target page.
  */
@@ -189,7 +189,7 @@ export function updatePageTitle(dispatch, pageUuid, newTitle) {
 /**
  * @function addPage
  * @description Add a child page under a page.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} parentUuid UUID of the parent.
  */
 export function addPage(dispatch, parentUuid) {
@@ -201,7 +201,7 @@ export function addPage(dispatch, parentUuid) {
 /**
  * @function setSavingState
  * @description Set saving state. If true, editor is synchornizing between client and server.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {boolean} state Saving state.
  */
 export function setSavingState(dispatch, state) {
@@ -211,7 +211,7 @@ export function setSavingState(dispatch, state) {
 /**
  * @function addBlock
  * @description Add a block under a page/block.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page to add a block.
  * @param {string} parentUuid UUID of the parent page/block to add a block. If this uuid is null, then the new block will be the first one.
  * @param {string} aboveUuid UUID of the previous block.
@@ -228,7 +228,7 @@ export function addBlock(dispatch, pageUuid, parentUuid, aboveUuid) {
  * @description Move blocks from `originalParentUuid` to `parentUuid` after `aboveUuid`. 
  *              Note: 1. All blocks should have the same parent.
  *                    2. Blocks in blockUuids should be continuous blocks.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page to add a block.
  * @param {string} parentUuid UUID of the new parent block/page.
  * @param {string} originParentUuid UUID of the original parent block/page.
@@ -251,7 +251,7 @@ export function fetchWorkspace() {
 /**
  * @function loadAllBlocks
  * @description Load all blocks of a page from server.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page to load all blocks.
  */
 export function loadAllBlocks(dispatch, pageUuid) {
@@ -261,7 +261,7 @@ export function loadAllBlocks(dispatch, pageUuid) {
 /**
  * @function parseBlockParents
  * @description Create a map from blocks to their parent block/page. This map will be used for moving cursor.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page to parse parent blocks.
  */
 export function parseBlockParents(dispatch, pageUuid) {
@@ -271,7 +271,7 @@ export function parseBlockParents(dispatch, pageUuid) {
 /**
  * @function setFocusedBlock
  * @description Mark a block as focused.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the focused page.
  * @param {string} blockUuid UUID of the focused block.
  */
@@ -390,7 +390,7 @@ export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
 /**
  * @function setMoreIndent
  * @description Make blocks have 1 more indent level.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page where the block belongs to.
  * @param {string} blockUuid Array of UUIDs of the blocks to indent.
  */
@@ -402,13 +402,27 @@ export function setMoreIndent(dispatch, pageUuid, blockUuids) {
 /**
  * @function setLessIndent
  * @description Make blocks have 1 less indent level.
- * @param {func} dispatch 
+ * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page where the block belongs to.
  * @param {string} blockUuids Array of UUIDs of the blocks to less indent.
  */
 export function setLessIndent(dispatch, pageUuid, blockUuids) {
   _setLessIndent(dispatch, pageUuid, blockUuids);
   _parseBlockParents(dispatch, pageUuid); // Need optimization
+}
+
+/**
+ * @function deleteBlocks
+ * @description Delete blocks.
+ * @param {function} dispatch 
+ * @param {string} pageUuid UUID of the page to delete block.
+ * @param {string} parentUuid UUID of the parent of the block to be deleted.
+ * @param {string} blockUuids UUIDs of the blocks to delete.
+ * @param {boolean} deleteChild Whether to delete child blocks at the same time.
+ */
+export function deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, deleteChild) {
+  _deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, deleteChild);
+  _parseBlockParents(dispatch, pageUuid);
 }
 
 /*************************************************
@@ -640,6 +654,28 @@ export function _setLessIndent(dispatch, pageUuid, blockUuids) {
       }
     }
 
+    return state;
+  }});
+}
+
+export function _deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, deleteChild=false) {
+  dispatch({type, callback: state => {
+    let parentBlock = parentUuid === pageUuid ? state.cachedPages[parentUuid] : state.cachedBlocks[parentUuid];
+    for (let i = 0; i < blockUuids.length; i++) {
+      let blockUuid = blockUuids[i];
+      let curIndex = parentBlock.blocks.indexOf(blockUuid);
+      if (curIndex === -1) {
+        console.error(`Unable to find block ${blockUuid} under block ${parentUuid}!`);
+        continue;
+      }
+
+      if (!deleteChild && state.cachedBlocks[blockUuid].blocks.length > 0) {
+        parentBlock.blocks.splice(curIndex, 1, ...state.cachedBlocks[blockUuid].blocks);
+      } else {
+        parentBlock.blocks.splice(curIndex, 1);
+      }
+      delete state.cachedBlocks[blockUuid];
+    }
     return state;
   }});
 }

@@ -29,6 +29,7 @@ import {
   _setMoreIndent,
   _setLessIndent,
   _moveBlocks,
+  _deleteBlocks,
 } from '../states/editor';
 
 /*************************************************
@@ -895,6 +896,7 @@ describe('Test move block', () => {
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(1);
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.length).toBe(1);
     })});
   });
 
@@ -914,6 +916,7 @@ describe('Test move block', () => {
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(3);
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(4))).toBe(0);
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(5))).toBe(1);
+      expect(state.cachedBlocks[blockUuids(3)].blocks.length).toBe(0);
     })});
   });
 
@@ -933,6 +936,108 @@ describe('Test move block', () => {
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(3);
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(4))).toBe(1);
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(5))).toBe(2);
+      expect(state.cachedBlocks[blockUuids(3)].blocks.length).toBe(0);
     })});
   });
 });
+
+describe('Test _deleteBlocks', () => {
+  test('Delete root first', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+    }, state => {
+    run(state, _deleteBlocks, [pageUuids(1), pageUuids(1), [blockUuids(1)]], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.length).toBe(2);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+      expect(state.cachedBlocks[blockUuids(1)]).toBeUndefined();
+    })});
+  });
+
+  test('Delete root non first', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+    }, state => {
+    run(state, _deleteBlocks, [pageUuids(1), pageUuids(1), [blockUuids(2)]], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.length).toBe(2);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+      expect(state.cachedBlocks[blockUuids(2)]).toBeUndefined();
+    })});
+  });
+
+  test('Delete non root first', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {},
+      },
+    }, state => {
+    run(state, _deleteBlocks, [pageUuids(1), blockUuids(2), [blockUuids(3)]], state => {
+      expect(state.cachedBlocks[blockUuids(2)].blocks.length).toBe(1);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
+      expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(-1);
+      expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(4))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(3)]).toBeUndefined();
+    })});
+  });
+
+  test('Delete non root non first', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {},
+      },
+    }, state => {
+    run(state, _deleteBlocks, [pageUuids(1), blockUuids(2), [blockUuids(4)]], state => {
+      expect(state.cachedBlocks[blockUuids(2)].blocks.length).toBe(1);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
+      expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(3))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(2)].blocks.indexOf(blockUuids(4))).toBe(-1);
+      expect(state.cachedBlocks[blockUuids(4)]).toBeUndefined();
+    })});
+  });
+
+  test('Delete block with children', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {},
+      },
+    }, state => {
+    run(state, _deleteBlocks, [pageUuids(1), pageUuids(1), [blockUuids(2)]], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.length).toBe(3);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(1);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(4))).toBe(2);
+      expect(state.cachedBlocks[blockUuids(2)]).toBeUndefined();
+    })});
+  });
+
+  test('Delete multiple blocks', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {},
+      },
+    }, state => {
+    run(state, _deleteBlocks, [pageUuids(1), blockUuids(2), [blockUuids(3), blockUuids(4)]], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
+      expect(state.cachedBlocks[blockUuids(2)].blocks.length).toBe(0);
+      expect(state.cachedBlocks[blockUuids(3)]).toBeUndefined();
+      expect(state.cachedBlocks[blockUuids(4)]).toBeUndefined();
+    })});
+  });
+})

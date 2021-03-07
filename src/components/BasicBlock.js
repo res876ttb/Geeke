@@ -72,7 +72,7 @@ const BasicBlock = props => {
         editor.current.focus();
       }, 0.1);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (editor.current) {
