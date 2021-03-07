@@ -224,17 +224,19 @@ export function addBlock(dispatch, pageUuid, parentUuid, aboveUuid) {
 }
 
 /**
- * @function moveBlock
- * @description Move block from `originalParentUuid` to `parentUuid` after `aboveUuid`.
+ * @function moveBlocks
+ * @description Move blocks from `originalParentUuid` to `parentUuid` after `aboveUuid`. 
+ *              Note: 1. All blocks should have the same parent.
+ *                    2. Blocks in blockUuids should be continuous blocks.
  * @param {func} dispatch 
  * @param {string} pageUuid UUID of the page to add a block.
  * @param {string} parentUuid UUID of the new parent block/page.
  * @param {string} originParentUuid UUID of the original parent block/page.
  * @param {string} aboveUuid UUID of the block at target position.
- * @param {string} blokUuid UUID of the block to move.
+ * @param {string} blockUuids UUIDs of the blocks to move.
  */
-export function moveBlock(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuid) {
-  _moveBlock(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuid);
+export function moveBlocks(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuids) {
+  _moveBlocks(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuids);
   _parseBlockParents(dispatch, pageUuid); // Need optimization
 }
 
@@ -480,15 +482,25 @@ export function _addBlock(dispatch, parentUuid, aboveUuid, newUuid) {
   }});
 }
 
-export function _moveBlock(dispatch, pageUuid, newParentUuid, originParentUuid, aboveUuid, blockUuid) {
+export function _moveBlocks(dispatch, pageUuid, newParentUuid, originParentUuid, aboveUuid, blockUuids) {
   dispatch({type, callback: state => {
+    let blockUuid = blockUuids[0];
     let newParentBlock = newParentUuid === pageUuid ? state.cachedPages[newParentUuid] : state.cachedBlocks[newParentUuid];
     let originParentBlock = originParentUuid === pageUuid ? state.cachedPages[originParentUuid] : state.cachedBlocks[originParentUuid];
     let curIndex = originParentBlock.blocks.indexOf(blockUuid);
-    let aboveBlockIndex = aboveUuid ? newParentBlock.indexOf(aboveUuid) : -1;
+    let aboveBlockIndex = aboveUuid ? newParentBlock.blocks.indexOf(aboveUuid) : -1;
 
     originParentBlock.blocks.splice(curIndex, 1);
     newParentBlock.blocks.splice(aboveBlockIndex + 1, 0, blockUuid);
+
+    for (let i = 1; i < blockUuids.length; i++) {
+      let blockUuid = blockUuids[i];
+      let curIndex = originParentBlock.blocks.indexOf(blockUuid);
+      let aboveBlockIndex = newParentBlock.blocks.indexOf(blockUuids[i - 1]);
+
+      originParentBlock.blocks.splice(curIndex, 1);
+      newParentBlock.blocks.splice(aboveBlockIndex + 1, 0, blockUuid);
+    }
 
     return state;
   }});

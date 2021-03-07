@@ -28,7 +28,7 @@ import {
   getNextBlock,
   _setMoreIndent,
   _setLessIndent,
-  _moveBlock,
+  _moveBlocks,
 } from '../states/editor';
 
 /*************************************************
@@ -876,8 +876,8 @@ describe('Test move block', () => {
       [blockUuids(2)]: {},
       [blockUuids(3)]: {},
     }, state => {
-    run(state, _moveBlock, [pageUuids(1), pageUuids(1), pageUuids(1), null, blockUuids(2)], state => {
-    run(state, _moveBlock, [pageUuids(1), pageUuids(1), pageUuids(1), null, blockUuids(3)], state => {
+    run(state, _moveBlocks, [pageUuids(1), pageUuids(1), pageUuids(1), null, [blockUuids(2)]], state => {
+    run(state, _moveBlocks, [pageUuids(1), pageUuids(1), pageUuids(1), null, [blockUuids(3)]], state => {
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(2);
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(0);
@@ -891,10 +891,48 @@ describe('Test move block', () => {
         [blockUuids(3)]: {},
       },
     }, state => {
-    run(state, _moveBlock, [pageUuids(1), pageUuids(1), blockUuids(1), null, blockUuids(2)], state => {
+    run(state, _moveBlocks, [pageUuids(1), pageUuids(1), blockUuids(1), null, [blockUuids(2)]], state => {
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(1);
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
       expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(0);
+    })});
+  });
+
+  test('Move multiple blocks to first', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {
+          [blockUuids(4)]: {},
+          [blockUuids(5)]: {},
+        },
+      },
+    }, state => {
+    run(state, _moveBlocks, [pageUuids(1), blockUuids(1), blockUuids(3), null, [blockUuids(4), blockUuids(5)]], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(2);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(3);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(4))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(5))).toBe(1);
+    })});
+  });
+
+  test('Move multiple blocks', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {
+          [blockUuids(4)]: {},
+          [blockUuids(5)]: {},
+        },
+      },
+    }, state => {
+    run(state, _moveBlocks, [pageUuids(1), blockUuids(1), blockUuids(3), blockUuids(2), [blockUuids(4), blockUuids(5)]], state => {
+      expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(3);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(4))).toBe(1);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(5))).toBe(2);
     })});
   });
 });
