@@ -1040,4 +1040,4 @@ describe('Test _deleteBlocks', () => {
       expect(state.cachedBlocks[blockUuids(4)]).toBeUndefined();
     })});
   });
-})
+});

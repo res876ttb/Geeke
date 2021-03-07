@@ -93,6 +93,7 @@ const BasicBlock = props => {
           e.preventDefault();
           
           let newBlockId = props.handleNewBlock(uuid)
+          updateContent(dispatch, newBlockId, EditorState.createEmpty());
           setFocusedBlock(dispatch, pageUuid, newBlockId);
           return preventDefault;
         }
@@ -108,6 +109,12 @@ const BasicBlock = props => {
           setMoreIndent(dispatch, pageUuid, [uuid]);
           e.preventDefault();
         }
+        break;
+      
+      case 8: // Backspace
+        break;
+      
+      case 46: // Delete
         break;
 
       case 76: // L
