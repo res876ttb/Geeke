@@ -6,7 +6,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 /*************************************************
@@ -15,7 +15,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   addBlock,
   blockType,
-  cursorDirection,
   loadAllBlocks,
   parseBlockParents
 } from '../states/editor';
@@ -38,7 +37,6 @@ const Page = props => {
   const dispatch = useDispatch();
   const page = useSelector(state => state.editor.cachedPages[uuid]);
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
-  const [focusedBlock, setFocusBlock] = useState({});
 
   // Synchornize current page with server every 3 seconds.
 

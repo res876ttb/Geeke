@@ -78,6 +78,8 @@ const emptyPage = {
   createDate: 0.0,
   // Last modified date
   lastModifiedDate: 0.0,
+  // Ancestors
+  ancestors: [],
 };
 
 // Empty Block
@@ -439,6 +441,7 @@ export function _addPage(dispatch, pageUuid, blockUuid, parentUuid) {
     state.cachedBlocks[blockUuid] = newBlock;
 
     // Update page tree structure
+    // TODO: Move this step out of function _addPage
     _pageTreeAddPage(action => {
       state = action.callback(state);
     }, parentUuid, pageUuid);

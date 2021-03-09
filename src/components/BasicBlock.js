@@ -43,6 +43,15 @@ import '../styles/BasicBlock.css';
 /*************************************************
  * Constant
  *************************************************/
+const keyCommandConst = {
+  lessIndent: 1,
+  moreIndent: 2,
+  newBlock: 3,
+  moveCursorUp: 4,
+  moveCursorDown: 5,
+  selectUp: 6,
+  selectDown: 7,
+};
 
 /*************************************************
  * Main components
@@ -84,79 +93,121 @@ const BasicBlock = props => {
     }
   }, [focus]);
 
+  const getTruncatedContentState = editorState => {
+    
+  };
+
   const mapKeyToEditorCommand = e => {
-    const preventDefault = null; // Prevent default action.
-    let res = null;
     switch (e.keyCode) {
       case 13: // Enter
         if (!e.shiftKey) {
-          e.preventDefault();
-          
-          let newBlockId = props.handleNewBlock(uuid)
-          updateContent(dispatch, newBlockId, EditorState.createEmpty());
-          setFocusedBlock(dispatch, pageUuid, newBlockId);
-          return preventDefault;
+          const contentState = editorState.getCurrentContent();
+          const selectionState = editorState.getSelection();
+          const blockMap = contentState.getBlockMap();
+
+          console.log(selectionState.getStartKey(), selectionState.getStartOffset(), selectionState.getEndKey(), selectionState.getEndOffset());
+          console.log(selectionState.getAnchorKey(), selectionState.getAnchorOffset(), selectionState.getFocusKey(), selectionState.getFocusOffset());
+          console.log(blockMap, blockMap.get(selectionState.getStartKey()));
+
+          return keyCommandConst.newBlock;
         }
         break;
       
       case 9: // Tab
         if (e.shiftKey) {
-          // 1 LESS indent level
-          setLessIndent(dispatch, pageUuid, [uuid]);
-          e.preventDefault();
+          return keyCommandConst.lessIndent;
         } else {
-          // 1 MORE indent level
-          setMoreIndent(dispatch, pageUuid, [uuid]);
-          e.preventDefault();
+          return keyCommandConst.moreIndent;
         }
-        break;
       
       case 8: // Backspace
         break;
       
       case 46: // Delete
         break;
-
-      case 76: // L
-        res = (KeyBindingUtil.hasCommandModifier(e) && e.shiftKey) ? 'inline-latex' : null;
-        break;
       
       case 38: // Arrow key Up
         if (e.shiftKey) {
-          return preventDefault;
+          // return keyCommandConst.selectUp;
+          break;
         } else {
-          let previousUuid = getPreviousBlock(state, pageUuid, uuid);
-          setFocusedBlock(dispatch, pageUuid, previousUuid);
+          const contentState = editorState.getCurrentContent();
+          const selectionState = editorState.getSelection();
+          const firstBlockKey = contentState.getFirstBlock().getKey();
+          const focusBlockKey = selectionState.getFocusKey();
+          if (firstBlockKey === focusBlockKey) {
+            return keyCommandConst.moveCursorUp;
+          } else {
+            break;
+          }
         }
-        break;
 
       case 40: // Arrow key Down
         if (e.shiftKey) {
-          return preventDefault;
+          // return keyCommandConst.selectDown;
+          break;
         } else {
-          let nextUuid = getNextBlock(state, pageUuid, uuid);
-          setFocusedBlock(dispatch, pageUuid, nextUuid);
+          const contentState = editorState.getCurrentContent();
+          const selectionState = editorState.getSelection();
+          const lastBlockKey = contentState.getLastBlock().getKey();
+          const focusBlockKey = selectionState.getFocusKey();
+          if (lastBlockKey === focusBlockKey) {
+            return keyCommandConst.moveCursorDown;
+          } else {
+            break;
+          }
         }
-        break;
 
       default:
         break;
     }
 
-    if (res != null) {
-      return res;
-    } else {
-      return getDefaultKeyBinding(e);
-    }
+    return getDefaultKeyBinding(e);
   };
 
   const handleKeyCommand = (command, editorState) => {
-    const newState = RichUtils.handleKeyCommand(editorState, command);
-    if (newState) {
-      updateEditorState(newState);
-      return true;
+    switch (command) {
+      case keyCommandConst.moreIndent:
+        setMoreIndent(dispatch, pageUuid, [uuid]);
+        break;
+      
+      case keyCommandConst.lessIndent:
+        setLessIndent(dispatch, pageUuid, [uuid]);
+        break;
+      
+      case keyCommandConst.newBlock:
+        let newBlockId = props.handleNewBlock(uuid)
+        updateContent(dispatch, newBlockId, EditorState.createEmpty());
+        setFocusedBlock(dispatch, pageUuid, newBlockId);
+        break;
+      
+      case keyCommandConst.moveCursorUp:
+        let previousUuid = getPreviousBlock(state, pageUuid, uuid);
+        setFocusedBlock(dispatch, pageUuid, previousUuid);
+        break;
+      
+      case keyCommandConst.moveCursorDown:
+        let nextUuid = getNextBlock(state, pageUuid, uuid);
+        setFocusedBlock(dispatch, pageUuid, nextUuid);
+        break;
+      
+      case keyCommandConst.selectUp:
+        break;
+      
+      case keyCommandConst.selectDown:
+        break;
+
+      default:
+        const newState = RichUtils.handleKeyCommand(editorState, command);
+        if (newState) {
+          updateEditorState(newState);
+          return true;
+        } else {
+          return false;
+        }
     }
-    return false;
+
+    return true;
   }
 
   const blocks = 
