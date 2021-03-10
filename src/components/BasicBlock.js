@@ -14,7 +14,9 @@ import {
   EditorState,
   getDefaultKeyBinding,
   RichUtils,
-  KeyBindingUtil,
+  Modifier,
+  ContentState,
+  SelectionState,
 } from 'draft-js';
 import {useDispatch, useSelector} from 'react-redux';
 
@@ -29,6 +31,7 @@ import {
   setLessIndent,
   blockType,
   updateContent,
+  addBlock,
 } from '../states/editor';
 
 /*************************************************
@@ -58,6 +61,7 @@ const keyCommandConst = {
  *************************************************/
 const BasicBlock = props => {
   const uuid = props.dataId;
+  const parentUuid = props.parentId;
   const pageUuid = props.pageId;
 
   const state = useSelector(state => state.editor);
@@ -93,22 +97,11 @@ const BasicBlock = props => {
     }
   }, [focus]);
 
-  const getTruncatedContentState = editorState => {
-    
-  };
-
   const mapKeyToEditorCommand = e => {
     switch (e.keyCode) {
       case 13: // Enter
         if (!e.shiftKey) {
-          const contentState = editorState.getCurrentContent();
-          const selectionState = editorState.getSelection();
-          const blockMap = contentState.getBlockMap();
-
-          console.log(selectionState.getStartKey(), selectionState.getStartOffset(), selectionState.getEndKey(), selectionState.getEndOffset());
-          console.log(selectionState.getAnchorKey(), selectionState.getAnchorOffset(), selectionState.getFocusKey(), selectionState.getFocusOffset());
-          console.log(blockMap, blockMap.get(selectionState.getStartKey()));
-
+          e.preventDefault();
           return keyCommandConst.newBlock;
         }
         break;
@@ -176,9 +169,69 @@ const BasicBlock = props => {
         break;
       
       case keyCommandConst.newBlock:
-        let newBlockId = props.handleNewBlock(uuid)
-        updateContent(dispatch, newBlockId, EditorState.createEmpty());
-        setFocusedBlock(dispatch, pageUuid, newBlockId);
+        {
+          let contentState = editorState.getCurrentContent();
+          const selectionState = editorState.getSelection();
+          const startKey = selectionState.getStartKey();
+          const endKey = selectionState.getEndKey();
+          const startOffset = selectionState.getStartOffset();
+          const endOffset = selectionState.getEndOffset();
+
+          // Split focused block into 2 blocks
+          if (startKey !== endKey || startOffset !== endOffset) {
+            contentState = Modifier.removeRange(contentState, selectionState, 'forward');
+            contentState = Modifier.splitBlock(contentState, new SelectionState({
+              anchorKey: startKey,
+              anchorOffset: startOffset,
+              focusKey: startKey,
+              focusOffset: startOffset
+            }));
+          } else {
+            contentState = Modifier.splitBlock(contentState, selectionState);
+          }
+
+          const blockArray = contentState.getBlocksAsArray();
+          let newBlockArray = [];
+          let newNextBlockArray = [];
+          let idx = 0;
+
+          for(; idx < blockArray.length; idx++) {
+            newBlockArray.push(blockArray[idx]);
+            if (blockArray[idx].getKey() === startKey) break;
+          }
+
+          for (idx += 1; idx < blockArray.length; idx++) {
+            newNextBlockArray.push(blockArray[idx]);
+          }
+
+          // Move cursor to correct position
+          let newCurEditorState = EditorState.createWithContent(ContentState.createFromBlockArray(newBlockArray));
+          let newNextEditorState = EditorState.createWithContent(ContentState.createFromBlockArray(newNextBlockArray));
+          let newCurContentState = newCurEditorState.getCurrentContent();
+          let newNextContentState = newNextEditorState.getCurrentContent();
+          if (newBlockArray.length > 0) {
+            newCurEditorState = EditorState.acceptSelection(newCurEditorState, new SelectionState({
+              anchorKey: newCurContentState.getLastBlock().getKey(),
+              anchorOffset: newCurContentState.getLastBlock().getLength(),
+              focusKey: newCurContentState.getLastBlock().getKey(),
+              focusOffset: newCurContentState.getLastBlock().getLength(),
+            }));
+          }
+          if (newNextBlockArray.length > 0) {
+            newNextEditorState = EditorState.acceptSelection(newNextEditorState, new SelectionState({
+              anchorKey: newNextContentState.getFirstBlock().getKey(),
+              anchorOffset: 0,
+              focusKey: newNextContentState.getFirstBlock().getKey(),
+              focusOffset: 0,
+            }));
+          }
+
+          // Apply new editors state
+          let newBlockId = addBlock(dispatch, pageUuid, parentUuid, uuid);
+          updateContent(dispatch, uuid, newCurEditorState);
+          updateContent(dispatch, newBlockId, newNextEditorState);
+          setFocusedBlock(dispatch, pageUuid, newBlockId);
+        }
         break;
       
       case keyCommandConst.moveCursorUp:
@@ -219,7 +272,7 @@ const BasicBlock = props => {
             <BasicBlock key={blockUuid}
               dataId={blockUuid}
               pageId={pageUuid}
-              handleNewBlock={props.handleNewBlock}
+              parentId={uuid}
             />
           );
 

@@ -12,8 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 /*************************************************
  * Utils & States
  *************************************************/
-import { 
-  addBlock,
+import {
   blockType,
   loadAllBlocks,
   parseBlockParents
@@ -40,11 +39,6 @@ const Page = props => {
 
   // Synchornize current page with server every 3 seconds.
 
-  // Handle create new block
-  const handleNewBlock = curUuid => {
-    return addBlock(dispatch, uuid, uuid, curUuid);
-  };
-
   // Handle load all blocks
   useEffect(() => {
     loadAllBlocks(dispatch, uuid);
@@ -61,7 +55,7 @@ const Page = props => {
             <BasicBlock key={blockUuid}
               dataId={blockUuid}
               pageId={uuid}
-              handleNewBlock={handleNewBlock}
+              parentId={uuid}
             />
           );
         
