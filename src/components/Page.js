@@ -48,7 +48,7 @@ const Page = props => {
   // Get child blocks
   const blocks = 
   <div>
-    {page.blocks.map(blockUuid => {
+    {page.blocks.map((blockUuid, idx) => {
       switch(cachedBlocks[blockUuid].type) {
         case blockType.basic:
           return (
@@ -56,6 +56,7 @@ const Page = props => {
               dataId={blockUuid}
               pageId={uuid}
               parentId={uuid}
+              isFirstBlock={idx === 0}
             />
           );
         
