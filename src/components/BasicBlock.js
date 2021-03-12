@@ -258,15 +258,50 @@ const BasicBlock = props => {
         setFocusedBlock(dispatch, pageUuid, newBlockId);
       } break;
       
-      case keyCommandConst.deleteBlockBackward: {
+      case keyCommandConst.deleteBlockBackward:
         if (isFirstBlock) break;
         if (!contentState.hasText()) {
           moveCursorUp();
           deleteBlocks(dispatch, pageUuid, parentUuid, [uuid], false);
         } else {
-          console.log('Move content and delete block!!!');
+          let previousBlockUuid = getPreviousBlock(state, pageUuid, uuid);
+          let previousEditorState = state.cachedBlocks[previousBlockUuid].content;
+
+          if (previousEditorState === '') {
+            moveCursorUp();
+            updateContent(dispatch, previousBlockUuid, editorState);
+            deleteBlocks(dispatch, pageUuid, parentUuid, [uuid], false);
+            break;
+          }
+
+          let previousContentState = previousEditorState.getCurrentContent();
+          let previousBlockArray = previousContentState.getBlocksAsArray();
+          let previousLastBlock = previousContentState.getLastBlock();
+          let curBlockArray = contentState.getBlocksAsArray();
+          let curFirstBlock = contentState.getFirstBlock();
+          let fakeSelectionState = new SelectionState({
+            anchorKey: previousLastBlock.getKey(),
+            anchorOffset: previousLastBlock.getLength(),
+            focusKey: curFirstBlock.getKey(),
+            focusOffset: 0,
+          });
+          let newSelectionState = new SelectionState({
+            anchorKey: previousLastBlock.getKey(),
+            anchorOffset: previousLastBlock.getLength(),
+            focusKey: previousLastBlock.getKey(),
+            focusOffset: previousLastBlock.getLength(),
+          });
+          let newPreviousContentState = ContentState.createFromBlockArray(previousBlockArray.concat(curBlockArray));
+          newPreviousContentState = Modifier.removeRange(newPreviousContentState, fakeSelectionState, 'forward');
+
+          let newPreviousEditorState = EditorState.createWithContent(newPreviousContentState);
+          newPreviousEditorState = EditorState.acceptSelection(newPreviousEditorState, newSelectionState);
+
+          moveCursorUp();
+          updateContent(dispatch, previousBlockUuid, newPreviousEditorState);
+          deleteBlocks(dispatch, pageUuid, parentUuid, [uuid], false);
         }
-      } break;
+        break;
 
       case keyCommandConst.moveCursorUp:
         moveCursorUp();
