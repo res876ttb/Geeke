@@ -57,6 +57,8 @@ const keyCommandConst = {
   selectDown: 7,
   deleteBlockBackward: 8,
   deleteBlockForward: 9,
+  moveCursorUpForward: 10,
+  moveCursorDownBackward: 11,
 };
 
 /*************************************************
@@ -139,6 +141,17 @@ const BasicBlock = props => {
       case 46: // Delete
         break;
       
+      case 37: // Arrow key left
+        if (firstBlockKey === focusBlockKey && focusOffset === 0) {
+          if (e.shiftKey) {
+            // Switch to block select mode
+            break;
+          } else {
+            return keyCommandConst.moveCursorUpForward;
+          }
+        }
+        break;
+      
       case 38: // Arrow key Up
         if (e.shiftKey) {
           // return keyCommandConst.selectUp;
@@ -150,6 +163,17 @@ const BasicBlock = props => {
             break;
           }
         }
+      
+      case 39: // Arrow key right
+        if (lastBlockKey === focusBlockKey && focusOffset === lastBlock.getLength()) {
+          if (e.shiftKey) {
+            // Switch to block selection mode
+            break;
+          } else {
+            return keyCommandConst.moveCursorDownBackward;
+          }
+        }
+        break;
 
       case 40: // Arrow key Down
         if (e.shiftKey) {
@@ -267,6 +291,7 @@ const BasicBlock = props => {
           let previousBlockUuid = getPreviousBlock(state, pageUuid, uuid);
           let previousEditorState = state.cachedBlocks[previousBlockUuid].content;
 
+          // If the content is not ready, move current editorState into it
           if (previousEditorState === '') {
             moveCursorUp();
             updateContent(dispatch, previousBlockUuid, editorState);
@@ -291,9 +316,12 @@ const BasicBlock = props => {
             focusKey: previousLastBlock.getKey(),
             focusOffset: previousLastBlock.getLength(),
           });
+
+          // Remove the barrier between these 2 blocks by remove the fake selection range
           let newPreviousContentState = ContentState.createFromBlockArray(previousBlockArray.concat(curBlockArray));
           newPreviousContentState = Modifier.removeRange(newPreviousContentState, fakeSelectionState, 'forward');
 
+          // Create new editor state with the new selection
           let newPreviousEditorState = EditorState.createWithContent(newPreviousContentState);
           newPreviousEditorState = EditorState.acceptSelection(newPreviousEditorState, newSelectionState);
 
@@ -307,9 +335,47 @@ const BasicBlock = props => {
         moveCursorUp();
         break;
       
+      case keyCommandConst.moveCursorUpForward: {
+        let previousBlockUuid = getPreviousBlock(state, pageUuid, uuid);
+        let previousEditorState = state.cachedBlocks[previousBlockUuid].content;
+
+        if (previousEditorState !== '' && previousBlockUuid !== uuid) {
+          let previousContentState = previousEditorState.getCurrentContent();
+          let previousLastBlock = previousContentState.getLastBlock();
+          let newSelectionState = new SelectionState({
+            anchorKey: previousLastBlock.getKey(),
+            anchorOffset: previousLastBlock.getLength(),
+            focusKey: previousLastBlock.getKey(),
+            focusOffset: previousLastBlock.getLength(),
+          });
+          previousEditorState = EditorState.acceptSelection(previousEditorState, newSelectionState);
+          updateContent(dispatch, previousBlockUuid, previousEditorState);
+        }
+        moveCursorUp();
+      } break;
+      
       case keyCommandConst.moveCursorDown:
         moveCursorDown();
         break;
+      
+      case keyCommandConst.moveCursorDownBackward: {
+        let nextBlockUuid = getNextBlock(state, pageUuid, uuid);
+        let nextEditorState = state.cachedBlocks[nextBlockUuid].content;
+
+        if (nextEditorState !== '' && nextBlockUuid !== uuid) {
+          let nextContentState = nextEditorState.getCurrentContent();
+          let nextFirstBlock = nextContentState.getFirstBlock();
+          let newSelectionState = new SelectionState({
+            anchorKey: nextFirstBlock.getKey(),
+            anchorOffset: 0,
+            focusKey: nextFirstBlock.getKey(),
+            focusOffset: 0,
+          });
+          nextEditorState = EditorState.acceptSelection(nextEditorState, newSelectionState);
+          updateContent(dispatch, nextBlockUuid, nextEditorState);
+        }
+        moveCursorDown();
+      } break;
       
       case keyCommandConst.selectUp:
         break;
