@@ -235,7 +235,7 @@ export function addBlock(dispatch, pageUuid, parentUuid, aboveUuid) {
  * @param {string} parentUuid UUID of the new parent block/page.
  * @param {string} originParentUuid UUID of the original parent block/page.
  * @param {string} aboveUuid UUID of the block at target position.
- * @param {string} blockUuids UUIDs of the blocks to move.
+ * @param {array} blockUuids UUIDs of the blocks to move.
  */
 export function moveBlocks(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuids) {
   _moveBlocks(dispatch, pageUuid, parentUuid, originParentUuid, aboveUuid, blockUuids);
@@ -394,7 +394,7 @@ export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
  * @description Make blocks have 1 more indent level.
  * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page where the block belongs to.
- * @param {string} blockUuid Array of UUIDs of the blocks to indent.
+ * @param {array} blockUuids Array of UUIDs of the blocks to indent.
  */
 export function setMoreIndent(dispatch, pageUuid, blockUuids) {
   _setMoreIndent(dispatch, pageUuid, blockUuids);
@@ -406,7 +406,7 @@ export function setMoreIndent(dispatch, pageUuid, blockUuids) {
  * @description Make blocks have 1 less indent level.
  * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page where the block belongs to.
- * @param {string} blockUuids Array of UUIDs of the blocks to less indent.
+ * @param {array} blockUuids Array of UUIDs of the blocks to less indent.
  */
 export function setLessIndent(dispatch, pageUuid, blockUuids) {
   _setLessIndent(dispatch, pageUuid, blockUuids);
@@ -419,7 +419,7 @@ export function setLessIndent(dispatch, pageUuid, blockUuids) {
  * @param {function} dispatch 
  * @param {string} pageUuid UUID of the page to delete block.
  * @param {string} parentUuid UUID of the parent of the block to be deleted.
- * @param {string} blockUuids UUIDs of the blocks to delete.
+ * @param {array} blockUuids UUIDs of the blocks to delete.
  * @param {boolean} deleteChild Whether to delete child blocks at the same time.
  */
 export function deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, deleteChild) {
