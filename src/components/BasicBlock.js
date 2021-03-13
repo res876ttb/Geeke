@@ -200,12 +200,34 @@ const BasicBlock = props => {
 
     const moveCursorUp = () => {
       const previousUuid = getPreviousBlock(state, pageUuid, uuid);
-      setFocusedBlock(dispatch, pageUuid, previousUuid);
+      if (previousUuid === uuid) {
+        let firstBlock = contentState.getFirstBlock();
+        let newSelectionState = new SelectionState({
+          anchorKey: firstBlock.getKey(),
+          anchorOffset: 0,
+          focusKey: firstBlock.getKey(),
+          focusOffset: 0,
+        });
+        updateContent(dispatch, uuid, EditorState.forceSelection(editorState, newSelectionState));
+      } else {
+        setFocusedBlock(dispatch, pageUuid, previousUuid);
+      }
     };
 
     const moveCursorDown = () => {
       const nextUuid = getNextBlock(state, pageUuid, uuid);
-      setFocusedBlock(dispatch, pageUuid, nextUuid);
+      if (nextUuid === uuid) {
+        let lastBlock = contentState.getLastBlock();
+        let newSelectionState = new SelectionState({
+          anchorKey: lastBlock.getKey(),
+          anchorOffset: lastBlock.getLength(),
+          focusKey: lastBlock.getKey(),
+          focusOffset: lastBlock.getLength(),
+        });
+        updateContent(dispatch, uuid, EditorState.forceSelection(editorState, newSelectionState));
+      } else {
+        setFocusedBlock(dispatch, pageUuid, nextUuid);
+      }
     };
 
     switch (command) {
