@@ -348,9 +348,9 @@ const BasicBlock = props => {
         }
         break;
 
-      case keyCommandConst.deleteBlockBackward:
-        if (moveCursorDown()) {
-          let nextBlockUuid = getNextBlock(state, pageUuid, uuid);
+      case keyCommandConst.deleteBlockBackward: {
+        let nextBlockUuid = getNextBlock(state, pageUuid, uuid);
+        if (nextBlockUuid !== uuid) {
           let nextEditorState = state.cachedBlocks[nextBlockUuid].content;
           let nextContentState = nextEditorState.getCurrentContent();
           let nextBlockArray = nextContentState.getBlocksAsArray();
@@ -371,17 +371,17 @@ const BasicBlock = props => {
           });
 
           // Remove the barrier between these 2 blocks by remove the fake selection range
-          let newNextContentState = ContentState.createFromBlockArray(curBlockArray.concat(nextBlockArray));
-          newNextContentState = Modifier.removeRange(newNextContentState, fakeSelectionState, 'backward');
+          let newCurContentState = ContentState.createFromBlockArray(curBlockArray.concat(nextBlockArray));
+          newCurContentState = Modifier.removeRange(newCurContentState, fakeSelectionState, 'forward');
 
           // Create new editor state with the new selection
-          let newNextEditorState = EditorState.createWithContent(newNextContentState);
-          newNextEditorState = EditorState.acceptSelection(newNextEditorState, newSelectionState);
+          let newCurEditorState = EditorState.createWithContent(newCurContentState);
+          newCurEditorState = EditorState.forceSelection(newCurEditorState, newSelectionState);
 
-          updateContent(dispatch, nextBlockUuid, newNextEditorState);
-          deleteBlocks(dispatch, pageUuid, parentUuid, [uuid], false);
+          updateContent(dispatch, uuid, newCurEditorState);
+          deleteBlocks(dispatch, pageUuid, state.blockParents[nextBlockUuid], [nextBlockUuid], false);
         }
-        break;
+      } break;
 
       case keyCommandConst.moveCursorUp:
         moveCursorUp();
