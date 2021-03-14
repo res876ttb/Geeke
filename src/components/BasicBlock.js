@@ -34,6 +34,10 @@ import {
   addBlock,
   deleteBlocks,
 } from '../states/editor';
+import {
+  defaultKeyboardHandlingConfig,
+  mapKeyToEditorCommand as _mapKeyToEditorCommand,
+} from '../utils/BlockKeyboardUtils';
 
 /*************************************************
  * Import Components
@@ -104,97 +108,7 @@ const BasicBlock = props => {
   }, [focus]);
 
   const mapKeyToEditorCommand = e => {
-    const contentState = editorState.getCurrentContent();
-    const selectionState = editorState.getSelection();
-    const firstBlock = contentState.getFirstBlock();
-    const lastBlock = contentState.getLastBlock();
-    const firstBlockKey = firstBlock.getKey();
-    const lastBlockKey = lastBlock.getKey();
-    const focusBlockKey = selectionState.getFocusKey();
-    const focusOffset = selectionState.getFocusOffset();
-
-    switch (e.keyCode) {
-      case 13: // Enter
-        if (!e.shiftKey) {
-          e.preventDefault();
-          return keyCommandConst.newBlock;
-        }
-        break;
-      
-      case 9: // Tab
-        if (e.shiftKey) {
-          return keyCommandConst.lessIndent;
-        } else {
-          return keyCommandConst.moreIndent;
-        }
-      
-      case 8: // Backspace
-        if (firstBlockKey === focusBlockKey && focusOffset === 0) {
-          if (isFirstBlock) {
-            return keyCommandConst.lessIndent;
-          } else {
-            return keyCommandConst.deleteBlockForward;
-          }
-        }
-        break;
-      
-      case 46: // Delete
-        if (lastBlockKey === focusBlockKey && focusOffset === lastBlock.getLength()) {
-          return keyCommandConst.deleteBlockBackward;
-        }
-        break;
-      
-      case 37: // Arrow key left
-        if (firstBlockKey === focusBlockKey && focusOffset === 0) {
-          if (e.shiftKey) {
-            // Switch to block select mode
-            break;
-          } else {
-            return keyCommandConst.moveCursorUpForward;
-          }
-        }
-        break;
-      
-      case 38: // Arrow key Up
-        if (e.shiftKey) {
-          // return keyCommandConst.selectUp;
-          break;
-        } else {
-          if (firstBlockKey === focusBlockKey) {
-            return keyCommandConst.moveCursorUp;
-          } else {
-            break;
-          }
-        }
-      
-      case 39: // Arrow key right
-        if (lastBlockKey === focusBlockKey && focusOffset === lastBlock.getLength()) {
-          if (e.shiftKey) {
-            // Switch to block selection mode
-            break;
-          } else {
-            return keyCommandConst.moveCursorDownBackward;
-          }
-        }
-        break;
-
-      case 40: // Arrow key Down
-        if (e.shiftKey) {
-          // return keyCommandConst.selectDown;
-          break;
-        } else {
-          if (lastBlockKey === focusBlockKey) {
-            return keyCommandConst.moveCursorDown;
-          } else {
-            break;
-          }
-        }
-
-      default:
-        break;
-    }
-
-    return getDefaultKeyBinding(e);
+    return _mapKeyToEditorCommand(e, {...defaultKeyboardHandlingConfig}, editorState, isFirstBlock);
   };
 
   const handleKeyCommand = (command, editorState) => {
