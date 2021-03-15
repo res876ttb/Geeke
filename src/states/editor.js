@@ -104,33 +104,33 @@ const emptyBlock = {
 }
 
 // Empty Workspace
-const emptyWorkspace = {
-  // Space ID
-  uuid: '11111111-3333-5555-7777-999999999999',
-  // Name
-  name: 'Workspace',
-  // Private pages
-  privates: [],
-  // Shared: accessible by all workspace members by default
-  shares: [],
-  // Favorites
-  favorites: [],
-  // Members
-  members: [],
-  // Administrators
-  administrators: [],
-  // Root pages
-  rootPages: [],
-  // Opened page
-  openedPages: [],
-  // Permission: default permission
-  permission: {
-    read: permissionConst.members,
-    write: permissionConst.members,
-  },
-  // Theme
-  theme: 'default',
-}
+// const emptyWorkspace = {
+//   // Space ID
+//   uuid: '11111111-3333-5555-7777-999999999999',
+//   // Name
+//   name: 'Workspace',
+//   // Private pages
+//   privates: [],
+//   // Shared: accessible by all workspace members by default
+//   shares: [],
+//   // Favorites
+//   favorites: [],
+//   // Members
+//   members: [],
+//   // Administrators
+//   administrators: [],
+//   // Root pages
+//   rootPages: [],
+//   // Opened page
+//   openedPages: [],
+//   // Permission: default permission
+//   permission: {
+//     read: permissionConst.members,
+//     write: permissionConst.members,
+//   },
+//   // Theme
+//   theme: 'default',
+// }
 
 // Init state
 const initState = {
@@ -486,9 +486,9 @@ export function _addBlock(dispatch, parentUuid, aboveUuid, newUuid) {
     }
 
     newBlock.uuid = newUuid;
-    let newBlockIndex = aboveUuid ? block.blocks.indexOf(aboveUuid) : 0;
+    let newBlockIndex = block.blocks.indexOf(aboveUuid);
 
-    if (newBlockIndex === -1) {
+    if (newBlockIndex === -1 && aboveUuid) {
       console.error(`Block with uuid ${aboveUuid} cannot be found in block ${parentUuid}`);
       return state;
     }

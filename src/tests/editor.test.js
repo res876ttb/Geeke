@@ -162,11 +162,13 @@ describe('Test _addBlock', () => {
     let state = getInitState();
     run(state, _addPage, [pageUuids(1), blockUuids(1), null], state => {
     run(state, _addBlock, [blockUuids(1), null, blockUuids(2)], state => {
+    run(state, _addBlock, [blockUuids(1), null, blockUuids(3)], state => {
       expect(state.cachedBlocks[blockUuids(2)]).not.toBeUndefined();
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(1))).toBe(0);
       expect(state.cachedPages[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
-      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(0);
-    })});
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(3))).toBe(0);
+      expect(state.cachedBlocks[blockUuids(1)].blocks.indexOf(blockUuids(2))).toBe(1);
+    })})});
   });
 
   test('Add a block in the middle of blocks', () => {

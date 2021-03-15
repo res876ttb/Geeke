@@ -279,7 +279,7 @@ const handleKeyCommand_lessIndent = (dispatch, pageUuid, uuid) => {
   setLessIndent(dispatch, pageUuid, [uuid]);
 };
 
-const handleKeyCommand_newBlock = (dispatch, pageUuid, parentUuid, uuid, editorState) => {
+const handleKeyCommand_newBlock = (dispatch, pageUuid, parentUuid, uuid, state, editorState) => {
   const contentState = editorState.getCurrentContent();
   const selectionState = editorState.getSelection();
   const startKey = selectionState.getStartKey();
@@ -340,7 +340,12 @@ const handleKeyCommand_newBlock = (dispatch, pageUuid, parentUuid, uuid, editorS
   }
 
   // Apply new editors state
-  const newBlockId = addBlock(dispatch, pageUuid, parentUuid, uuid);
+  let newBlockId;
+  if (state.cachedBlocks[uuid].blocks.length > 0) {
+    newBlockId = addBlock(dispatch, pageUuid, uuid, null);
+  } else {
+    newBlockId = addBlock(dispatch, pageUuid, parentUuid, uuid);
+  }
   updateContent(dispatch, uuid, newCurEditorState);
   updateContent(dispatch, newBlockId, newNextEditorState);
   setFocusedBlock(dispatch, pageUuid, newBlockId);
@@ -484,7 +489,7 @@ export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, ed
       break;
     
     case keyCommandConst.newBlock:
-      handleKeyCommand_newBlock(dispatch, pageUuid, parentUuid, uuid, editorState);
+      handleKeyCommand_newBlock(dispatch, pageUuid, parentUuid, uuid, state, editorState);
       break;
     
     case keyCommandConst.deleteBlockForward:
