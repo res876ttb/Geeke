@@ -6,7 +6,7 @@
 /*************************************************
  * IMPORT
  *************************************************/
-import produce, { original } from 'immer';
+import produce from 'immer';
 import {newBlockId} from '../utils/Misc';
 const _ = require('lodash');
 
@@ -34,7 +34,6 @@ export const cursorDirection = {
 };
 
 const type = null;
-const rootPage = null;
 
 /**
  * Data structure
@@ -122,6 +121,8 @@ const emptyWorkspace = {
   administrators: [],
   // Root pages
   rootPages: [],
+  // Opened page
+  openedPages: [],
   // Permission: default permission
   permission: {
     read: permissionConst.members,
