@@ -6,7 +6,24 @@
 /*************************************************
  * IMPORT
  *************************************************/
- import {getDefaultKeyBinding} from 'draft-js';
+import {
+  ContentState,
+  EditorState,
+  getDefaultKeyBinding,
+  Modifier,
+  RichUtils,
+  SelectionState,
+} from 'draft-js';
+import {
+  addBlock,
+  deleteBlocks,
+  getNextBlock,
+  getPreviousBlock,
+  setFocusedBlock,
+  setLessIndent,
+  setMoreIndent,
+  updateContent,
+} from '../states/editor';
 
 /*************************************************
  * CONST
@@ -175,7 +192,7 @@ const mapKeyToEditorCommand_arrowDown = (e, config, editorState) => {
   return getDefaultKeyBinding(e);
 }
 
-export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock, customFunc = () => undefined) => {
+export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock = false, customFunc = () => undefined) => {
   switch (e.keyCode) {
     case 13: // Enter
       return mapKeyToEditorCommand_enter(e, config);
@@ -211,3 +228,300 @@ export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock, cust
 };
 
 //// End of mapKeyToEditorCommand
+
+//// Start of handleKeyCommand
+
+const handleKeyCommand_moveCursorUp = (dispatch, pageUuid, uuid, state, editorState) => {
+  const previousUuid = getPreviousBlock(state, pageUuid, uuid);
+  const contentState = editorState.getCurrentContent();
+
+  if (previousUuid === uuid) {
+    let firstBlock = contentState.getFirstBlock();
+    let newSelectionState = new SelectionState({
+      anchorKey: firstBlock.getKey(),
+      anchorOffset: 0,
+      focusKey: firstBlock.getKey(),
+      focusOffset: 0,
+    });
+    updateContent(dispatch, uuid, EditorState.forceSelection(editorState, newSelectionState));
+    return false;
+  } else {
+    setFocusedBlock(dispatch, pageUuid, previousUuid);
+    return true;
+  }
+};
+
+const handleKeyCommand_moveCursorDown = (dispatch, pageUuid, uuid, state, editorState) => {
+  const nextUuid = getNextBlock(state, pageUuid, uuid);
+  const contentState = editorState.getCurrentContent();
+
+  if (nextUuid === uuid) {
+    let lastBlock = contentState.getLastBlock();
+    let newSelectionState = new SelectionState({
+      anchorKey: lastBlock.getKey(),
+      anchorOffset: lastBlock.getLength(),
+      focusKey: lastBlock.getKey(),
+      focusOffset: lastBlock.getLength(),
+    });
+    updateContent(dispatch, uuid, EditorState.forceSelection(editorState, newSelectionState));
+    return false;
+  } else {
+    setFocusedBlock(dispatch, pageUuid, nextUuid);
+    return true;
+  }
+};
+
+const handleKeyCommand_moreIndent = (dispatch, pageUuid, uuid) => {
+  setMoreIndent(dispatch, pageUuid, [uuid]);
+};
+
+const handleKeyCommand_lessIndent = (dispatch, pageUuid, uuid) => {
+  setLessIndent(dispatch, pageUuid, [uuid]);
+};
+
+const handleKeyCommand_newBlock = (dispatch, pageUuid, parentUuid, uuid, editorState) => {
+  const contentState = editorState.getCurrentContent();
+  const selectionState = editorState.getSelection();
+  const startKey = selectionState.getStartKey();
+  const endKey = selectionState.getEndKey();
+  const startOffset = selectionState.getStartOffset();
+  const endOffset = selectionState.getEndOffset();
+
+  let newContentState = contentState;
+
+  // Split focused block into 2 blocks
+  if (startKey !== endKey || startOffset !== endOffset) {
+    newContentState = Modifier.removeRange(newContentState, selectionState, 'forward');
+    newContentState = Modifier.splitBlock(newContentState, new SelectionState({
+      anchorKey: startKey,
+      anchorOffset: startOffset,
+      focusKey: startKey,
+      focusOffset: startOffset
+    }));
+  } else {
+    newContentState = Modifier.splitBlock(newContentState, selectionState);
+  }
+
+  // Split block array into 2 heaps: current heap and the new heap.
+  const blockArray = newContentState.getBlocksAsArray();
+  let newBlockArray = [];
+  let newNextBlockArray = [];
+  let idx = 0;
+
+  for(; idx < blockArray.length; idx++) {
+    newBlockArray.push(blockArray[idx]);
+    if (blockArray[idx].getKey() === startKey) break;
+  }
+
+  for (idx += 1; idx < blockArray.length; idx++) {
+    newNextBlockArray.push(blockArray[idx]);
+  }
+
+  // Move cursor to correct position
+  let newCurEditorState = EditorState.createWithContent(ContentState.createFromBlockArray(newBlockArray));
+  let newNextEditorState = EditorState.createWithContent(ContentState.createFromBlockArray(newNextBlockArray));
+  let newCurContentState = newCurEditorState.getCurrentContent();
+  let newNextContentState = newNextEditorState.getCurrentContent();
+  if (newBlockArray.length > 0) {
+    newCurEditorState = EditorState.acceptSelection(newCurEditorState, new SelectionState({
+      anchorKey: newCurContentState.getLastBlock().getKey(),
+      anchorOffset: newCurContentState.getLastBlock().getLength(),
+      focusKey: newCurContentState.getLastBlock().getKey(),
+      focusOffset: newCurContentState.getLastBlock().getLength(),
+    }));
+  }
+  if (newNextBlockArray.length > 0) {
+    newNextEditorState = EditorState.acceptSelection(newNextEditorState, new SelectionState({
+      anchorKey: newNextContentState.getFirstBlock().getKey(),
+      anchorOffset: 0,
+      focusKey: newNextContentState.getFirstBlock().getKey(),
+      focusOffset: 0,
+    }));
+  }
+
+  // Apply new editors state
+  const newBlockId = addBlock(dispatch, pageUuid, parentUuid, uuid);
+  updateContent(dispatch, uuid, newCurEditorState);
+  updateContent(dispatch, newBlockId, newNextEditorState);
+  setFocusedBlock(dispatch, pageUuid, newBlockId);
+};
+
+const handleKeyCommand_deleteBlockForward = (dispatch, pageUuid, parentUuid, uuid, state, editorState) => {
+  const contentState = editorState.getCurrentContent();
+
+  if (handleKeyCommand_moveCursorUp(dispatch, pageUuid, uuid, state, editorState)) {
+    let previousBlockUuid = getPreviousBlock(state, pageUuid, uuid);
+    let previousEditorState = state.cachedBlocks[previousBlockUuid].content;
+    let previousContentState = previousEditorState.getCurrentContent();
+    let previousBlockArray = previousContentState.getBlocksAsArray();
+    let previousLastBlock = previousContentState.getLastBlock();
+    let curBlockArray = contentState.getBlocksAsArray();
+    let curFirstBlock = contentState.getFirstBlock();
+    let fakeSelectionState = new SelectionState({
+      anchorKey: previousLastBlock.getKey(),
+      anchorOffset: previousLastBlock.getLength(),
+      focusKey: curFirstBlock.getKey(),
+      focusOffset: 0,
+    });
+    let newSelectionState = new SelectionState({
+      anchorKey: previousLastBlock.getKey(),
+      anchorOffset: previousLastBlock.getLength(),
+      focusKey: previousLastBlock.getKey(),
+      focusOffset: previousLastBlock.getLength(),
+    });
+
+    // Remove the barrier between these 2 blocks by remove the fake selection range
+    let newPreviousContentState = ContentState.createFromBlockArray(previousBlockArray.concat(curBlockArray));
+    newPreviousContentState = Modifier.removeRange(newPreviousContentState, fakeSelectionState, 'forward');
+
+    // Create new editor state with the new selection
+    let newPreviousEditorState = EditorState.createWithContent(newPreviousContentState);
+    newPreviousEditorState = EditorState.acceptSelection(newPreviousEditorState, newSelectionState);
+
+    updateContent(dispatch, previousBlockUuid, newPreviousEditorState);
+    deleteBlocks(dispatch, pageUuid, parentUuid, [uuid], false);
+  }
+};
+
+const handleKeyCommand_deleteBlockBackward = (dispatch, pageUuid, uuid, state, editorState) => {
+  const contentState = editorState.getCurrentContent();
+  let nextBlockUuid = getNextBlock(state, pageUuid, uuid);
+
+  if (nextBlockUuid !== uuid) {
+    let nextEditorState = state.cachedBlocks[nextBlockUuid].content;
+    let nextContentState = nextEditorState.getCurrentContent();
+    let nextBlockArray = nextContentState.getBlocksAsArray();
+    let nextFirstBlock = nextContentState.getFirstBlock();
+    let curBlockArray = contentState.getBlocksAsArray();
+    let curLastBlock = contentState.getLastBlock();
+    let fakeSelectionState = new SelectionState({
+      anchorKey: curLastBlock.getKey(),
+      anchorOffset: curLastBlock.getLength(),
+      focusKey: nextFirstBlock.getKey(),
+      focusOffset: 0,
+    });
+    let newSelectionState = new SelectionState({
+      anchorKey: curLastBlock.getKey(),
+      anchorOffset: curLastBlock.getLength(),
+      focusKey: curLastBlock.getKey(),
+      focusOffset: curLastBlock.getLength(),
+    });
+
+    // Remove the barrier between these 2 blocks by remove the fake selection range
+    let newCurContentState = ContentState.createFromBlockArray(curBlockArray.concat(nextBlockArray));
+    newCurContentState = Modifier.removeRange(newCurContentState, fakeSelectionState, 'forward');
+
+    // Create new editor state with the new selection
+    let newCurEditorState = EditorState.createWithContent(newCurContentState);
+    newCurEditorState = EditorState.forceSelection(newCurEditorState, newSelectionState);
+
+    updateContent(dispatch, uuid, newCurEditorState);
+    deleteBlocks(dispatch, pageUuid, state.blockParents[nextBlockUuid], [nextBlockUuid], false);
+  }
+};
+
+const handleKeyCommand_moveCursorUpForward = (dispatch, pageUuid, uuid, state, editorState) => {
+  let previousBlockUuid = getPreviousBlock(state, pageUuid, uuid);
+  let previousEditorState = state.cachedBlocks[previousBlockUuid].content;
+
+  if (previousEditorState !== '' && previousBlockUuid !== uuid) {
+    let previousContentState = previousEditorState.getCurrentContent();
+    let previousLastBlock = previousContentState.getLastBlock();
+    let newSelectionState = new SelectionState({
+      anchorKey: previousLastBlock.getKey(),
+      anchorOffset: previousLastBlock.getLength(),
+      focusKey: previousLastBlock.getKey(),
+      focusOffset: previousLastBlock.getLength(),
+    });
+
+    previousEditorState = EditorState.acceptSelection(previousEditorState, newSelectionState);
+    updateContent(dispatch, previousBlockUuid, previousEditorState);
+  }
+
+  handleKeyCommand_moveCursorUp(dispatch, pageUuid, uuid, state, editorState);
+};
+
+const handleKeyCommand_moveCursorDownBackward = (dispatch, pageUuid, uuid, state, editorState) => {
+  let nextBlockUuid = getNextBlock(state, pageUuid, uuid);
+  let nextEditorState = state.cachedBlocks[nextBlockUuid].content;
+
+  if (nextEditorState !== '' && nextBlockUuid !== uuid) {
+    let nextContentState = nextEditorState.getCurrentContent();
+    let nextFirstBlock = nextContentState.getFirstBlock();
+    let newSelectionState = new SelectionState({
+      anchorKey: nextFirstBlock.getKey(),
+      anchorOffset: 0,
+      focusKey: nextFirstBlock.getKey(),
+      focusOffset: 0,
+    });
+
+    nextEditorState = EditorState.acceptSelection(nextEditorState, newSelectionState);
+    updateContent(dispatch, nextBlockUuid, nextEditorState);
+  }
+
+  handleKeyCommand_moveCursorDown(dispatch, pageUuid, uuid, state, editorState);
+};
+
+const handleKeyCommand_default = (dispatch, command, uuid, editorState) => {
+  const newState = RichUtils.handleKeyCommand(editorState, command);
+
+  if (newState) {
+    updateContent(dispatch, uuid, newState);
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, editorState, command, customFunc = () => undefined) => {
+  switch (command) {
+    case keyCommandConst.moreIndent:
+      handleKeyCommand_moreIndent(dispatch, pageUuid, uuid);
+      break;
+    
+    case keyCommandConst.lessIndent:
+      handleKeyCommand_lessIndent(dispatch, pageUuid, uuid);
+      break;
+    
+    case keyCommandConst.newBlock:
+      handleKeyCommand_newBlock(dispatch, pageUuid, parentUuid, uuid, editorState);
+      break;
+    
+    case keyCommandConst.deleteBlockForward:
+      handleKeyCommand_deleteBlockForward(dispatch, pageUuid, parentUuid, uuid, state, editorState);
+      break;
+
+    case keyCommandConst.deleteBlockBackward:
+      handleKeyCommand_deleteBlockBackward(dispatch, pageUuid, uuid, state, editorState);
+      break;
+
+    case keyCommandConst.moveCursorUp:
+      handleKeyCommand_moveCursorUp(dispatch, pageUuid, uuid, state, editorState);
+      break;
+    
+    case keyCommandConst.moveCursorUpForward:
+      handleKeyCommand_moveCursorUpForward(dispatch, pageUuid, uuid, state, editorState);
+      break;
+    
+    case keyCommandConst.moveCursorDown:
+      handleKeyCommand_moveCursorDown(dispatch, pageUuid, uuid, state, editorState);
+      break;
+    
+    case keyCommandConst.moveCursorDownBackward:
+      handleKeyCommand_moveCursorDownBackward(dispatch, pageUuid, uuid, state, editorState);
+      break;
+    
+    case keyCommandConst.selectUp:
+      break;
+    
+    case keyCommandConst.selectDown:
+      break;
+
+    default:
+      break;
+  }
+
+  let res = customFunc();
+  if (res) return res;
+  return handleKeyCommand_default(dispatch, command, uuid, editorState);;
+};

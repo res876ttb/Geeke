@@ -344,9 +344,9 @@ export function getPreviousBlock(state, pageUuid, blockUuid) {
  * @param {state} state Redux State, which should be state.editor.
  * @param {string} pageUuid UUID of the focused page.
  * @param {string} blockUuid UUID of the block to find the next block.
- * @param {boolean} canChild Whether the next block can be the child of this block. Default value is true.
+ * @param {boolean} canBeChild Whether the next block can be the child of this block. Default value is true.
  */
-export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
+export function getNextBlock(state, pageUuid, blockUuid, canBeChild=true) {
   let parentUuid = state.blockParents[blockUuid];
 
   if (!state.cachedBlocks[parentUuid] && !state.cachedPages[parentUuid]) {
@@ -354,7 +354,7 @@ export function getNextBlock(state, pageUuid, blockUuid, canChild=true) {
     return undefined;
   }
 
-  if (canChild && state.cachedBlocks[blockUuid].blocks.length > 0) {
+  if (canBeChild && state.cachedBlocks[blockUuid].blocks.length > 0) {
     return state.cachedBlocks[blockUuid].blocks[0];
   }
 
