@@ -23,6 +23,7 @@ import {
  *************************************************/
 import BasicBlock from './BasicBlock';
 import PageTitle from './PageTitle';
+import BlockSelector from './BlockSelector';
 
 /*************************************************
  * Styles
@@ -70,6 +71,7 @@ const Page = props => {
   return (
     <div>
       <PageTitle uuid={uuid} />
+      <BlockSelector pageId={uuid} />
       {blocks}
     </div>
   )

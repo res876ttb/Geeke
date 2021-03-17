@@ -28,9 +28,11 @@ export const blockType = {
 }
 
 // Cursor move direction
-export const cursorDirection = {
+export const selectDirection = {
   up: 0,
   down: 1,
+  left: 2,
+  right: 3,
 };
 
 const type = null;
@@ -428,6 +430,10 @@ export function deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, deleteC
   _parseBlockParents(dispatch, pageUuid);
 }
 
+export function selectBlock(dispatch, pageUuid, direction) {
+  _selectBlock(dispatch, pageUuid, direction);
+}
+
 /*************************************************
  * MIDDLE FUNCTION
  *************************************************/
@@ -681,6 +687,12 @@ export function _deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, delete
       delete state.cachedBlocks[blockUuid];
     }
     return state;
+  }});
+}
+
+export function _selectBlock(dispatch, pageUuid, direction) {
+  dispatch({type, callback: state => {
+
   }});
 }
 
