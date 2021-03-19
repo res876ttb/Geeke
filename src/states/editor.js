@@ -141,6 +141,7 @@ const initState = {
   cachedBlocks: {},
   blockParents: {},
   focusedBlock: {},
+  selectedBlocks: {},
   pageTree: {
     root: {},
     rLink: {}, // reverse link
@@ -430,6 +431,14 @@ export function deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, deleteC
   _parseBlockParents(dispatch, pageUuid);
 }
 
+export function enterSelectionMode(dispatch, pageUuid, blockUuid) {
+  _enterSelectionMode(dispatch, pageUuid, blockUuid);
+}
+
+export function escapeSelectionMode(dispatch, pageUuid, direction) {
+  _escapeSelectionMode(dispatch, pageUuid, direction);
+}
+
 export function selectBlock(dispatch, pageUuid, direction) {
   _selectBlock(dispatch, pageUuid, direction);
 }
@@ -690,9 +699,85 @@ export function _deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, delete
   }});
 }
 
+export function _enterSelectionMode(dispatch, pageUuid, blockUuid) {
+  dispatch({type, callback: state => {
+    state.selectedBlocks[pageUuid] = {
+      anchorUuid: blockUuid,
+      focusUuid: blockUuid,
+      blocks: [blockUuid],
+    };
+
+    return state;
+  }});
+}
+
+export function _escapeSelectionMode(dispatch, pageUuid, direction) {
+  dispatch({type, callback: state => {
+    return state;
+  }});
+}
+
 export function _selectBlock(dispatch, pageUuid, direction) {
   dispatch({type, callback: state => {
+    let selectedBlocks = state.selectedBlocks[pageUuid];
 
+    switch (direction) {
+      case selectDirection.up: {
+        let parentUuid = state.blockParents[selectedBlocks.focusUuid];
+        let previousUuid = getPreviousBlock(state, pageUuid, selectedBlocks.focusUuid);
+
+        if (previousUuid === parentUuid) {
+          // Remove the blocks that is the child of the previous block
+          let toRemove = [];
+          for (let i = 0; i < selectedBlocks.blocks.length; i++) {
+            if (state.blockParents[selectedBlocks.blocks[i]] === parentUuid) {
+              toRemove.push(i);
+            }
+          }
+          for (let i = toRemove.length - 1; i >= 0; i--) {
+            selectedBlocks.blocks.splice(toRemove[i], 1);
+          }
+
+          // If anchor or focus block is child of previou block, then set focus/anchor block as previous block
+          if (selectedBlocks.blocks.indexOf(selectedBlocks.focusUuid) === -1) {
+            selectedBlocks.focusUuid = previousUuid;
+          }
+          if (selectedBlocks.blocks.indexOf(selectedBlocks.anchorUuid) === -1) {
+            selectedBlocks.anchorUuid = previousUuid;
+          }
+
+          // Put the previous block into selectedBlocks
+          selectedBlocks.blocks.push(parentUuid);
+        } else {
+          if (selectedBlocks.blocks.indexOf(previousUuid) !== -1) {
+            if (selectedBlocks.focusUuid !== previousUuid) {
+              // Previous block has been in current selection. As a result, this movement is to remove the current focus block.
+              let focusOffset = selectedBlocks.blocks.indexOf(selectedBlocks.focusUuid);
+              selectedBlocks.splice(focusOffset, 1);
+              selectedBlocks.focusUuid = previousUuid;
+            } // Else: current block is the first block. Do not need to do anything.
+          } else {
+            // Previous block is not in current selection. As a result, this movement is to add a new block into current selection range.
+            selectedBlocks.blocks.push(previousUuid);
+            selectedBlocks.focusUuid = previousUuid;
+          }
+        }
+      } break;
+
+      case selectDirection.down:
+        break;
+
+      case selectDirection.left:
+        break;
+
+      case selectDirection.right:
+        break;
+
+      default:
+        return state;
+    }
+
+    return state;
   }});
 }
 
