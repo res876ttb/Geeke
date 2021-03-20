@@ -781,8 +781,31 @@ export function _selectBlock(dispatch, pageUuid, direction) {
         }
       } break;
 
-      case selectDirection.left:
-        break;
+      case selectDirection.left: {
+        let parentUuid = state.blockParents[selectedBlocks.focusUuid];
+
+        // Remove the blocks that is the child of the parent block
+        let toRemove = [];
+        for (let i = 0; i < selectedBlocks.blocks.length; i++) {
+          if (state.blockParents[selectedBlocks.blocks[i]] === parentUuid) {
+            toRemove.push(i);
+          }
+        }
+        for (let i = toRemove.length - 1; i >= 0; i--) {
+          selectedBlocks.blocks.splice(toRemove[i], 1);
+        }
+
+        // If anchor or focus block is child of the parent block, then set focus/anchor block as the parent block
+        if (selectedBlocks.blocks.indexOf(selectedBlocks.focusUuid) === -1) {
+          selectedBlocks.focusUuid = parentUuid;
+        }
+        if (selectedBlocks.blocks.indexOf(selectedBlocks.anchorUuid) === -1) {
+          selectedBlocks.anchorUuid = parentUuid;
+        }
+
+        // Put the previous block into selectedBlocks
+        selectedBlocks.blocks.push(parentUuid);
+      } break;
 
       case selectDirection.right:
         break;
