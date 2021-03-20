@@ -1138,4 +1138,77 @@ describe('Test _selectBlock', () => {
       expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(4))).not.toBe(-1);
     })})})});
   });
+
+  test('Down, all the same level', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(2)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+      expect(state.selectedBlocks[pageUuids(1)].anchorUuid).toBe(blockUuids(2));
+      expect(state.selectedBlocks[pageUuids(1)].focusUuid).toBe(blockUuids(3));
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(2))).not.toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(3))).not.toBe(-1);
+    })})});
+  });
+
+  test('Down, bump into the last block', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(3)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+      expect(state.selectedBlocks[pageUuids(1)].anchorUuid).toBe(blockUuids(3));
+      expect(state.selectedBlocks[pageUuids(1)].focusUuid).toBe(blockUuids(4));
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(3))).not.toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(4))).not.toBe(-1);
+    })})})});
+  });
+
+  test('Up, different level, more to less', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+      },
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(2)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+      expect(state.selectedBlocks[pageUuids(1)].anchorUuid).toBe(blockUuids(2));
+      expect(state.selectedBlocks[pageUuids(1)].focusUuid).toBe(blockUuids(4));
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(2))).not.toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(3))).not.toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(4))).not.toBe(-1);
+    })})})});
+  });
+
+  test('Up, different level, less to more to less', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {
+          [blockUuids(3)]: {},
+        },
+      },
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(2)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+      expect(state.selectedBlocks[pageUuids(1)].anchorUuid).toBe(blockUuids(2));
+      expect(state.selectedBlocks[pageUuids(1)].focusUuid).toBe(blockUuids(4));
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(2))).not.toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(4))).not.toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.length).toBe(2);
+    })})})});
+  });
 });

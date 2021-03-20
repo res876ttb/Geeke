@@ -764,8 +764,22 @@ export function _selectBlock(dispatch, pageUuid, direction) {
         }
       } break;
 
-      case selectDirection.down:
-        break;
+      case selectDirection.down: {
+        let nextUuid = getNextBlock(state, pageUuid, selectedBlocks.focusUuid, false);
+
+        if (selectedBlocks.blocks.indexOf(nextUuid) !== -1) {
+          if (selectedBlocks.focusUuid !== nextUuid) {
+            // Next block has been in current selection. As a result, this movement is to remove the current focus block.
+            let focusOffset = selectedBlocks.blocks.indexOf(selectedBlocks.focusUuid);
+            selectedBlocks.splice(focusOffset, 1);
+            selectedBlocks.focusUuid = nextUuid;
+          } // Else: current block is the last block. Do not need to do anything.
+        } else {
+          // Next block is not in current selection. As a result, this movement is to add a new block into current selection range.
+          selectedBlocks.blocks.push(nextUuid);
+          selectedBlocks.focusUuid = nextUuid;
+        }
+      } break;
 
       case selectDirection.left:
         break;
