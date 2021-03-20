@@ -808,9 +808,21 @@ export function _selectBlock(dispatch, pageUuid, direction) {
       } break;
 
       case selectDirection.right:
+        if (state.cachedBlocks[selectedBlocks.focusUuid].blocks.length > 0) {
+          // If this block has children blocks, then just focus the first child block.
+          let firstChildUuid = state.cachedBlocks[selectedBlocks.focusUuid].blocks[0];
+          selectedBlocks.focusUuid = firstChildUuid;
+          selectedBlocks.anchorUuid = firstChildUuid;
+          selectedBlocks.blocks = [firstChildUuid];
+        } else {
+          // Just select current focused block
+          selectedBlocks.anchorUuid = selectedBlocks.focusUuid;
+          selectedBlocks.blocks = [selectedBlocks.focusUuid];
+        }
         break;
 
       default:
+        console.error(`Unknown select direction: ${direction}`);
         return state;
     }
 
