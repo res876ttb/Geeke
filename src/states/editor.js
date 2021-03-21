@@ -431,14 +431,34 @@ export function deleteBlocks(dispatch, pageUuid, parentUuid, blockUuids, deleteC
   _parseBlockParents(dispatch, pageUuid);
 }
 
+/**
+ * @function enterSelectionMode
+ * @description Enter selection mode.
+ * @param {function} dispatch 
+ * @param {string} pageUuid UUID of the page that enters selection mode.
+ * @param {string} blockUuid UUID of the fisrt selected block.
+ */
 export function enterSelectionMode(dispatch, pageUuid, blockUuid) {
   _enterSelectionMode(dispatch, pageUuid, blockUuid);
 }
 
-export function escapeSelectionMode(dispatch, pageUuid, direction) {
-  _escapeSelectionMode(dispatch, pageUuid, direction);
+/**
+ * @function escapeSelectionMode
+ * @description Escape selection mode.
+ * @param {function} dispatch 
+ * @param {string} pageUuid UUID of the page that escapes selection mode.
+ */
+export function escapeSelectionMode(dispatch, pageUuid) {
+  _escapeSelectionMode(dispatch, pageUuid);
 }
 
+/**
+ * @function selectBlock
+ * @description Select/unselecte new block with direction.
+ * @param {function} dispatch 
+ * @param {string} pageUuid UUID of the page that change selection.
+ * @param {selectDirection} direction Direction of new selection.
+ */
 export function selectBlock(dispatch, pageUuid, direction) {
   _selectBlock(dispatch, pageUuid, direction);
 }
@@ -706,16 +726,24 @@ export function _enterSelectionMode(dispatch, pageUuid, blockUuid) {
       focusUuid: blockUuid,
       blocks: [blockUuid],
     };
+    state.focusedBlock[pageUuid] = `${pageUuid}_blockSelector`;
 
     return state;
   }});
 }
 
-export function _escapeSelectionMode(dispatch, pageUuid, direction) {
+export function _escapeSelectionMode(dispatch, pageUuid) {
   dispatch({type, callback: state => {
+    state.selectedBlocks[pageUuid] = {
+      anchorUuid: state.selectedBlocks[pageUuid].focusUuid,
+      focusUuid: state.selectedBlocks[pageUuid].focusUuid,
+      blocks: [state.selectedBlocks[pageUuid].focusUuid],
+    };
+    state.focusedBlock[pageUuid] = state.selectedBlocks[pageUuid].focusUuid;
+
     return state;
   }});
-}
+};
 
 export function _selectBlock(dispatch, pageUuid, direction) {
   dispatch({type, callback: state => {
@@ -753,13 +781,32 @@ export function _selectBlock(dispatch, pageUuid, direction) {
             if (selectedBlocks.focusUuid !== previousUuid) {
               // Previous block has been in current selection. As a result, this movement is to remove the current focus block.
               let focusOffset = selectedBlocks.blocks.indexOf(selectedBlocks.focusUuid);
-              selectedBlocks.splice(focusOffset, 1);
+              selectedBlocks.blocks.splice(focusOffset, 1);
               selectedBlocks.focusUuid = previousUuid;
             } // Else: current block is the first block. Do not need to do anything.
           } else {
-            // Previous block is not in current selection. As a result, this movement is to add a new block into current selection range.
-            selectedBlocks.blocks.push(previousUuid);
-            selectedBlocks.focusUuid = previousUuid;
+            // Check whether previous block is selected
+            let selected = false;
+            let c = previousUuid;
+            while (c !== pageUuid) {
+              if (selectedBlocks.blocks.indexOf(c) !== -1) {
+                selected = true;
+                break;
+              }
+
+              c = state.blockParents[c];
+            }
+
+            if (selected) {
+              // One of the ancestors of the previous block is in current selection. As a result, set focus block as this ancestor and do not add this block into the list of selected blocks, and remove the previous focus block.
+              let focusOffset = selectedBlocks.blocks.indexOf(selectedBlocks.focusUuid);
+              selectedBlocks.blocks.splice(focusOffset, 1);
+              selectedBlocks.focusUuid = c;
+            } else {
+              // Previous block is not in current selection. As a result, this movement is to add a new block into current selection range.
+              selectedBlocks.blocks.push(previousUuid);
+              selectedBlocks.focusUuid = previousUuid;
+            }
           }
         }
       } break;
@@ -771,7 +818,7 @@ export function _selectBlock(dispatch, pageUuid, direction) {
           if (selectedBlocks.focusUuid !== nextUuid) {
             // Next block has been in current selection. As a result, this movement is to remove the current focus block.
             let focusOffset = selectedBlocks.blocks.indexOf(selectedBlocks.focusUuid);
-            selectedBlocks.splice(focusOffset, 1);
+            selectedBlocks.blocks.splice(focusOffset, 1);
             selectedBlocks.focusUuid = nextUuid;
           } // Else: current block is the last block. Do not need to do anything.
         } else {
