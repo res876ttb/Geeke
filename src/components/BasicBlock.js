@@ -21,6 +21,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
   blockType,
   updateContent,
+  removeBlockSelection,
 } from '../states/editor';
 import {
   defaultKeyboardHandlingConfig,
@@ -56,6 +57,7 @@ const BasicBlock = props => {
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
   const dispatch = useDispatch();
   const editor = useRef(null);
+  const selectedBlock = state.selectedBlocks[pageUuid].blocks.indexOf(uuid) > -1;
 
   const focusedBlock = state.focusedBlock[pageUuid];
   const focus = uuid === focusedBlock;
@@ -74,14 +76,14 @@ const BasicBlock = props => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (editor.current) {
+    if (editor.current && focusedBlock) {
       if (focus) {
         editor.current.focus();
       } else {
         editor.current.blur();
       }
     }
-  }, [focus]);
+  }, [focus, focusedBlock]);
 
   const mapKeyToEditorCommand = e => {
     return _mapKeyToEditorCommand(e, {...defaultKeyboardHandlingConfig}, editorState, isFirstBlock);
@@ -89,6 +91,10 @@ const BasicBlock = props => {
 
   const handleKeyCommand = (command, editorState) => {
     return _handleKeyCommand(dispatch, pageUuid, parentUuid, uuid, state, editorState, command);
+  }
+
+  const handleRemoveBlockSelection = () => {
+    removeBlockSelection(dispatch, pageUuid);
   }
 
   const blocks = 
@@ -112,7 +118,7 @@ const BasicBlock = props => {
   </div>;
 
   return (
-    <>
+    <div className={selectedBlock ? ' geeke-selectedBlock' : ''}>
       <div className='test-outline'>
         {
           editorState === '' ? null :
@@ -122,6 +128,7 @@ const BasicBlock = props => {
             onChange={newEditorState => updateEditorState(newEditorState)}
             keyBindingFn={mapKeyToEditorCommand}
             handleKeyCommand={handleKeyCommand}
+            onFocus={handleRemoveBlockSelection}
           />
         }
       </div>
@@ -131,7 +138,7 @@ const BasicBlock = props => {
           {blocks}
         </div> : null
       }
-    </>
+    </div>
   )
 }
 

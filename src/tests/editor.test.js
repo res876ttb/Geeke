@@ -1212,7 +1212,7 @@ describe('Test _selectBlock', () => {
     })})})});
   });
 
-  test('Left', () => {
+  test('Left, non root', () => {
     createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
       [blockUuids(1)]: {},
       [blockUuids(2)]: {
@@ -1228,6 +1228,25 @@ describe('Test _selectBlock', () => {
       expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(-1);
       expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(4))).toBe(-1);
     })})});
+  });
+
+  test('Left, root', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {
+        [blockUuids(3)]: {},
+      },
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(2)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.left], state => {
+      expect(state.selectedBlocks[pageUuids(1)].anchorUuid).toBe(blockUuids(4));
+      expect(state.selectedBlocks[pageUuids(1)].focusUuid).toBe(blockUuids(4));
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(2))).toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(-1);
+      expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(4))).toBe(0);
+    })})})});
   });
 
   test('Right, no child', () => {

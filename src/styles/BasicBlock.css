@@ -7,3 +7,7 @@
 .geeke-indent {
   padding-left: 2rem;
 }
+
+.geeke-selectedBlock {
+  background-color: rgba(2, 141, 255, 0.2);
+}

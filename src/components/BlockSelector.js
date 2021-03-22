@@ -17,9 +17,12 @@ import {useDispatch, useSelector} from 'react-redux';
  * Utils & States
  *************************************************/
 import {
-  selectBlock,
-  selectDirection,
+  setFocusedBlock,
 } from '../states/editor';
+import {
+  keyCommandConst,
+  handleKeyCommand as _handleKeyCommand,
+} from '../utils/BlockKeyboardUtils';
 
 /*************************************************
  * Import Components
@@ -33,18 +36,12 @@ import '../styles/BlockSelector.css';
 /*************************************************
  * Constant
  *************************************************/
-const selectKey = {
-  selectUp: 1,
-  selectDown: 2,
-  selectLeft: 3,
-  selectRight: 4,
-};
 
 /*************************************************
  * Main components
  *************************************************/
 const BasicBlock = props => {
-  const pageUuid = props.pageUuid;
+  const pageUuid = props.pageId;
   const uuid = pageUuid + '_blockSelector';
 
   const state = useSelector(state => state.editor);
@@ -68,41 +65,23 @@ const BasicBlock = props => {
   const mapKeyToEditorCommand = e => {
     switch (e.keyCode) {
       case 37: // Arrow key left
-        return selectKey.selectLeft;
+        return keyCommandConst.selectLeft;
       case 38: // Arrow key Up
-        return selectKey.selectUp;
+        return keyCommandConst.selectUp;
       case 39: // Arrow key right
-        return selectKey.selectRight;
+        return keyCommandConst.selectRight;
       case 40: // Arrow key Down
-        return selectKey.selectDown;
+        return keyCommandConst.selectDown;
+      case 27: // Escape
+      case 13: // Enter
+        return keyCommandConst.escapeSelectionMode;
       default:
         return null;
     }
   };
 
   const handleKeyCommand = (command, editorState) => {
-    switch (command) {
-      case selectKey.selectLeft:
-        selectBlock(dispatch, pageUuid, selectDirection.left);
-        break;
-      
-      case selectKey.selectUp:
-        selectBlock(dispatch, pageUuid, selectDirection.up);
-        break;
-      
-      case selectKey.selectRight:
-        selectBlock(dispatch, pageUuid, selectDirection.right);
-        break;
-      
-      case selectKey.selectDown:
-        selectBlock(dispatch, pageUuid, selectDirection.down);
-        break;
-      
-      default:
-        break;
-    }
-
-    return null;
+    return _handleKeyCommand(dispatch, pageUuid, pageUuid, uuid, state, editorState, command);
   }
 
   return (
@@ -116,6 +95,7 @@ const BasicBlock = props => {
             onChange={setEditorState}
             keyBindingFn={mapKeyToEditorCommand}
             handleKeyCommand={handleKeyCommand}
+            onBlur={() => {setFocusedBlock(dispatch, pageUuid, null)}}
           />
         }
       </div>

@@ -23,6 +23,10 @@ import {
   setLessIndent,
   setMoreIndent,
   updateContent,
+  enterSelectionMode,
+  escapeSelectionMode,
+  selectBlock,
+  selectDirection,
 } from '../states/editor';
 
 /*************************************************
@@ -33,9 +37,10 @@ export const defaultKeyboardHandlingConfig = {
   indentBlock: true,
   deleteBlock: true,
   moveCursor: true,
+  selectionMode: true,
 };
 
-const keyCommandConst = {
+export const keyCommandConst = {
   lessIndent: 1,
   moreIndent: 2,
   newBlock: 3,
@@ -43,10 +48,14 @@ const keyCommandConst = {
   moveCursorDown: 5,
   selectUp: 6,
   selectDown: 7,
-  deleteBlockBackward: 8,
-  deleteBlockForward: 9,
-  moveCursorUpForward: 10,
-  moveCursorDownBackward: 11,
+  selectLeft: 8,
+  selectRight: 9,
+  deleteBlockBackward: 10,
+  deleteBlockForward: 11,
+  moveCursorUpForward: 12,
+  moveCursorDownBackward: 13,
+  enterSelectionMode: 14,
+  escapeSelectionMode: 15,
 };
 
 /*************************************************
@@ -124,7 +133,7 @@ const mapKeyToEditorCommand_arrowLeft = (e, config, editorState) => {
 
   if (firstBlockKey === focusBlockKey && focusOffset === 0) {
     if (e.shiftKey) {
-      // Switch to block select mode
+      return keyCommandConst.enterSelectionMode;
     } else {
       if (config.moveCursor) {
         return keyCommandConst.moveCursorUpForward;
@@ -142,7 +151,7 @@ const mapKeyToEditorCommand_arrowUp = (e, config, editorState) => {
   const focusBlockKey = selectionState.getFocusKey();
 
   if (e.shiftKey) {
-    // return keyCommandConst.selectUp;
+    return keyCommandConst.enterSelectionMode;
   } else {
     if (firstBlockKey === focusBlockKey) {
       if (config.moveCursor) {
@@ -163,7 +172,7 @@ const mapKeyToEditorCommand_arrowRight = (e, config, editorState) => {
 
   if (lastBlockKey === focusBlockKey && focusOffset === lastBlock.getLength()) {
     if (e.shiftKey) {
-      // Switch to block selection mode
+      return keyCommandConst.enterSelectionMode;
     } else {
       if (config.moveCursor) {
         return keyCommandConst.moveCursorDownBackward;
@@ -181,7 +190,7 @@ const mapKeyToEditorCommand_arrowDown = (e, config, editorState) => {
   const focusBlockKey = selectionState.getFocusKey();
 
   if (e.shiftKey) {
-    // return keyCommandConst.selectDown;
+    return keyCommandConst.enterSelectionMode;
   } else {
     if (lastBlockKey === focusBlockKey) {
       if (config.moveCursor) {
@@ -190,7 +199,14 @@ const mapKeyToEditorCommand_arrowDown = (e, config, editorState) => {
     }
   }
   return getDefaultKeyBinding(e);
-}
+};
+
+const mapKeyToEditorCommand_escape = (e, config) => {
+  if (config.selectionMode) {
+    return keyCommandConst.enterSelectionMode;
+  }
+  return getDefaultKeyBinding(e);
+};
 
 export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock = false, customFunc = () => undefined) => {
   switch (e.keyCode) {
@@ -217,6 +233,9 @@ export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock = fal
 
     case 40: // Arrow key Down
       return mapKeyToEditorCommand_arrowDown(e, config, editorState);
+    
+    case 27: // Escape
+      return mapKeyToEditorCommand_escape(e, config);
 
     default:
       break;
@@ -478,6 +497,43 @@ const handleKeyCommand_default = (dispatch, command, uuid, editorState) => {
   }
 };
 
+const handleKeyCommand_enterSelectionMode = (dispatch, pageUuid, uuid) => {
+  enterSelectionMode(dispatch, pageUuid, uuid);
+};
+
+const handleKeyCommand_escapeSelectionMode = (dispatch, pageUuid) => {
+  escapeSelectionMode(dispatch, pageUuid);
+};
+
+const handleKeyCommand_selectBlock = (dispatch, pageUuid, uuid, state, direction) => {
+  if (state.focusedBlock[pageUuid].indexOf('_blockSelector') === -1) {
+    // Current mode is not select block. Enter block selection mode.
+    handleKeyCommand_enterSelectionMode(dispatch, pageUuid, uuid);
+  } else {
+    // Current mode is in block selection mode.
+    switch (direction) {
+      case keyCommandConst.selectUp:
+        selectBlock(dispatch, pageUuid, selectDirection.up);
+        break;
+
+      case keyCommandConst.selectDown:
+        selectBlock(dispatch, pageUuid, selectDirection.down);
+        break;
+
+      case keyCommandConst.selectLeft:
+        selectBlock(dispatch, pageUuid, selectDirection.left);
+        break;
+
+      case keyCommandConst.selectRight:
+        selectBlock(dispatch, pageUuid, selectDirection.right);
+        break;
+      
+      default:
+        break;
+    }
+  }
+};
+
 export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, editorState, command, customFunc = () => undefined) => {
   switch (command) {
     case keyCommandConst.moreIndent:
@@ -515,11 +571,20 @@ export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, ed
     case keyCommandConst.moveCursorDownBackward:
       handleKeyCommand_moveCursorDownBackward(dispatch, pageUuid, uuid, state, editorState);
       break;
-    
-    case keyCommandConst.selectUp:
+
+    case keyCommandConst.enterSelectionMode:
+      handleKeyCommand_enterSelectionMode(dispatch, pageUuid, uuid);
       break;
     
+    case keyCommandConst.escapeSelectionMode:
+      handleKeyCommand_escapeSelectionMode(dispatch, pageUuid);
+      break;
+    
+    case keyCommandConst.selectUp:
     case keyCommandConst.selectDown:
+    case keyCommandConst.selectLeft:
+    case keyCommandConst.selectRight:
+      handleKeyCommand_selectBlock(dispatch, pageUuid, uuid, state, command);
       break;
 
     default:
@@ -530,3 +595,5 @@ export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, ed
   if (res) return res;
   return handleKeyCommand_default(dispatch, command, uuid, editorState);;
 };
+
+//// End of handleKeyCommand
