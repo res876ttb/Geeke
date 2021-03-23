@@ -479,6 +479,46 @@ export function removeBlockSelection(dispatch, pageUuid) {
   _removeBlockSelection(dispatch, pageUuid);
 }
 
+export function isSelectionDirectionUp(state, pageUuid) {
+  let selectedBlock = state.selectedBlocks[pageUuid];
+  let focusUuid = selectedBlock.focusUuid;
+  let anchorUuid = selectedBlock.anchorUuid;
+
+  // Find ancestor list
+  const getAncestors = cuuid => {
+    let puuid = state.blockParents[cuuid];
+    if (puuid === pageUuid) return [cuuid];
+
+    let ancestorList = getAncestors(puuid);
+    ancestorList.push(cuuid);
+    return ancestorList;
+  };
+
+  let focusAncestors = getAncestors(focusUuid);
+  let anchorAncestors = getAncestors(anchorUuid);
+
+  // Find deepest common ancestor
+  let depth = Math.min(focusAncestors.length, anchorAncestors.length);
+  if (focusAncestors[0] === anchorAncestors[0]) {
+    for (let i = 1; i < depth; i++) {
+      if (focusAncestors[i] !== anchorAncestors[i]) {
+        depth = i;
+        break;
+      }
+    }
+  } else {
+    depth = 0;
+  }
+
+  // Compare order
+  let commonAncestor = depth === 0 ? pageUuid : focusAncestors[depth - 1];
+  let blockList = depth === 0 ? state.cachedPages : state.cachedBlocks;
+  let focusIndex = blockList[commonAncestor].blocks.indexOf(focusAncestors[depth]);
+  let anchorIndex = blockList[commonAncestor].blocks.indexOf(anchorAncestors[depth]);
+
+  return focusIndex <= anchorIndex;
+}
+
 /*************************************************
  * MIDDLE FUNCTION
  *************************************************/

@@ -33,6 +33,7 @@ import {
   _selectBlock,
   _enterSelectionMode,
   selectDirection,
+  isSelectionDirectionUp,
 } from '../states/editor';
 
 /*************************************************
@@ -1367,5 +1368,127 @@ describe('Test _selectBlock', () => {
       expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(3))).toBe(-1);
       expect(state.selectedBlocks[pageUuids(1)].blocks.indexOf(blockUuids(4))).toBe(-1);
     })})})})});
+  });
+});
+
+describe('Test isSelectionDirectionUp', () => {
+  test('Same level at root, up', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(4)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).toBeTruthy();
+    })})})});
+  });
+
+  test('Same level at root, down', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {},
+      [blockUuids(3)]: {},
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(2)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).not.toBeTruthy();
+    })})})});
+  });
+
+  test('Same level not at root, up', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {},
+      },
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(4)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).toBeTruthy();
+    })})})});
+  });
+
+  test('Same level not at root, down', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {},
+      },
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(2)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).not.toBeTruthy();
+    })})})});
+  });
+
+  test('High low, up', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {},
+      [blockUuids(2)]: {
+        [blockUuids(3)]: {},
+        [blockUuids(4)]: {},
+      },
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(4)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).toBeTruthy();
+    })})})});
+  });
+
+  test('High low, down', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+      },
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(2)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.down], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).not.toBeTruthy();
+    })})})});
+  });
+
+  test('Low high, up', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {},
+        [blockUuids(3)]: {},
+      },
+      [blockUuids(4)]: {},
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(4)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).toBeTruthy();
+    })})})});
+  });
+
+  test('High low all not root, up', () => {
+    createPageWithBlocksAndParseParent(getInitState(), pageUuids(1), {
+      [blockUuids(1)]: {
+        [blockUuids(2)]: {
+          [blockUuids(3)]: {},
+          [blockUuids(4)]: {},
+        },
+        [blockUuids(5)]: {},
+      },
+    }, state => {
+    run(state, _enterSelectionMode,  [pageUuids(1), blockUuids(5)], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+    run(state, _selectBlock, [pageUuids(1), selectDirection.up], state => {
+      expect(isSelectionDirectionUp(state, pageUuids(1))).toBeTruthy();
+    })})})});
   });
 });
