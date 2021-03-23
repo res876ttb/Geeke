@@ -18,6 +18,7 @@ import {useDispatch, useSelector} from 'react-redux';
  *************************************************/
 import {
   setFocusedBlock,
+  isSelectionDirectionUp,
 } from '../states/editor';
 import {
   keyCommandConst,
@@ -65,13 +66,32 @@ const BasicBlock = props => {
   const mapKeyToEditorCommand = e => {
     switch (e.keyCode) {
       case 37: // Arrow key left
-        return keyCommandConst.selectLeft;
+        if (e.shiftKey)
+          return keyCommandConst.selectLeft; // eslint-disable-next-line
       case 38: // Arrow key Up
-        return keyCommandConst.selectUp;
+        if (e.shiftKey)
+          return keyCommandConst.selectUp;
+        
+      // if shift is not pressed, then go to the first block
+      console.log(isSelectionDirectionUp(state, pageUuid));
+      if (isSelectionDirectionUp(state, pageUuid))
+        return keyCommandConst.selectFocus;
+      else 
+        return keyCommandConst.selectAnchor;
+
       case 39: // Arrow key right
-        return keyCommandConst.selectRight;
+        if (e.shiftKey)
+          return keyCommandConst.selectRight; // eslint-disable-next-line
       case 40: // Arrow key Down
-        return keyCommandConst.selectDown;
+        if (e.shiftKey)
+          return keyCommandConst.selectDown;
+      
+      // if shift is not pressed, then go to the last block
+      if (isSelectionDirectionUp(state, pageUuid))
+        return keyCommandConst.selectAnchor;
+      else 
+        return keyCommandConst.selectFocus;
+
       case 27: // Escape
       case 13: // Enter
         return keyCommandConst.escapeSelectionMode;

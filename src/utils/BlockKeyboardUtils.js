@@ -56,6 +56,8 @@ export const keyCommandConst = {
   moveCursorDownBackward: 13,
   enterSelectionMode: 14,
   escapeSelectionMode: 15,
+  selectAnchor: 16,
+  selectFocus: 17,
 };
 
 /*************************************************
@@ -209,6 +211,9 @@ const mapKeyToEditorCommand_escape = (e, config) => {
 };
 
 export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock = false, customFunc = () => undefined) => {
+  let res = customFunc();
+  if (res) return res;
+
   switch (e.keyCode) {
     case 13: // Enter
       return mapKeyToEditorCommand_enter(e, config);
@@ -241,8 +246,6 @@ export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock = fal
       break;
   }
 
-  let res = customFunc();
-  if (res) return res;
   return getDefaultKeyBinding(e);
 };
 
@@ -534,7 +537,18 @@ const handleKeyCommand_selectBlock = (dispatch, pageUuid, uuid, state, direction
   }
 };
 
+const handleKeyCommand_selectAnchor = (dispatch, pageUuid, state) => {
+  setFocusedBlock(dispatch, pageUuid, state.selectedBlocks[pageUuid].anchorUuid);
+};
+
+const handleKeyCommand_selectFocus = (dispatch, pageUuid, state) => {
+  setFocusedBlock(dispatch, pageUuid, state.selectedBlocks[pageUuid].focusUuid);
+};
+
 export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, editorState, command, customFunc = () => undefined) => {
+  let res = customFunc();
+  if (res) return res;
+
   switch (command) {
     case keyCommandConst.moreIndent:
       handleKeyCommand_moreIndent(dispatch, pageUuid, uuid);
@@ -587,12 +601,18 @@ export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, ed
       handleKeyCommand_selectBlock(dispatch, pageUuid, uuid, state, command);
       break;
 
+    case keyCommandConst.selectAnchor:
+      handleKeyCommand_selectAnchor(dispatch, pageUuid, state);
+      break;
+
+    case keyCommandConst.selectFocus:
+      handleKeyCommand_selectFocus(dispatch, pageUuid, state);
+      break;
+
     default:
       break;
   }
 
-  let res = customFunc();
-  if (res) return res;
   return handleKeyCommand_default(dispatch, command, uuid, editorState);;
 };
 

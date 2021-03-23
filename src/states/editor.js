@@ -479,6 +479,13 @@ export function removeBlockSelection(dispatch, pageUuid) {
   _removeBlockSelection(dispatch, pageUuid);
 }
 
+/**
+ * @function isSelectionDirectionUp
+ * @description Check whether selection direction is up
+ * @param {state} state Reducer state object.
+ * @param {string} pageUuid UUID of the page you want to find selection direction.
+ * @returns 
+ */
 export function isSelectionDirectionUp(state, pageUuid) {
   let selectedBlock = state.selectedBlocks[pageUuid];
   let focusUuid = selectedBlock.focusUuid;
