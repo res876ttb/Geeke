@@ -73,7 +73,6 @@ const BasicBlock = props => {
           return keyCommandConst.selectUp;
         
       // if shift is not pressed, then go to the first block
-      console.log(isSelectionDirectionUp(state, pageUuid));
       if (isSelectionDirectionUp(state, pageUuid))
         return keyCommandConst.selectFocus;
       else 

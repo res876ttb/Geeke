@@ -205,7 +205,7 @@ describe('Test test helper function createPageWithBlocks', () => {
     });
   });
 
-  test('2 levels page', () => {
+  test('2 levels blocks', () => {
     createPageWithBlocks(getInitState(), pageUuids(1), {
       [blockUuids(1)]: {
         [blockUuids(2)]: {}
@@ -222,7 +222,7 @@ describe('Test test helper function createPageWithBlocks', () => {
     });
   });
 
-  test('3 levels page', () => {
+  test('3 levels blocks', () => {
     createPageWithBlocks(getInitState(), pageUuids(1), {
       [blockUuids(1)]: {
         [blockUuids(2)]: {
