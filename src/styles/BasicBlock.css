@@ -1,11 +1,22 @@
-.test-outline {
-  border: solid 2px gray;
-  margin: 1rem;
-  padding: 0.5rem;
+.geeke-draggableWrapper {
+  height: 0px;
+  position: absolute;
+  top: 0.35rem;
+  left: 2rem;
+  transition-duration: 0.3s;
+}
+
+.geeke-blockWrapper {
+  position: relative;
+}
+
+.geeke-editorWrapper {
+  margin: 0.2rem 0px;
+  padding: 0.3rem 3rem;
 }
 
 .geeke-indent {
-  padding-left: 2rem;
+  padding-left: 1.6rem;
 }
 
 .geeke-selectedBlock {

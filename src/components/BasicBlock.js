@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Editor, 
   EditorState,
@@ -28,6 +28,9 @@ import {
   mapKeyToEditorCommand as _mapKeyToEditorCommand,
   handleKeyCommand as _handleKeyCommand,
 } from '../utils/BlockKeyboardUtils';
+import {
+  onBasicBlockDragStart
+} from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Import Components
@@ -46,19 +49,24 @@ import '../styles/BasicBlock.css';
  * Main components
  *************************************************/
 const BasicBlock = props => {
+  // Props
   const uuid = props.dataId;
   const parentUuid = props.parentId;
   const pageUuid = props.pageId;
   const isFirstBlock = props.isFirstBlock;
 
+  // States & Reducers
   const state = useSelector(state => state.editor);
   const block = useSelector(state => state.editor.cachedBlocks[uuid]);
   const editorState = useSelector(state => state.editor.cachedBlocks[uuid].content);
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
   const dispatch = useDispatch();
   const editor = useRef(null);
-  const selectedBlock = state.selectedBlocks[pageUuid].blocks.indexOf(uuid) > -1;
+  const [hover, setHover] = useState(false);
 
+  // Constants
+  const selectedBlock = state.selectedBlocks[pageUuid].blocks.indexOf(uuid) > -1;
+  const readOnly = state.tempLock[pageUuid] ? true : false;
   const focusedBlock = state.focusedBlock[pageUuid];
   const focus = uuid === focusedBlock;
 
@@ -118,26 +126,40 @@ const BasicBlock = props => {
   </div>;
 
   return (
-    <div className={selectedBlock ? ' geeke-selectedBlock' : ''}>
-      <div className='test-outline'>
+    <div
+      className={'geeke-blockWrapper' + (selectedBlock ? ' geeke-selectedBlock' : '')}
+      draggable='true'
+      onDragStart={e => {e.stopPropagation(); onBasicBlockDragStart();}}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onMouseMove={() => setHover(true)}
+      onKeyDown={() => setHover(false)}
+    >
+      <div className={'geeke-draggableWrapper' + (hover ? '' : ' geeke-invisible')}>
+        <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
+      </div>
+      <div draggable='true' onDragStart={e => e.preventDefault()}>
+        <div className='geeke-editorWrapper'>
+          {
+            editorState === '' ? null :
+            <Editor 
+              ref={editor}
+              editorState={editorState}
+              onChange={newEditorState => updateEditorState(newEditorState)}
+              keyBindingFn={mapKeyToEditorCommand}
+              handleKeyCommand={handleKeyCommand}
+              onFocus={handleRemoveBlockSelection}
+              readOnly={readOnly}
+            />
+          }
+        </div>
         {
-          editorState === '' ? null :
-          <Editor 
-            ref={editor}
-            editorState={editorState}
-            onChange={newEditorState => updateEditorState(newEditorState)}
-            keyBindingFn={mapKeyToEditorCommand}
-            handleKeyCommand={handleKeyCommand}
-            onFocus={handleRemoveBlockSelection}
-          />
+          block.blocks.length > 0 ?
+          <div className='geeke-indent'>
+            {blocks}
+          </div> : null
         }
       </div>
-      {
-        block.blocks.length > 0 ?
-        <div className='geeke-indent'>
-          {blocks}
-        </div> : null
-      }
     </div>
   )
 }

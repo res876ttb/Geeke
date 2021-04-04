@@ -105,7 +105,7 @@ const BasicBlock = props => {
 
   return (
     <>
-      <div className='test-selector'>
+      <div className='geeke-selector'>
         {
           editorState === '' ? null :
           <Editor 

@@ -148,6 +148,7 @@ const initState = {
   blockParents: {},
   focusedBlock: {},
   selectedBlocks: {},
+  tempLock: {},
   pageTree: {
     root: {},
     rLink: {}, // reverse link
@@ -524,6 +525,26 @@ export function isSelectionDirectionUp(state, pageUuid) {
   let anchorIndex = blockList[commonAncestor].blocks.indexOf(anchorAncestors[depth]);
 
   return focusIndex <= anchorIndex;
+}
+
+/**
+ * @function lockPage
+ * @description Lock the page to prevent the page to be edited accidently.
+ * @param {function} dispatch 
+ * @param {string} pageUuid UUID of the page you wnat to lock.
+ */
+export function lockPage(dispatch, pageUuid) {
+  _lockPage(dispatch, pageUuid);
+}
+
+/**
+ * @function unlockPage
+ * @description Unlock the page for contiuning editing.
+ * @param {function} dispatch 
+ * @param {String} pageUuid UUID of the page you want to unlock.
+ */
+export function unlockPage(dispatch, pageUuid) {
+  _unlockPage(dispatch, pageUuid);
 }
 
 /*************************************************
@@ -944,6 +965,24 @@ export function _selectBlock(dispatch, pageUuid, direction) {
       default:
         console.error(`Unknown select direction: ${direction}`);
         return state;
+    }
+
+    return state;
+  }});
+}
+
+function _lockPage(dispatch, pageUuid) {
+  dispatch({type, callback: state => {
+    state.tempLock[pageUuid] = 1;
+
+    return state;
+  }});
+}
+
+function _unlockPage(dispatch, pageUuid) {
+  dispatch({type, callback: state => {
+    if (pageUuid in state.tempLock) {
+      delete state.tempLock[pageUuid];
     }
 
     return state;
