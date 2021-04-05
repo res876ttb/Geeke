@@ -61,6 +61,7 @@ const Page = props => {
               pageId={uuid}
               parentId={uuid}
               isFirstBlock={idx === 0}
+              depth={0}
             />
           );
         

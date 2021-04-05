@@ -2,8 +2,8 @@
   height: 0px;
   position: absolute;
   top: 0.35rem;
-  left: 2rem;
   transition-duration: 0.3s;
+  cursor: -webkit-grab; cursor: grab;
 }
 
 .geeke-blockWrapper {
@@ -13,10 +13,6 @@
 .geeke-editorWrapper {
   margin: 0.2rem 0px;
   padding: 0.3rem 3rem;
-}
-
-.geeke-indent {
-  padding-left: 1.6rem;
 }
 
 .geeke-selectedBlock {

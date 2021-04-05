@@ -45,6 +45,10 @@ import '../styles/BasicBlock.css';
 /*************************************************
  * Constant
  *************************************************/
+import {
+  indentWidth,
+  draggableLeftPadding,
+} from '../constant';
 
 /*************************************************
  * Main components
@@ -55,6 +59,7 @@ const BasicBlock = props => {
   const parentUuid = props.parentId;
   const pageUuid = props.pageId;
   const isFirstBlock = props.isFirstBlock;
+  const depth = props.depth;
 
   // States & Reducers
   const state = useSelector(state => state.editor);
@@ -117,6 +122,7 @@ const BasicBlock = props => {
               pageId={pageUuid}
               parentId={uuid}
               isFirstBlock={idx === 0}
+              depth={depth + 1}
             />
           );
 
@@ -136,11 +142,14 @@ const BasicBlock = props => {
       onMouseMove={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, uuid);}}
       onKeyDown={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, null);}}
     >
-      <div className={'geeke-draggableWrapper' + (hover ? '' : ' geeke-invisible')}>
+      <div
+        className={'geeke-draggableWrapper' + (hover ? '' : ' geeke-invisible')}
+        style={{marginLeft: `${draggableLeftPadding + indentWidth * depth}rem`}}
+      >
         <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
       </div>
       <div draggable='true' onDragStart={e => e.preventDefault()}>
-        <div className='geeke-editorWrapper'>
+        <div className='geeke-editorWrapper' style={{marginLeft: `${indentWidth * depth}rem`}}>
           {
             editorState === '' ? null :
             <Editor 
@@ -156,9 +165,7 @@ const BasicBlock = props => {
         </div>
         {
           block.blocks.length > 0 ?
-          <div className='geeke-indent'>
-            {blocks}
-          </div> : null
+          <>{blocks}</> : null
         }
       </div>
     </div>
