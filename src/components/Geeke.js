@@ -13,7 +13,8 @@ import { useDispatch, useSelector } from 'react-redux';
  * Utils & States
  *************************************************/
 import { getRootPages } from '../utils/Sync';
-import { addPage, fetchRootPages } from '../states/editor';
+import { fetchRootPages } from '../states/editor';
+import { createFakePage } from '../utils/Mockup';
 
 /*************************************************
  * Import Components
@@ -39,9 +40,9 @@ const Geeke = () => {
       fetchRootPages(dispatch, rootPages);
     }
     
-    // For debug convenience
+    // Mock page (for debug convenience only)
     else {
-      addPage(dispatch, null);
+      createFakePage(dispatch);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

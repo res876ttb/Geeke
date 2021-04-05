@@ -10,10 +10,6 @@
 /*************************************************
  * FUNCTIONS TO TEST
  *************************************************/
-
-/*************************************************
- * REDUX REDUCER
- *************************************************/
 import {
   getInitState,
   getNewBlock,
@@ -35,70 +31,40 @@ import {
   selectDirection,
   isSelectionDirectionUp,
 } from '../states/editor';
+import {
+  runMockup,
+  getMockupPageUuid,
+  getMockupBlockUuid,
+  createMockupPageWithBlocks,
+  createMockupPageWithBlocksAndParseParent,
+} from '../utils/Mockup';
+
+/*************************************************
+ * REDUX REDUCER
+ *************************************************/
 
 /*************************************************
  * TEST HELPER FUNCTION
  *************************************************/
-const run = (state, testFunc, args, callback) => {
-  testFunc(action => {
-    state = action.callback(state);
-    callback(state);
-  }, ...args);
+export const run = (state, testFunc, args, callback) => {
+  runMockup(state, testFunc, args, callback);
 };
 
-const pageUuids = index => {
-  return index.toString();
-}
-
-const createPageWithBlocks = (state, pageUuid, blockStructure, callback) => {
-  const gvbi = (obj, i) => obj[Object.keys(obj)[i]]; // get value by index
-  const gkbi = (obj, i) => Object.keys(obj)[i];      // get key by index
-  const gl = obj => Object.keys(obj).length;         // get length
-
-  const createBlockUnderBlock = (i, state, parentUuid, partialStructure, callback) => {
-    if (i >= gl(partialStructure)) {
-      callback(state);
-      return;
-    }
-
-    run(state, _addBlock, [parentUuid, i === 0 ? null : gkbi(partialStructure, i - 1), gkbi(partialStructure, i)], state => {
-      createBlockUnderBlock(0, state, gkbi(partialStructure, i), gvbi(partialStructure, i), state => {
-        createBlockUnderBlock(i + 1, state, parentUuid, partialStructure, callback);
-      });
-    })
-  };
-
-  const createBlockAtRoot = (i, state, callback) => {
-    if (i >= gl(blockStructure)) {
-      callback(state);
-      return;
-    }
-
-    run(state, _addBlock, [pageUuid, gkbi(blockStructure, i - 1), gkbi(blockStructure, i)], state => {
-      createBlockUnderBlock(0, state, gkbi(blockStructure, i), gvbi(blockStructure, i), state => {
-        createBlockAtRoot(i + 1, state, callback);
-      });
-    });
-  };
-
-  run(state, _addPage, [pageUuid, gkbi(blockStructure, 0), null], state => {
-    createBlockUnderBlock(0, state, gkbi(blockStructure, 0), gvbi(blockStructure, 0), state => {
-      createBlockAtRoot(1, state, callback);
-    });
-  });
-}
-
-const createPageWithBlocksAndParseParent = (state, pageUuid, blockStructure, callback) => {
-  createPageWithBlocks(state, pageUuid, blockStructure, state => {
-    run(state, _parseBlockParents, [pageUuids(1)], state => {
-      callback(state);
-    })
-  });
+export const pageUuids = index => {
+  return getMockupPageUuid(index);
 };
 
-const blockUuids = index => {
-  return (100 + index).toString();
-}
+export const blockUuids = index => {
+  return getMockupBlockUuid(index);
+};
+
+export const createPageWithBlocks = (state, pageUuid, blockStructure, callback) => {
+  createMockupPageWithBlocks(state, pageUuid, blockStructure, callback);
+};
+
+export const createPageWithBlocksAndParseParent = (state, pageUuid, blockStructure, callback) => {
+  createMockupPageWithBlocksAndParseParent(state, pageUuid, blockStructure, callback);
+};
 
 /*************************************************
  * TEST CODE

@@ -48,6 +48,7 @@ import '../styles/BasicBlock.css';
 import {
   indentWidth,
   draggableLeftPadding,
+  editorLeftPadding,
 } from '../constant';
 
 /*************************************************
@@ -134,7 +135,7 @@ const BasicBlock = props => {
 
   return (
     <div
-      className={'geeke-blockWrapper' + (selectedBlock ? ' geeke-selectedBlock' : '')}
+      className='geeke-blockWrapper'
       draggable='true'
       onDragStart={e => {e.stopPropagation(); onBasicBlockDragStart();}}
       onMouseEnter={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, uuid);}}
@@ -149,10 +150,13 @@ const BasicBlock = props => {
         <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
       </div>
       <div draggable='true' onDragStart={e => e.preventDefault()}>
-        <div className='geeke-editorWrapper' style={{marginLeft: `${indentWidth * depth}rem`}}>
+        <div 
+          className={'geeke-editorWrapper' + (selectedBlock ? ' geeke-selectedBlock' : '')} 
+          style={{paddingLeft: `${editorLeftPadding + indentWidth * depth}rem`}}
+        >
           {
             editorState === '' ? null :
-            <Editor 
+            <Editor
               ref={editor}
               editorState={editorState}
               onChange={newEditorState => updateEditorState(newEditorState)}

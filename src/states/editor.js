@@ -210,6 +210,7 @@ export function addPage(dispatch, parentUuid) {
   let newPageId = newBlockId();
   _addPage(dispatch, newPageId, newBlockId(), parentUuid);
   _parseBlockParents(dispatch, newPageId);
+  return newPageId;
 }
 
 /**
@@ -1004,7 +1005,7 @@ function _unlockPage(dispatch, pageUuid) {
 function _setHoverBlock(dispatch, pageUuid, blockUuid) {
   dispatch({type, callback: state => {
     state.hoveredBlock[pageUuid] = blockUuid;
-    
+
     return state;
   }});
 }
