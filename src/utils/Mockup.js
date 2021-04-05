@@ -86,7 +86,14 @@ export const createMockupPageWithBlocksAndParseParent = (state, pageUuid, blockS
   });
 };
 
-export function createFakePage(dispatch) {
+export function createFakePage(dispatch, callback) {
+  let runDisaptch = state => {
+    dispatch({type: 'type', callback: () => {
+      state.focusedBlock[getMockupPageUuid(1)] = getMockupBlockUuid(1);
+      return state;
+    }});
+  };
+
   createMockupPageWithBlocksAndParseParent(getInitState(), getMockupPageUuid(1), {
     [getMockupBlockUuid(1)]: {},
     [getMockupBlockUuid(2)]: {
@@ -102,9 +109,8 @@ export function createFakePage(dispatch) {
     runMockup(state, _updateContent, [getMockupBlockUuid(2), contentOfBlock2], state => {
     runMockup(state, _updateContent, [getMockupBlockUuid(3), contentOfBlock3], state => {
     runMockup(state, _updateContent, [getMockupBlockUuid(4), contentOfBlock4], state => {
-      dispatch({type: 'type', callback: () => {
-        return state;
-      }});
+      if (callback) state = callback(state, runDisaptch);
+      else runDisaptch(state);
     })})})});
   });
 }
