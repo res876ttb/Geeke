@@ -151,6 +151,7 @@ const BasicBlock = props => {
       </div>
       <div draggable='true' onDragStart={e => e.preventDefault()}>
         <div 
+          // TODO: fix block selection display error...
           className={'geeke-editorWrapper' + (selectedBlock ? ' geeke-selectedBlock' : '')} 
           style={{paddingLeft: `${editorLeftPadding + indentWidth * depth}rem`}}
         >
