@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   Editor, 
   EditorState,
@@ -22,6 +22,7 @@ import {
   blockType,
   updateContent,
   removeBlockSelection,
+  setHoverBlock,
 } from '../states/editor';
 import {
   defaultKeyboardHandlingConfig,
@@ -62,13 +63,13 @@ const BasicBlock = props => {
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
   const dispatch = useDispatch();
   const editor = useRef(null);
-  const [hover, setHover] = useState(false);
 
   // Constants
   const selectedBlock = state.selectedBlocks[pageUuid].blocks.indexOf(uuid) > -1;
   const readOnly = state.tempLock[pageUuid] ? true : false;
   const focusedBlock = state.focusedBlock[pageUuid];
   const focus = uuid === focusedBlock;
+  const hover = uuid === state.hoveredBlock[pageUuid];
 
   const updateEditorState = newState => {
     updateContent(dispatch, uuid, newState);
@@ -130,10 +131,10 @@ const BasicBlock = props => {
       className={'geeke-blockWrapper' + (selectedBlock ? ' geeke-selectedBlock' : '')}
       draggable='true'
       onDragStart={e => {e.stopPropagation(); onBasicBlockDragStart();}}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onMouseMove={() => setHover(true)}
-      onKeyDown={() => setHover(false)}
+      onMouseEnter={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, uuid);}}
+      onMouseLeave={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, null);}}
+      onMouseMove={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, uuid);}}
+      onKeyDown={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, null);}}
     >
       <div className={'geeke-draggableWrapper' + (hover ? '' : ' geeke-invisible')}>
         <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>

@@ -149,6 +149,7 @@ const initState = {
   focusedBlock: {},
   selectedBlocks: {},
   tempLock: {},
+  hoveredBlock: {},
   pageTree: {
     root: {},
     rLink: {}, // reverse link
@@ -545,6 +546,17 @@ export function lockPage(dispatch, pageUuid) {
  */
 export function unlockPage(dispatch, pageUuid) {
   _unlockPage(dispatch, pageUuid);
+}
+
+/**
+ * @function setHoverBlock
+ * @description Set hover block.
+ * @param {function} dispatch 
+ * @param {string} pageUuid UUID of the page that the block you hover belongs to.
+ * @param {string} blockUuid UUID of the block that you hover over.
+ */
+export function setHoverBlock(dispatch, pageUuid, blockUuid) {
+  _setHoverBlock(dispatch, pageUuid, blockUuid);
 }
 
 /*************************************************
@@ -985,6 +997,14 @@ function _unlockPage(dispatch, pageUuid) {
       delete state.tempLock[pageUuid];
     }
 
+    return state;
+  }});
+}
+
+function _setHoverBlock(dispatch, pageUuid, blockUuid) {
+  dispatch({type, callback: state => {
+    state.hoveredBlock[pageUuid] = blockUuid;
+    
     return state;
   }});
 }

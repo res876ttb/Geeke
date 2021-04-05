@@ -33,7 +33,10 @@ import BlockSelector from './BlockSelector';
  * Main components
  *************************************************/
 const Page = props => {
+  // Props
   const uuid = props.dataId;
+
+  // States and Reducers
   const dispatch = useDispatch();
   const page = useSelector(state => state.editor.cachedPages[uuid]);
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
