@@ -44,6 +44,7 @@ ReactDOM.render(
 );
 
 // Disable animation when release dragged component
+// Source: https://stackoverflow.com/questions/42725321/prevent-html5-drag-ghost-image-flying-back
 document.ondragover = e => {
   e.preventDefault();
 }

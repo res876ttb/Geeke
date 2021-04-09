@@ -1,20 +1,30 @@
 .geeke-draggableWrapper {
   height: 0px;
   position: absolute;
-  top: 0.35rem;
+  top: 0.4rem;
   transition-duration: 0.3s;
   cursor: -webkit-grab; cursor: grab;
 }
 
 .geeke-blockWrapper {
   position: relative;
+  margin: 0.2rem 0rem 0rem 0rem;
 }
 
 .geeke-editorWrapper {
-  margin: 0.2rem 0rem;
-  padding: 0.3rem 3rem;
+  padding: 0.4rem 3rem;
 }
 
 .geeke-selectedBlock {
   background-color: rgba(2, 141, 255, 0.2);
+}
+
+.geeke-editorDragMask {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  border: black 2px solid;
+  z-index: 1;
 }

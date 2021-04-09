@@ -22,7 +22,6 @@ import {
   blockType,
   updateContent,
   removeBlockSelection,
-  setHoverBlock,
 } from '../states/editor';
 import {
   defaultKeyboardHandlingConfig,
@@ -30,12 +29,20 @@ import {
   handleKeyCommand as _handleKeyCommand,
 } from '../utils/BlockKeyboardUtils';
 import {
-  onBasicBlockDragStart
+  draggableOnDragEnter,
+  draggableOnDragLeave,
+  draggableOnDragStart,
+  draggableOnDrop,
+  draggableOnKeyDown,
+  draggableOnMouseEnter,
+  draggableOnMouseLeave,
+  draggableOnMouseMove,
 } from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Import Components
  *************************************************/
+import BlockDragMask from './BlockDragMask';
 
 /*************************************************
  * Styles
@@ -75,7 +82,8 @@ const BasicBlock = props => {
   const readOnly = state.tempLock[pageUuid] ? true : false;
   const focusedBlock = state.focusedBlock[pageUuid];
   const focus = uuid === focusedBlock;
-  const hover = uuid === state.hoveredBlock[pageUuid];
+  const hovering = uuid === state.hoveredBlock[pageUuid];
+  const dragging = uuid === state.draggedBlock[pageUuid];
 
   const updateEditorState = newState => {
     updateContent(dispatch, uuid, newState);
@@ -128,7 +136,7 @@ const BasicBlock = props => {
           );
 
         default:
-          return <></>
+          return null;
       };
     })}
   </div>;
@@ -137,22 +145,25 @@ const BasicBlock = props => {
     <div
       className='geeke-blockWrapper'
       draggable='true'
-      onDragStart={e => {e.stopPropagation(); onBasicBlockDragStart();}}
-      onMouseEnter={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, uuid);}}
-      onMouseLeave={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, null);}}
-      onMouseMove={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, uuid);}}
-      onKeyDown={e => {e.stopPropagation(); setHoverBlock(dispatch, pageUuid, null);}}
+      onDragEnter= {e => draggableOnDragEnter (e, dispatch, pageUuid, uuid)}
+      onDragOver=  {e => draggableOnDragEnter (e, dispatch, pageUuid, uuid)}
+      onDragLeave= {e => draggableOnDragLeave (e, dispatch, pageUuid      )}
+      onDragStart= {e => draggableOnDragStart (e, dispatch, pageUuid, uuid)}
+      onDrop=      {e => draggableOnDrop      (e, dispatch, pageUuid      )}
+      onKeyDown=   {e => draggableOnKeyDown   (e, dispatch, pageUuid      )}
+      onMouseEnter={e => draggableOnMouseEnter(e, dispatch, pageUuid, uuid)}
+      onMouseLeave={e => draggableOnMouseLeave(e, dispatch, pageUuid      )}
+      onMouseMove= {e => draggableOnMouseMove (e, dispatch, pageUuid, uuid)}
     >
       <div
-        className={'geeke-draggableWrapper' + (hover ? '' : ' geeke-invisible')}
+        className={'geeke-draggableWrapper' + (hovering ? '' : ' geeke-invisible')}
         style={{marginLeft: `${draggableLeftPadding + indentWidth * depth}rem`}}
       >
         <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
       </div>
-      <div draggable='true' onDragStart={e => e.preventDefault()}>
-        <div 
-          // TODO: fix block selection display error...
-          className={'geeke-editorWrapper' + (selectedBlock ? ' geeke-selectedBlock' : '')} 
+      <div className={(selectedBlock ? 'geeke-selectedBlock' : '')} draggable='true' onDragStart={e => e.preventDefault()}>
+        <div
+          className={'geeke-editorWrapper'} 
           style={{paddingLeft: `${editorLeftPadding + indentWidth * depth}rem`}}
         >
           {
@@ -173,6 +184,8 @@ const BasicBlock = props => {
           <>{blocks}</> : null
         }
       </div>
+  
+      <BlockDragMask show={dragging} />
     </div>
   )
 }

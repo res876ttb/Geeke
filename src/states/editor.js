@@ -150,6 +150,7 @@ const initState = {
   selectedBlocks: {},
   tempLock: {},
   hoveredBlock: {},
+  draggedBlock: {},
   pageTree: {
     root: {},
     rLink: {}, // reverse link
@@ -558,6 +559,17 @@ export function unlockPage(dispatch, pageUuid) {
  */
 export function setHoverBlock(dispatch, pageUuid, blockUuid) {
   _setHoverBlock(dispatch, pageUuid, blockUuid);
+}
+
+/**
+ * @function setDragBlock
+ * @description Set drag block.
+ * @param {function} dispatch 
+ * @param {string} pageUuid UUID of the page that block you drag belongs to.
+ * @param {string} blockUuid UUID of the block that you drag.
+ */
+export function setDragBlock(dispatch, pageUuid, blockUuid) {
+  _setDragBlock(dispatch, pageUuid, blockUuid);
 }
 
 /*************************************************
@@ -1005,6 +1017,14 @@ function _unlockPage(dispatch, pageUuid) {
 function _setHoverBlock(dispatch, pageUuid, blockUuid) {
   dispatch({type, callback: state => {
     state.hoveredBlock[pageUuid] = blockUuid;
+
+    return state;
+  }});
+}
+
+function _setDragBlock(dispatch, pageUuid, blockUuid) {
+  dispatch({type, callback: state => {
+    state.draggedBlock[pageUuid] = blockUuid;
 
     return state;
   }});
