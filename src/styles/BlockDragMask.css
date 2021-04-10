@@ -1,9 +1,10 @@
 .geeke-blockDragMask {
-  position: absolute;
+  position: fixed;
   bottom: 0px;
   height: 10px;
   left: 0px;
   right: 0px;
   background-color: cadetblue;
-  transition: 200ms;
+  height: 3px;
+  z-index: -1;
 }

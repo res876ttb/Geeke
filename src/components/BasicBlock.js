@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Editor, 
   EditorState,
@@ -29,8 +29,8 @@ import {
   handleKeyCommand as _handleKeyCommand,
 } from '../utils/BlockKeyboardUtils';
 import {
+  draggableOnDragEnd,
   draggableOnDragEnter,
-  draggableOnDragLeave,
   draggableOnDragStart,
   draggableOnDrop,
   draggableOnKeyDown,
@@ -42,7 +42,6 @@ import {
 /*************************************************
  * Import Components
  *************************************************/
-import BlockDragMask from './BlockDragMask';
 
 /*************************************************
  * Styles
@@ -68,6 +67,8 @@ const BasicBlock = props => {
   const pageUuid = props.pageId;
   const isFirstBlock = props.isFirstBlock;
   const depth = props.depth;
+  const lockParentDrop = props.lockDrop;
+  const setLockParentDrop = props.setLockDrop;
 
   // States & Reducers
   const state = useSelector(state => state.editor);
@@ -76,6 +77,7 @@ const BasicBlock = props => {
   const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
   const dispatch = useDispatch();
   const editor = useRef(null);
+  const [lockThisDrop, setLockThisDrop] = useState(false);
 
   // Constants
   const selectedBlock = state.selectedBlocks[pageUuid].blocks.indexOf(uuid) > -1;
@@ -83,7 +85,9 @@ const BasicBlock = props => {
   const focusedBlock = state.focusedBlock[pageUuid];
   const focus = uuid === focusedBlock;
   const hovering = uuid === state.hoveredBlock[pageUuid];
-  const dragging = uuid === state.draggedBlock[pageUuid];
+  const draggedBlockUuid = state.draggedBlock[pageUuid] ? state.draggedBlock[pageUuid].blockUuid : null;
+  const lockDrop = lockParentDrop || lockThisDrop;
+  const setLockDrop = lockParentDrop ? setLockParentDrop : setLockThisDrop;
 
   const updateEditorState = newState => {
     updateContent(dispatch, uuid, newState);
@@ -132,6 +136,8 @@ const BasicBlock = props => {
               parentId={uuid}
               isFirstBlock={idx === 0}
               depth={depth + 1}
+              lockDrop={lockDrop}
+              setLockDrop={setLockDrop}
             />
           );
 
@@ -145,15 +151,18 @@ const BasicBlock = props => {
     <div
       className='geeke-blockWrapper'
       draggable='true'
-      onDragEnter= {e => draggableOnDragEnter (e, dispatch, pageUuid, uuid)}
-      onDragOver=  {e => draggableOnDragEnter (e, dispatch, pageUuid, uuid)}
-      onDragLeave= {e => draggableOnDragLeave (e, dispatch, pageUuid      )}
-      onDragStart= {e => draggableOnDragStart (e, dispatch, pageUuid, uuid)}
-      onDrop=      {e => draggableOnDrop      (e, dispatch, pageUuid      )}
-      onKeyDown=   {e => draggableOnKeyDown   (e, dispatch, pageUuid      )}
+      geeke-id={uuid}
+      geeke-type='BasicBlock'
+      depth={depth}
+
+      onDragEnd={e => draggableOnDragEnd(e, dispatch, pageUuid, setLockDrop)}
+      onDragEnter={e => draggableOnDragEnter(e, dispatch, pageUuid, uuid, draggedBlockUuid, lockDrop)}
+      onDragStart={e => draggableOnDragStart(e, dispatch, pageUuid, uuid, setLockDrop)}
+      onDrop={e => draggableOnDrop(e, dispatch, pageUuid, draggedBlockUuid)}
+      onKeyDown={e => draggableOnKeyDown(e, dispatch, pageUuid)}
       onMouseEnter={e => draggableOnMouseEnter(e, dispatch, pageUuid, uuid)}
-      onMouseLeave={e => draggableOnMouseLeave(e, dispatch, pageUuid      )}
-      onMouseMove= {e => draggableOnMouseMove (e, dispatch, pageUuid, uuid)}
+      onMouseLeave={e => draggableOnMouseLeave(e, dispatch, pageUuid)}
+      onMouseMove={e => draggableOnMouseMove(e, dispatch, pageUuid, uuid)}
     >
       <div
         className={'geeke-draggableWrapper' + (hovering ? '' : ' geeke-invisible')}
@@ -184,8 +193,6 @@ const BasicBlock = props => {
           <>{blocks}</> : null
         }
       </div>
-  
-      <BlockDragMask show={dragging} />
     </div>
   )
 }

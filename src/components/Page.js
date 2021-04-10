@@ -24,6 +24,7 @@ import {
 import BasicBlock from './BasicBlock';
 import PageTitle from './PageTitle';
 import BlockSelector from './BlockSelector';
+import BlockDragMask from './BlockDragMask';
 
 /*************************************************
  * Styles
@@ -62,6 +63,7 @@ const Page = props => {
               parentId={uuid}
               isFirstBlock={idx === 0}
               depth={0}
+              lockDrop={false}
             />
           );
         
@@ -77,6 +79,7 @@ const Page = props => {
       <PageTitle uuid={uuid} />
       <BlockSelector pageId={uuid} />
       {blocks}
+      <BlockDragMask pageId={uuid} />
     </div>
   )
 }

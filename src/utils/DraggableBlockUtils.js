@@ -18,12 +18,6 @@ import {
 /*************************************************
  * FUNCTIONS
  *************************************************/
-export const draggableOnDragStart = (e, dispatch, pageUuid, blockUuid) => {
-  e.stopPropagation();
-  e.dataTransfer.setData('geeke-drag', `geeke-block:${blockUuid}`);
-  setDragBlock(dispatch, pageUuid, blockUuid);
-}
-
 export const draggableOnMouseEnter = (e, dispatch, pageUuid, blockUuid) => {
   e.stopPropagation();
   setHoverBlock(dispatch, pageUuid, blockUuid);
@@ -44,18 +38,45 @@ export const draggableOnKeyDown = (e, dispatch, pageUuid) => {
   setHoverBlock(dispatch, pageUuid, null);
 }
 
-export const draggableOnDragEnter = (e, dispatch, pageUuid, blockUuid) => {
+export const draggableOnDragStart = (e, dispatch, pageUuid, blockUuid, setLockDrop) => {
   e.stopPropagation();
+  e.dataTransfer.setData('geeke-drag', 'geeke-block');
   setDragBlock(dispatch, pageUuid, blockUuid);
+  setLockDrop(true);
 }
 
-export const draggableOnDragLeave = (e, dispatch, pageUuid) => {
+export const draggableOnDragEnter = (e, dispatch, pageUuid, blockUuid, draggedBlockUuid, lockDrop) => {
   e.stopPropagation();
-  setDragBlock(dispatch, pageUuid, null);
+
+  if (lockDrop) {
+    setDragBlock(dispatch, pageUuid, draggedBlockUuid);
+    return;
+  }
+
+  const getBlockDom = (dom) => {
+    if (dom.hasAttribute('geeke-type')) {
+      return dom;
+    } else if (dom) {
+      return getBlockDom(dom.parentNode);
+    }
+  };
+
+  let dom = getBlockDom(e.target);
+  let domRect = dom.getBoundingClientRect();
+  
+  if (blockUuid === draggedBlockUuid) {
+    setDragBlock(dispatch, pageUuid, draggedBlockUuid); // Do not need to show drag mask
+  } else {
+    setDragBlock(dispatch, pageUuid, draggedBlockUuid, domRect.left, domRect.bottom);
+  }
 }
 
-export const draggableOnDrop = (e, dispatch, pageUuid) => {
+export const draggableOnDragEnd = (e, dispatch, pageUuid, setLockDrop) => {
   e.stopPropagation();
-  console.log(e.dataTransfer.getData('geeke-drag'));
-  setDragBlock(dispatch, pageUuid, null);
+  setLockDrop(false);
+  setDragBlock(dispatch, pageUuid);
+}
+
+export const draggableOnDrop = (e, dispatch, pageUuid, draggedBlockUuid) => {
+  e.stopPropagation();
 }
