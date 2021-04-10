@@ -568,8 +568,8 @@ export function setHoverBlock(dispatch, pageUuid, blockUuid) {
  * @param {string} pageUuid UUID of the page that block you drag belongs to.
  * @param {string} blockUuid UUID of the block that you drag.
  */
-export function setDragBlock(dispatch, pageUuid, blockUuid, left, bottom) {
-  _setDragBlock(dispatch, pageUuid, blockUuid, left, bottom);
+export function setDragBlock(dispatch, pageUuid, blockUuid, depth, left, bottom) {
+  _setDragBlock(dispatch, pageUuid, blockUuid, depth, left, bottom);
 }
 
 /*************************************************
@@ -1022,12 +1022,13 @@ function _setHoverBlock(dispatch, pageUuid, blockUuid) {
   }});
 }
 
-function _setDragBlock(dispatch, pageUuid, blockUuid, left, bottom) {
+function _setDragBlock(dispatch, pageUuid, blockUuid, depth, left, bottom) {
   dispatch({type, callback: state => {
     state.draggedBlock[pageUuid] = {
       blockUuid,
       left,
       bottom,
+      depth,
     };
 
     return state;

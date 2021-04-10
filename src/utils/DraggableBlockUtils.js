@@ -45,16 +45,17 @@ export const draggableOnDragStart = (e, dispatch, pageUuid, blockUuid, setLockDr
   setLockDrop(true);
 }
 
-export const draggableOnDragEnter = (e, dispatch, pageUuid, blockUuid, draggedBlockUuid, lockDrop) => {
+export const draggableOnDragEnter = (e, dispatch, pageUuid, blockUuid, draggedBlockInfo, lockDrop) => {
   e.stopPropagation();
 
   if (lockDrop) {
-    setDragBlock(dispatch, pageUuid, draggedBlockUuid);
+    setDragBlock(dispatch, pageUuid, draggedBlockInfo.blockUuid, draggedBlockInfo.depth);
     return;
   }
 
   const getBlockDom = (dom) => {
     if (dom.hasAttribute('geeke-type')) {
+      // TODO: Support different action when there are multiple block types
       return dom;
     } else if (dom) {
       return getBlockDom(dom.parentNode);
@@ -62,12 +63,13 @@ export const draggableOnDragEnter = (e, dispatch, pageUuid, blockUuid, draggedBl
   };
 
   let dom = getBlockDom(e.target);
+  let depth = dom.getAttribute('depth');
   let domRect = dom.getBoundingClientRect();
   
-  if (blockUuid === draggedBlockUuid) {
-    setDragBlock(dispatch, pageUuid, draggedBlockUuid); // Do not need to show drag mask
+  if (blockUuid === draggedBlockInfo.blockUuid) {
+    setDragBlock(dispatch, pageUuid, draggedBlockInfo.blockUuid, depth); // Do not need to show drag mask
   } else {
-    setDragBlock(dispatch, pageUuid, draggedBlockUuid, domRect.left, domRect.bottom);
+    setDragBlock(dispatch, pageUuid, draggedBlockInfo.blockUuid, depth, domRect.left, domRect.bottom, depth);
   }
 }
 

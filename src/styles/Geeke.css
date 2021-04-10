@@ -1,3 +1,5 @@
+/* General Geeke styles */
+
 .geeke-disableDrag {
   -webkit-user-drag: none; 
   -khtml-user-drag: none; 
@@ -8,4 +10,8 @@
 
 .geeke-invisible {
   opacity: 0;
+}
+
+.geeke-inlineBlock {
+  display: inline-block;
 }

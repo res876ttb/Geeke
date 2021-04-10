@@ -85,7 +85,7 @@ const BasicBlock = props => {
   const focusedBlock = state.focusedBlock[pageUuid];
   const focus = uuid === focusedBlock;
   const hovering = uuid === state.hoveredBlock[pageUuid];
-  const draggedBlockUuid = state.draggedBlock[pageUuid] ? state.draggedBlock[pageUuid].blockUuid : null;
+  const draggedBlockInfo = state.draggedBlock[pageUuid];
   const lockDrop = lockParentDrop || lockThisDrop;
   const setLockDrop = lockParentDrop ? setLockParentDrop : setLockThisDrop;
 
@@ -156,9 +156,9 @@ const BasicBlock = props => {
       depth={depth}
 
       onDragEnd={e => draggableOnDragEnd(e, dispatch, pageUuid, setLockDrop)}
-      onDragEnter={e => draggableOnDragEnter(e, dispatch, pageUuid, uuid, draggedBlockUuid, lockDrop)}
+      onDragEnter={e => draggableOnDragEnter(e, dispatch, pageUuid, uuid, draggedBlockInfo, lockDrop)}
       onDragStart={e => draggableOnDragStart(e, dispatch, pageUuid, uuid, setLockDrop)}
-      onDrop={e => draggableOnDrop(e, dispatch, pageUuid, draggedBlockUuid)}
+      onDrop={e => draggableOnDrop(e, dispatch, pageUuid, draggedBlockInfo)}
       onKeyDown={e => draggableOnKeyDown(e, dispatch, pageUuid)}
       onMouseEnter={e => draggableOnMouseEnter(e, dispatch, pageUuid, uuid)}
       onMouseLeave={e => draggableOnMouseLeave(e, dispatch, pageUuid)}
