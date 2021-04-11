@@ -152,13 +152,13 @@ const BasicBlock = props => {
       className='geeke-blockWrapper'
       draggable='true'
       geeke-id={uuid}
-      geeke-type='BasicBlock'
+      geeke-type='Wrapper:BasicBlock'
       depth={depth}
 
       onDragEnd={e => draggableOnDragEnd(e, dispatch, pageUuid, setLockDrop)}
       onDragEnter={e => draggableOnDragEnter(e, dispatch, pageUuid, uuid, draggedBlockInfo, lockDrop)}
       onDragStart={e => draggableOnDragStart(e, dispatch, pageUuid, uuid, setLockDrop)}
-      onDrop={e => draggableOnDrop(e, dispatch, pageUuid, draggedBlockInfo)}
+      onDrop={e => draggableOnDrop(e, dispatch, pageUuid, draggedBlockInfo, state)}
       onKeyDown={e => draggableOnKeyDown(e, dispatch, pageUuid)}
       onMouseEnter={e => draggableOnMouseEnter(e, dispatch, pageUuid, uuid)}
       onMouseLeave={e => draggableOnMouseLeave(e, dispatch, pageUuid)}
@@ -174,6 +174,9 @@ const BasicBlock = props => {
         <div
           className={'geeke-editorWrapper'} 
           style={{paddingLeft: `${editorLeftPadding + indentWidth * depth}rem`}}
+          geeke-id={uuid}
+          geeke-type='BasicBlock'
+          depth={depth}
         >
           {
             editorState === '' ? null :

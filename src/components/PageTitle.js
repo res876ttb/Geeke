@@ -44,7 +44,7 @@ const PageTitle = props => {
 
   // States & Reducers
   const dispatch = useDispatch();
-  const draggedBlockInfo = useSelector(state => state.editor.draggedBlock[uuid]);
+  const state = useSelector(state => state.editor);
   const [title, setTitle] = useState(
     EditorState.createWithContent(
       ContentState.createFromText(
@@ -52,6 +52,9 @@ const PageTitle = props => {
       )
     )
   ); // Create ContentState wit pure text: https://stackoverflow.com/a/35885589/6868122
+
+  // Constants
+  const draggedBlockInfo = state.draggedBlock[uuid];
 
   const titleStyleFn = contentBlock => {
     return 'Geeke-Page-Title';
@@ -79,8 +82,9 @@ const PageTitle = props => {
       geeke-id={uuid}
       geeke-type='Title'
       depth={-1}
+
       onDragEnter={e => draggableOnDragEnter(e, dispatch, uuid, uuid, draggedBlockInfo, false)}
-      onDrop={e => draggableOnDrop(e, dispatch, uuid, draggedBlockInfo)}
+      onDrop={e => draggableOnDrop(e, dispatch, uuid, draggedBlockInfo, state)}
     >
       <Editor className='Geeke-Page-Title'
         editorState={title}

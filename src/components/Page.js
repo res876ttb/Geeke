@@ -29,6 +29,7 @@ import BlockDragMask from './BlockDragMask';
 /*************************************************
  * Styles
  *************************************************/
+import '../styles/Page.css';
 
 /*************************************************
  * Main components
@@ -80,6 +81,8 @@ const Page = props => {
       <BlockSelector pageId={uuid} />
       {blocks}
       <BlockDragMask pageId={uuid} />
+      <div className='geeke-pageBottom'></div>
+      {/* TODO: make it work: drop on bottom of a page */}
     </div>
   )
 }
