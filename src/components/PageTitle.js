@@ -21,6 +21,10 @@ import {
 import { 
   updatePageTitle,
 } from '../states/editor';
+import {
+  draggableOnDragEnter,
+  draggableOnDrop,
+} from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Import Components
@@ -34,10 +38,13 @@ import '../styles/PageTitle.css';
 /*************************************************
  * Main components
  *************************************************/
-
 const PageTitle = props => {
+  // Props
   const uuid = props.uuid;
+
+  // States & Reducers
   const dispatch = useDispatch();
+  const draggedBlockInfo = useSelector(state => state.editor.draggedBlock[uuid]);
   const [title, setTitle] = useState(
     EditorState.createWithContent(
       ContentState.createFromText(
@@ -68,12 +75,20 @@ const PageTitle = props => {
   }, [title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Editor className='Geeke-Page-Title'
-      editorState={title}
-      onChange={setTitle}
-      blockStyleFn={titleStyleFn}
-      keyBindingFn={mapKeyToEditorCommand}
-    />
+    <div
+      geeke-id={uuid}
+      geeke-type='Title'
+      depth={-1}
+      onDragEnter={e => draggableOnDragEnter(e, dispatch, uuid, uuid, draggedBlockInfo, false)}
+      onDrop={e => draggableOnDrop(e, dispatch, uuid, draggedBlockInfo)}
+    >
+      <Editor className='Geeke-Page-Title'
+        editorState={title}
+        onChange={setTitle}
+        blockStyleFn={titleStyleFn}
+        keyBindingFn={mapKeyToEditorCommand}
+      />
+    </div>
   );
 }
 

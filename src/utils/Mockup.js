@@ -89,7 +89,7 @@ export const createMockupPageWithBlocksAndParseParent = (state, pageUuid, blockS
 /**
  * 
  * @param {function} dispatch 
- * @param {function} callback Callback function if there are any further change. Args: [state, dispatch]. This callback function should call dispatch before it ends.
+ * @param {function} callback Callback function if there are any further change. Args: [state, dispatch]. This callback function should call dispatch(state) before it ends.
  */
 export function createFakePage(dispatch, callback) {
   let runDisaptch = state => {
