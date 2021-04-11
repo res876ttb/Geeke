@@ -89,8 +89,6 @@ export const draggableOnDrop = (e, dispatch, pageUuid, draggedBlockInfo, state) 
   e.stopPropagation();
   setDragBlock(dispatch, pageUuid);
 
-  console.log(pageUuid, draggedBlockInfo, state);
-
   let dom = getBlockDom(e.target);
   let targetBlockUuid = dom.getAttribute('geeke-id');
   let draggedBlockUuid = draggedBlockInfo.blockUuid;
