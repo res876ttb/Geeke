@@ -10,7 +10,7 @@
  *************************************************/
 import React, {useEffect, useRef, useState} from 'react';
 import {
-  Editor, 
+  Editor,
   EditorState,
 } from 'draft-js';
 import {useDispatch, useSelector} from 'react-redux';
@@ -124,7 +124,7 @@ const BasicBlock = props => {
     removeBlockSelection(dispatch, pageUuid);
   }
 
-  const blocks = 
+  const blocks =
   <div>
     {block.blocks.map((blockUuid, idx) => {
       switch(cachedBlocks[blockUuid].type) {
@@ -172,7 +172,8 @@ const BasicBlock = props => {
       </div>
       <div className={(selectedBlock ? 'geeke-selectedBlock' : '')} draggable='true' onDragStart={e => e.preventDefault()}>
         <div
-          className={'geeke-editorWrapper'} 
+          id={uuid}
+          className={'geeke-editorWrapper'}
           style={{paddingLeft: `${editorLeftPadding + indentWidth * depth}rem`}}
           geeke-id={uuid}
           geeke-type='BasicBlock'

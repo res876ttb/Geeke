@@ -28,6 +28,10 @@ import {
   selectBlock,
   selectDirection,
 } from '../states/editor';
+import {
+  getCaretPosition,
+  setNewCaretPosition,
+} from './CaretPositionUtils';
 
 /*************************************************
  * CONST
@@ -52,8 +56,8 @@ export const keyCommandConst = {
   selectRight: 9,
   deleteBlockBackward: 10,
   deleteBlockForward: 11,
-  moveCursorUpForward: 12,
-  moveCursorDownBackward: 13,
+  moveCursorUpForward: 12,    // Caret move to the previous block because of pressing left arrow key
+  moveCursorDownBackward: 13, // Caret move to the next block because of pressing right arrow key
   enterSelectionMode: 14,
   escapeSelectionMode: 15,
   selectAnchor: 16,
@@ -217,28 +221,28 @@ export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock = fal
   switch (e.keyCode) {
     case 13: // Enter
       return mapKeyToEditorCommand_enter(e, config);
-    
+
     case 9: // Tab
       return mapKeyToEditorCommand_tab(e, config);
-    
+
     case 8: // Backspace
       return mapKeyToEditorCommand_backspace(e, config, isFirstBlock, editorState);
-    
+
     case 46: // Delete
       return mapKeyToEditorCommand_delete(e, config, editorState);
-    
+
     case 37: // Arrow key left
       return mapKeyToEditorCommand_arrowLeft(e, config, editorState);
-    
+
     case 38: // Arrow key Up
       return mapKeyToEditorCommand_arrowUp(e, config, editorState);
-    
+
     case 39: // Arrow key right
       return mapKeyToEditorCommand_arrowRight(e, config, editorState);
 
     case 40: // Arrow key Down
       return mapKeyToEditorCommand_arrowDown(e, config, editorState);
-    
+
     case 27: // Escape
       return mapKeyToEditorCommand_escape(e, config);
 
@@ -253,10 +257,11 @@ export const mapKeyToEditorCommand = (e, config, editorState, isFirstBlock = fal
 
 //// Start of handleKeyCommand
 
-const handleKeyCommand_moveCursorUp = (dispatch, pageUuid, uuid, state, editorState) => {
+const handleKeyCommand_moveCursorUp = (dispatch, pageUuid, uuid, state, editorState, sameCaretPos=false) => {
   const previousUuid = getPreviousBlock(state, pageUuid, uuid);
   const contentState = editorState.getCurrentContent();
 
+  // This is the first block. As a result, just move the caret to the start of the line.
   if (previousUuid === uuid) {
     let firstBlock = contentState.getFirstBlock();
     let newSelectionState = new SelectionState({
@@ -265,18 +270,27 @@ const handleKeyCommand_moveCursorUp = (dispatch, pageUuid, uuid, state, editorSt
       focusKey: firstBlock.getKey(),
       focusOffset: 0,
     });
+
     updateContent(dispatch, uuid, EditorState.forceSelection(editorState, newSelectionState));
     return false;
   } else {
+    let lastCaretPos = sameCaretPos ? getCaretPosition() : -1;
     setFocusedBlock(dispatch, pageUuid, previousUuid);
+
+    if (lastCaretPos && lastCaretPos >= 0) {
+      // Calculate the position of the new caret.
+      let previousEditorState = state.cachedBlocks[previousUuid].content;
+      setNewCaretPosition(dispatch, previousEditorState, previousUuid, lastCaretPos);
+    }
     return true;
   }
 };
 
-const handleKeyCommand_moveCursorDown = (dispatch, pageUuid, uuid, state, editorState) => {
+const handleKeyCommand_moveCursorDown = (dispatch, pageUuid, uuid, state, editorState, sameCaretPos=false) => {
   const nextUuid = getNextBlock(state, pageUuid, uuid);
   const contentState = editorState.getCurrentContent();
 
+  // This is the last block. As a result, just move the caret to the end of the line.
   if (nextUuid === uuid) {
     let lastBlock = contentState.getLastBlock();
     let newSelectionState = new SelectionState({
@@ -285,6 +299,7 @@ const handleKeyCommand_moveCursorDown = (dispatch, pageUuid, uuid, state, editor
       focusKey: lastBlock.getKey(),
       focusOffset: lastBlock.getLength(),
     });
+
     updateContent(dispatch, uuid, EditorState.forceSelection(editorState, newSelectionState));
     return false;
   } else {
@@ -339,7 +354,7 @@ const handleKeyCommand_newBlock = (dispatch, pageUuid, parentUuid, uuid, state, 
     newNextBlockArray.push(blockArray[idx]);
   }
 
-  // Move cursor to correct position
+  // Move caret to correct position
   let newCurEditorState = EditorState.createWithContent(ContentState.createFromBlockArray(newBlockArray));
   let newNextEditorState = EditorState.createWithContent(ContentState.createFromBlockArray(newNextBlockArray));
   let newCurContentState = newCurEditorState.getCurrentContent();
@@ -530,7 +545,7 @@ const handleKeyCommand_selectBlock = (dispatch, pageUuid, uuid, state, direction
       case keyCommandConst.selectRight:
         selectBlock(dispatch, pageUuid, selectDirection.right);
         break;
-      
+
       default:
         break;
     }
@@ -553,15 +568,15 @@ export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, ed
     case keyCommandConst.moreIndent:
       handleKeyCommand_moreIndent(dispatch, pageUuid, uuid);
       break;
-    
+
     case keyCommandConst.lessIndent:
       handleKeyCommand_lessIndent(dispatch, pageUuid, uuid);
       break;
-    
+
     case keyCommandConst.newBlock:
       handleKeyCommand_newBlock(dispatch, pageUuid, parentUuid, uuid, state, editorState);
       break;
-    
+
     case keyCommandConst.deleteBlockForward:
       handleKeyCommand_deleteBlockForward(dispatch, pageUuid, parentUuid, uuid, state, editorState);
       break;
@@ -571,17 +586,17 @@ export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, ed
       break;
 
     case keyCommandConst.moveCursorUp:
-      handleKeyCommand_moveCursorUp(dispatch, pageUuid, uuid, state, editorState);
+      handleKeyCommand_moveCursorUp(dispatch, pageUuid, uuid, state, editorState, true);
       break;
-    
+
     case keyCommandConst.moveCursorUpForward:
       handleKeyCommand_moveCursorUpForward(dispatch, pageUuid, uuid, state, editorState);
       break;
-    
+
     case keyCommandConst.moveCursorDown:
-      handleKeyCommand_moveCursorDown(dispatch, pageUuid, uuid, state, editorState);
+      handleKeyCommand_moveCursorDown(dispatch, pageUuid, uuid, state, editorState, true);
       break;
-    
+
     case keyCommandConst.moveCursorDownBackward:
       handleKeyCommand_moveCursorDownBackward(dispatch, pageUuid, uuid, state, editorState);
       break;
@@ -589,11 +604,11 @@ export const handleKeyCommand = (dispatch, pageUuid, parentUuid, uuid, state, ed
     case keyCommandConst.enterSelectionMode:
       handleKeyCommand_enterSelectionMode(dispatch, pageUuid, uuid);
       break;
-    
+
     case keyCommandConst.escapeSelectionMode:
       handleKeyCommand_escapeSelectionMode(dispatch, pageUuid);
       break;
-    
+
     case keyCommandConst.selectUp:
     case keyCommandConst.selectDown:
     case keyCommandConst.selectLeft:
