@@ -17,3 +17,7 @@ export const editorLeftPadding = 3; // Unit: rem
 
 export const dragMaskHeight = 3; // Unit: px
 export const dragMaskIndentInterval = 0.15; // Unit: rem
+
+export const blockDataKeys = {
+  indentLevel: 'indentLevel',
+}

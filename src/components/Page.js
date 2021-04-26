@@ -1,30 +1,35 @@
 /*************************************************
  * @file Page.js
- * @description Page component.
+ * @description Page component. There are two children
+ * components: PageTitle and Editor. The later one is
+ * from draft-js.
  *************************************************/
 
 /*************************************************
  * React Components
  *************************************************/
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useRef } from 'react';
+import {
+  Editor,
+  EditorState,
+  DefaultDraftBlockRenderMap,
+} from 'draft-js';
+import Immutable from 'immutable';
 
 /*************************************************
  * Utils & States
  *************************************************/
 import {
-  blockType,
-  loadAllBlocks,
-  parseBlockParents
-} from '../states/editor';
+  mapKeyToEditorCommand as _mapKeyToEditorCommand,
+  handleKeyCommand as _handleKeyCommand,
+  defaultKeyboardHandlingConfig,
+} from '../utils/BlockKeyboardUtils';
 
 /*************************************************
  * Import Components
  *************************************************/
-import BasicBlock from './BasicBlock';
 import PageTitle from './PageTitle';
-import BlockSelector from './BlockSelector';
-import BlockDragMask from './BlockDragMask';
+import BasicBlock from './BasicBlock';
 
 /*************************************************
  * Styles
@@ -37,50 +42,54 @@ import '../styles/Page.css';
 const Page = props => {
   // Props
   const uuid = props.dataId;
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const editor = useRef(null);
 
-  // States and Reducers
-  const dispatch = useDispatch();
-  const page = useSelector(state => state.editor.cachedPages[uuid]);
-  const cachedBlocks = useSelector(state => state.editor.cachedBlocks);
+  // Constant
+  const commandConfig = {
+    ...defaultKeyboardHandlingConfig,
+  };
 
-  // Synchornize current page with server every 3 seconds.
+  // keyBindingFn
+  const mapKeyToEditorCommand = e => _mapKeyToEditorCommand(e, commandConfig);
 
-  // Handle load all blocks
-  useEffect(() => {
-    loadAllBlocks(dispatch, uuid);
-    parseBlockParents(dispatch, uuid);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // handleKeyCommand
+  const handleKeyCommand = (command, editorState) => _handleKeyCommand(editorState, command, {
+    setEditorState,
+  });
 
-  // Get child blocks
-  const blocks = 
-  <div>
-    {page.blocks.map((blockUuid, idx) => {
-      switch(cachedBlocks[blockUuid].type) {
-        case blockType.basic:
-          return (
-            <BasicBlock key={blockUuid}
-              dataId={blockUuid}
-              pageId={uuid}
-              parentId={uuid}
-              isFirstBlock={idx === 0}
-              depth={0}
-              lockDrop={false}
-            />
-          );
-        
-        default:
-          console.error(`Unknown block type: ${cachedBlocks[blockUuid].type}`);
-          return null;
-      }
-    })}
-  </div>;
+  // blockRendererFn
+  const blockDecorator = (contentBlock) => {
+    // const blockType = contentBlock.getType();
+    // switch (blockType) {
+    //   default:
+    //     return {
+    //       component: BasicBlock,
+    //     };
+    // }
+  };
+
+  // blockRenderMap
+  const blockRenderMap = DefaultDraftBlockRenderMap.merge(Immutable.Map({
+    'unstyled': {
+      element: BasicBlock,
+    }
+  }));
 
   return (
     <div>
       <PageTitle uuid={uuid} />
-      <BlockSelector pageId={uuid} />
-      {blocks}
-      <BlockDragMask pageId={uuid} />
+      <Editor
+        ref={editor}
+        editorState={editorState}
+        onChange={setEditorState}
+        keyBindingFn={mapKeyToEditorCommand}
+        handleKeyCommand={handleKeyCommand}
+        blockRendererFn={blockDecorator}
+        blockRenderMap={blockRenderMap}
+        spellCheck={true}
+        // placeholder={'Write something here...'}
+      />
       <div className='geeke-pageBottom'></div>
       {/* TODO: make it work: drop on bottom of a page */}
     </div>
