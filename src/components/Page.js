@@ -22,6 +22,7 @@ import Immutable from 'immutable';
 import {
   mapKeyToEditorCommand as _mapKeyToEditorCommand,
   handleKeyCommand as _handleKeyCommand,
+  handleReturn as _handleReturn,
   defaultKeyboardHandlingConfig,
 } from '../utils/BlockKeyboardUtils';
 
@@ -58,6 +59,11 @@ const Page = props => {
     setEditorState,
   });
 
+  // handleReturn
+  const handleReturn = (e, editorState) => _handleReturn(e, editorState, {
+    setEditorState,
+  });
+
   // blockRendererFn
   const blockDecorator = (contentBlock) => {
     // const blockType = contentBlock.getType();
@@ -85,6 +91,7 @@ const Page = props => {
         onChange={setEditorState}
         keyBindingFn={mapKeyToEditorCommand}
         handleKeyCommand={handleKeyCommand}
+        handleReturn={handleReturn}
         blockRendererFn={blockDecorator}
         blockRenderMap={blockRenderMap}
         spellCheck={true}

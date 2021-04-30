@@ -23,10 +23,31 @@ const keyCommandConst = {
   doNothing: 0,
   moreIndent: 1,
   lessIndent: 2,
-}
+};
 
+/**
+ * key             : value
+ * dispatcher name : error message
+ */
 const dispatcherNotFoundConst = {
   setEditorState: 'setEditorState is not configured!',
+};
+
+/**
+ * key        : value
+ * block type : unique number
+ */
+const blockDataPreserveConstant = {
+  none: 0,
+  all: 1,
+}
+
+/**
+ * key                : value
+ * name of block data : block type
+ */
+const blockDataPreserveConfig = {
+  [blockDataKeys.indentLevel]: [blockDataPreserveConstant.all],
 }
 
 /*************************************************
@@ -189,8 +210,60 @@ export const handleKeyCommand = (editorState, command, dispatcher) => {
       return handleKeyCommand_lessIndent(editorState, dispatcher);
 
     case keyCommandConst.doNothing:
+      return false;
+
     default:
       return handleKeyCommand_default(editorState, command, dispatcher);
   }
 }
 /// End handleKeyCommand
+
+/// Start handleReturn
+export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserveConfig) => {
+  if (!dispatcher.setEditorState) {
+    console.error(dispatcherNotFoundConst.setEditorState);
+    return false;
+  }
+
+  // Constants
+  const contentState = editorState.getCurrentContent();
+  const selectionState = editorState.getSelection();
+  const originalBlockKey = selectionState.getEndKey();
+
+  // If selection is not collapsed... return false!
+  if (!selectionState.isCollapsed()) return false;
+
+  // Get all block data from current block
+  const curBlock = contentState.getBlockMap().get(originalBlockKey);
+  const curBlockType = curBlock.getType();
+  const blockData = curBlock.getData();
+
+  // Copy only necessary block data
+  let newMap = new Map();
+  blockData.forEach((value, key) => {
+    if (config[key].indexOf(blockDataPreserveConstant.all) > -1 ||
+        config[key].indexOf(curBlockType) > -1) {
+      newMap.set(key, value);
+    }
+  });
+
+  // Perform split block operation
+  let newContentState = Modifier.splitBlock(contentState, selectionState);
+  let newEditorState = EditorState.push(editorState, newContentState, "split-block");
+  const newSelectionState = newEditorState.getSelection();
+
+  // Merge block data
+  newContentState = Modifier.mergeBlockData(
+    newEditorState.getCurrentContent(),
+    newSelectionState,
+    newMap
+  )
+
+  // Push copy block data action into editorState
+  newEditorState = EditorState.push(newEditorState, newContentState, 'split-block');
+
+  // Render current change
+  dispatcher.setEditorState(newEditorState);
+
+  return true;
+}

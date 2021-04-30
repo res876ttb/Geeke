@@ -47,7 +47,6 @@ const BasicBlock = props => {
 
   return (
     <div className='geeke-blockWrapper' style={{marginLeft: `${indentWidth * indentLevel}rem`}}>
-      <span contentEditable={false}></span>
       {children}
     </div>
   )
