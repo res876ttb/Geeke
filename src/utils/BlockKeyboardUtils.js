@@ -137,7 +137,6 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
 };
 
 const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
-  console.log('Less indent!');
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
     return;
@@ -259,8 +258,9 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
     newMap
   )
 
-  // Push copy block data action into editorState
+  // Push copy block data action into editorState & update selection state
   newEditorState = EditorState.push(newEditorState, newContentState, 'split-block');
+  newEditorState = EditorState.forceSelection(newEditorState, newSelectionState);
 
   // Render current change
   dispatcher.setEditorState(newEditorState);
