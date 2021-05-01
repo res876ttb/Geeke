@@ -6,7 +6,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React from 'react';
+import React, { useState } from 'react';
 
 /*************************************************
  * Utils & States
@@ -28,15 +28,17 @@ import {
   blockDataKeys,
   indentWidth,
 } from '../constant';
+import { EditorBlock } from 'draft-js';
 
 /*************************************************
  * Main components
  *************************************************/
 const BasicBlock = props => {
   // Props
-  const children = props.children;
-  const childBlock = children.props.block;
-  const blockData = childBlock.getData();
+  const blockData = props.block.getData();
+
+  // States
+  const [mouseOver, setMouseOver] = useState(false);
 
   // Variables
   let indentLevel = 0;
@@ -46,8 +48,17 @@ const BasicBlock = props => {
   }
 
   return (
-    <div className='geeke-blockWrapper' style={{marginLeft: `${indentWidth * indentLevel}rem`}}>
-      {children}
+    <div
+      className='geeke-blockWrapper'
+      style={{marginLeft: `${indentWidth * indentLevel}rem`}}
+      onMouseOver={() => setMouseOver(true)}
+      onMouseLeave={() => setMouseOver(false)}
+    >
+      <div contentEditable={false} className={'geeke-draggableWrapper' + (mouseOver ? '' : ' geeke-invisible')}>
+        <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
+      </div>
+
+      <EditorBlock {...props} />
     </div>
   )
 }

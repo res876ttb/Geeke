@@ -12,9 +12,7 @@ import React, { useState, useRef } from 'react';
 import {
   Editor,
   EditorState,
-  DefaultDraftBlockRenderMap,
 } from 'draft-js';
-import Immutable from 'immutable';
 
 /*************************************************
  * Utils & States
@@ -66,21 +64,15 @@ const Page = props => {
 
   // blockRendererFn
   const blockDecorator = (contentBlock) => {
-    // const blockType = contentBlock.getType();
-    // switch (blockType) {
-    //   default:
-    //     return {
-    //       component: BasicBlock,
-    //     };
-    // }
-  };
-
-  // blockRenderMap
-  const blockRenderMap = DefaultDraftBlockRenderMap.merge(Immutable.Map({
-    'unstyled': {
-      element: BasicBlock,
+    const blockType = contentBlock.getType();
+    switch (blockType) {
+      default:
+        return {
+          component: BasicBlock,
+          editable: true,
+        };
     }
-  }));
+  };
 
   return (
     <div>
@@ -93,7 +85,6 @@ const Page = props => {
         handleKeyCommand={handleKeyCommand}
         handleReturn={handleReturn}
         blockRendererFn={blockDecorator}
-        blockRenderMap={blockRenderMap}
         spellCheck={true}
         // placeholder={'Write something here...'}
       />
