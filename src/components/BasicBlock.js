@@ -6,11 +6,17 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useState } from 'react';
+import React from 'react';
+import { EditorBlock } from 'draft-js';
+import { useDispatch, useSelector } from 'react-redux';
 
 /*************************************************
  * Utils & States
  *************************************************/
+import {
+  setMouseOverBlockKey,
+  unsetMouseOverBlockKey,
+} from '../states/editorMisc';
 
 /*************************************************
  * Import Components
@@ -28,20 +34,37 @@ import {
   blockDataKeys,
   indentWidth,
 } from '../constant';
-import { EditorBlock } from 'draft-js';
+import {
+  pmsc
+} from '../states/editorMisc';
 
 /*************************************************
  * Main components
  *************************************************/
 const BasicBlock = props => {
   // Props
+  const pageUuid = props.blockProps.pageUuid;
   const blockData = props.block.getData();
+  const blockKey = props.block.key;
 
-  // States
-  const [mouseOver, setMouseOver] = useState(false);
+  // Reducers
+  const dispatch = useDispatch();
+  const editorMiscPages = useSelector(state => state.editorMisc.pages);
+  const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
 
   // Variables
   let indentLevel = 0;
+
+  // Functions
+  const onMouseOver = e => {
+    e.stopPropagation();
+    setMouseOverBlockKey(dispatch, pageUuid, blockKey);
+  };
+
+  const onMouseLeave = e => {
+    e.stopPropagation();
+    unsetMouseOverBlockKey(dispatch, pageUuid);
+  }
 
   if (blockData.has(blockDataKeys.indentLevel)) {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -51,10 +74,10 @@ const BasicBlock = props => {
     <div
       className='geeke-blockWrapper'
       style={{marginLeft: `${indentWidth * indentLevel}rem`}}
-      onMouseOver={() => setMouseOver(true)}
-      onMouseLeave={() => setMouseOver(false)}
+      onMouseOver={onMouseOver}
+      onMouseLeave={onMouseLeave}
     >
-      <div contentEditable={false} className={'geeke-draggableWrapper' + (mouseOver ? '' : ' geeke-invisible')}>
+      <div contentEditable={false} className={'geeke-draggableWrapper' + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible')}>
         <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
       </div>
 

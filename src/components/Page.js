@@ -9,6 +9,7 @@
  * React Components
  *************************************************/
 import React, { useState, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   Editor,
   EditorState,
@@ -41,6 +42,9 @@ import '../styles/Page.css';
 const Page = props => {
   // Props
   const uuid = props.dataId;
+
+  // Status & Reducers
+  const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const editor = useRef(null);
 
@@ -48,9 +52,12 @@ const Page = props => {
   const commandConfig = {
     ...defaultKeyboardHandlingConfig,
   };
+  const defaultBlockProps = {
+    pageUuid: uuid,
+  };
 
   // keyBindingFn
-  const mapKeyToEditorCommand = e => _mapKeyToEditorCommand(e, commandConfig);
+  const mapKeyToEditorCommand = e => _mapKeyToEditorCommand(e, commandConfig, dispatch, uuid);
 
   // handleKeyCommand
   const handleKeyCommand = (command, editorState) => _handleKeyCommand(editorState, command, {
@@ -70,6 +77,7 @@ const Page = props => {
         return {
           component: BasicBlock,
           editable: true,
+          props: {...defaultBlockProps},
         };
     }
   };

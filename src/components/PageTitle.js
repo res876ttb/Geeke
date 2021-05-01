@@ -6,11 +6,11 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState} from 'react';
+// import { useSelector } from 'react-redux';
 import {
   ContentState,
-  Editor, 
+  Editor,
   EditorState,
   getDefaultKeyBinding,
 } from 'draft-js';
@@ -18,13 +18,6 @@ import {
 /*************************************************
  * Utils & States
  *************************************************/
-import { 
-  updatePageTitle,
-} from '../states/editor';
-import {
-  draggableOnDragEnter,
-  draggableOnDrop,
-} from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Import Components
@@ -43,18 +36,18 @@ const PageTitle = props => {
   const uuid = props.uuid;
 
   // States & Reducers
-  const dispatch = useDispatch();
-  const state = useSelector(state => state.editor);
+  // const dispatch = useDispatch();
+  // const state = useSelector(state => state.editor);
   const [title, setTitle] = useState(
     EditorState.createWithContent(
       ContentState.createFromText(
-        useSelector(state => state.editor.cachedPages[uuid].title)
+        'Untitled'
       )
     )
   ); // Create ContentState wit pure text: https://stackoverflow.com/a/35885589/6868122
 
   // Constants
-  const draggedBlockInfo = state.draggedBlock[uuid];
+  // const draggedBlockInfo = state.draggedBlock[uuid];
 
   const titleStyleFn = contentBlock => {
     return 'Geeke-Page-Title';
@@ -72,10 +65,10 @@ const PageTitle = props => {
   };
 
   // Update page title to reducer
-  useEffect(() => {
-    // Get plain text: https://stackoverflow.com/a/56275995/6868122
-    updatePageTitle(dispatch, uuid, title.getCurrentContent().getPlainText('\u0001'));
-  }, [title]); // eslint-disable-line react-hooks/exhaustive-deps
+  // useEffect(() => {
+  //   // Get plain text: https://stackoverflow.com/a/56275995/6868122
+  //   updatePageTitle(dispatch, uuid, title.getCurrentContent().getPlainText('\u0001'));
+  // }, [title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -83,8 +76,8 @@ const PageTitle = props => {
       geeke-type='Title'
       depth={-1}
 
-      onDragEnter={e => draggableOnDragEnter(e, dispatch, uuid, uuid, draggedBlockInfo, false)}
-      onDrop={e => draggableOnDrop(e, dispatch, uuid, draggedBlockInfo, state)}
+      // onDragEnter={e => draggableOnDragEnter(e, dispatch, uuid, uuid, draggedBlockInfo, false)}
+      // onDrop={e => draggableOnDrop(e, dispatch, uuid, draggedBlockInfo, state)}
     >
       <Editor className='Geeke-Page-Title'
         editorState={title}

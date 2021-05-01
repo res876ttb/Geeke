@@ -11,11 +11,12 @@ import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 import {createStore, combineReducers} from 'redux';
 import reportWebVitals from './reportWebVitals';
+import { enableMapSet } from 'immer';
 
 /*************************************************
  * Redux Reducers
  *************************************************/
-import {editor} from './states/editor';
+import {editorMisc} from './states/editorMisc';
 
 /*************************************************
  * Components
@@ -28,10 +29,16 @@ import Geeke from './components/Geeke';
 import './styles/index.css';
 
 /*************************************************
+ * Setup libraries
+ *************************************************/
+// Immer: enable support for MapSet
+enableMapSet();
+
+/*************************************************
  * Renderer
  *************************************************/
 const store = createStore(combineReducers({
-  editor
+  editorMisc
 }));
 
 ReactDOM.render(

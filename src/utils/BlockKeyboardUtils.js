@@ -6,8 +6,18 @@
 /*************************************************
  * IMPORT
  *************************************************/
-import { EditorState, getDefaultKeyBinding, Modifier, RichUtils, SelectionState } from "draft-js";
+import {
+  EditorState,
+  getDefaultKeyBinding,
+  Modifier,
+  RichUtils,
+  SelectionState,
+} from "draft-js";
 import Immutable from 'immutable';
+
+import {
+  unsetMouseOverBlockKey,
+} from '../states/editorMisc';
 
 /*************************************************
  * CONST
@@ -62,7 +72,9 @@ const mapKeyToEditorCommand_tab = (e, config) => {
   else return keyCommandConst.moreIndent;
 }
 
-export const mapKeyToEditorCommand = (e, config) => {
+export const mapKeyToEditorCommand = (e, config, dispatch, pageUuid) => {
+  unsetMouseOverBlockKey(dispatch, pageUuid);
+
   switch (e.keyCode) {
     case 9: // Tab
       return mapKeyToEditorCommand_tab(e, config);
@@ -256,7 +268,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
     newEditorState.getCurrentContent(),
     newSelectionState,
     newMap
-  )
+  );
 
   // Push copy block data action into editorState & update selection state
   newEditorState = EditorState.push(newEditorState, newContentState, 'split-block');

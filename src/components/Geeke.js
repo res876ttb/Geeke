@@ -12,9 +12,9 @@ import { useDispatch, useSelector } from 'react-redux';
 /*************************************************
  * Utils & States
  *************************************************/
-import { getRootPages } from '../utils/Sync';
-import { fetchRootPages } from '../states/editor';
-import { createFakePage } from '../utils/Mockup';
+import {
+  initPage
+} from '../states/editorMisc';
 
 /*************************************************
  * Import Components
@@ -30,32 +30,18 @@ import '../styles/Geeke.css';
  * Main components
  *************************************************/
 const Geeke = () => {
-  const pageTree = useSelector(state => state.editor.pageTree);
   const dispatch = useDispatch();
+  const editorMiscPages = useSelector(state => state.editorMisc.pages);
+  const fakePageUuid = '100';
 
   useEffect(() => {
-    let rootPages = getRootPages();
-    if (rootPages.length > 0) {
-      console.log(rootPages);
-      fetchRootPages(dispatch, rootPages);
-    }
-    
-    // Mock page (for debug convenience only)
-    else {
-      createFakePage(dispatch);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // For debug convenience
-  let page = null;
-  if (Object.keys(pageTree.root).length > 0) {
-    page = <Page dataId={Object.keys(pageTree.root)[0]} />;
-  }
+    initPage(dispatch, fakePageUuid);
+  }, []); // eslint-disable-line
 
   return (
     <div>
       {/* For debug convenience */}
-      {page}
+      {editorMiscPages.has(fakePageUuid) ? <Page dataId={fakePageUuid} /> : null}
     </div>
   )
 }
