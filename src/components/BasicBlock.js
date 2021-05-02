@@ -8,7 +8,7 @@
  *************************************************/
 import React from 'react';
 import { EditorBlock } from 'draft-js';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 /*************************************************
  * Utils & States
@@ -21,6 +21,7 @@ import {
 /*************************************************
  * Import Components
  *************************************************/
+import BlockDargButton from './BlcokDragButton';
 
 /*************************************************
  * Styles
@@ -34,9 +35,6 @@ import {
   blockDataKeys,
   indentWidth,
 } from '../constant';
-import {
-  pmsc
-} from '../states/editorMisc';
 
 /*************************************************
  * Main components
@@ -49,8 +47,6 @@ const BasicBlock = props => {
 
   // Reducers
   const dispatch = useDispatch();
-  const editorMiscPages = useSelector(state => state.editorMisc.pages);
-  const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
 
   // Variables
   let indentLevel = 0;
@@ -77,10 +73,7 @@ const BasicBlock = props => {
       onMouseOver={onMouseOver}
       onMouseLeave={onMouseLeave}
     >
-      <div contentEditable={false} className={'geeke-draggableWrapper' + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible')}>
-        <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
-      </div>
-
+      <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} />
       <EditorBlock {...props} />
     </div>
   )
