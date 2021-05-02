@@ -46,6 +46,7 @@ const Page = props => {
   // Status & Reducers
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [readOnly, setReadOnly] = useState(false);
   const editor = useRef(null);
 
   // Constant
@@ -54,6 +55,13 @@ const Page = props => {
   };
   const defaultBlockProps = {
     pageUuid: uuid,
+    setReadOnly,
+    readOnly,
+  };
+
+  // onChange
+  const updateEditor = editorState => {
+    if (!readOnly) setEditorState(editorState);
   };
 
   // keyBindingFn
@@ -76,7 +84,6 @@ const Page = props => {
       default:
         return {
           component: BasicBlock,
-          editable: true,
           props: {...defaultBlockProps},
         };
     }
@@ -88,12 +95,13 @@ const Page = props => {
       <Editor
         ref={editor}
         editorState={editorState}
-        onChange={setEditorState}
+        onChange={updateEditor}
         keyBindingFn={mapKeyToEditorCommand}
         handleKeyCommand={handleKeyCommand}
         handleReturn={handleReturn}
         blockRendererFn={blockDecorator}
         spellCheck={true}
+        readOnly={readOnly}
         // placeholder={'Write something here...'}
       />
       <div className='geeke-pageBottom'></div>

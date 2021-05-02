@@ -3,7 +3,20 @@
   position: absolute;
   transition-duration: 0.3s;
   left: 2rem;
-  cursor: -webkit-grab; cursor: grab;
+
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  cursor: -o-grab;
+  cursor: -ms-grab;
+  cursor: grab;
+}
+
+.geeke-draggableWrapper:active {
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+  cursor: -o-grabbing;
+  cursor: -ms-grabbing;
+  cursor: grabbing;
 }
 
 .geeke-blockWrapper {

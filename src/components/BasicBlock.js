@@ -44,6 +44,8 @@ const BasicBlock = props => {
   const pageUuid = props.blockProps.pageUuid;
   const blockData = props.block.getData();
   const blockKey = props.block.key;
+  const setReadOnly = props.blockProps.setReadOnly;
+  const readOnly = props.blockProps.readOnly;
 
   // Reducers
   const dispatch = useDispatch();
@@ -62,6 +64,16 @@ const BasicBlock = props => {
     unsetMouseOverBlockKey(dispatch, pageUuid);
   }
 
+  const onDragStart = e => {
+    e.stopPropagation();
+    if (!readOnly) setReadOnly(true);
+  }
+
+  const onDragEnd = e => {
+    e.stopPropagation();
+    setReadOnly(false);
+  }
+
   if (blockData.has(blockDataKeys.indentLevel)) {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
   }
@@ -69,9 +81,13 @@ const BasicBlock = props => {
   return (
     <div
       className='geeke-blockWrapper'
+      draggable={true}
       style={{marginLeft: `${indentWidth * indentLevel}rem`}}
+
       onMouseOver={onMouseOver}
       onMouseLeave={onMouseLeave}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
     >
       <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} />
       <EditorBlock {...props} />
