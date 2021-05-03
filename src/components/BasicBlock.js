@@ -14,9 +14,12 @@ import { useDispatch } from 'react-redux';
  * Utils & States
  *************************************************/
 import {
-  setMouseOverBlockKey,
-  unsetMouseOverBlockKey,
-} from '../states/editorMisc';
+  onMouseOver as _onMouseOver,
+  onMouseLeave as _onMouseLeave,
+  onDragStart as _onDragStart,
+  onDragEnd as _onDragEnd,
+  onDragEnter as _onDragEnter,
+} from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Import Components
@@ -54,29 +57,11 @@ const BasicBlock = props => {
   let indentLevel = 0;
 
   // Functions
-  const onMouseOver = e => {
-    e.stopPropagation();
-    setMouseOverBlockKey(dispatch, pageUuid, blockKey);
-  };
-
-  const onMouseLeave = e => {
-    e.stopPropagation();
-    unsetMouseOverBlockKey(dispatch, pageUuid);
-  }
-
-  const onDragStart = e => {
-    e.stopPropagation();
-    if (!readOnly) {
-      setReadOnly(true);
-    } else {
-      e.preventDefault();
-    }
-  }
-
-  const onDragEnd = e => {
-    e.stopPropagation();
-    setReadOnly(false);
-  }
+  const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
+  const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
+  const onDragStart = e => _onDragStart(e, readOnly, setReadOnly);
+  const onDragEnd = e => _onDragEnd(e, setReadOnly);
+  const onDragEnter = e => _onDragEnter(e);
 
   if (blockData.has(blockDataKeys.indentLevel)) {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -92,6 +77,7 @@ const BasicBlock = props => {
       onMouseLeave={onMouseLeave}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
+      onDragEnter={onDragEnter}
     >
       <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} readOnly={readOnly} />
       <EditorBlock {...props} />

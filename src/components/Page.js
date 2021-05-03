@@ -13,6 +13,8 @@ import { useDispatch } from 'react-redux';
 import {
   Editor,
   EditorState,
+  // convertToRaw,
+  convertFromRaw,
 } from 'draft-js';
 
 /*************************************************
@@ -37,6 +39,11 @@ import BasicBlock from './BasicBlock';
 import '../styles/Page.css';
 
 /*************************************************
+ * Constants
+ *************************************************/
+const testString = `{"blocks":[{"key":"feut4","text":"This is block 1","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"4uump","text":"This is block 2","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7tegj","text":"This is block 3","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7cl1n","text":"This is block 4","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":2}},{"key":"dn4hc","text":"This is block 5","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`;
+
+/*************************************************
  * Main components
  *************************************************/
 const Page = props => {
@@ -45,7 +52,7 @@ const Page = props => {
 
   // Status & Reducers
   const dispatch = useDispatch();
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [editorState, setEditorState] = useState(EditorState.createWithContent(convertFromRaw(JSON.parse(testString))));
   const [readOnly, setReadOnly] = useState(false);
   const editor = useRef(null);
 
@@ -61,6 +68,7 @@ const Page = props => {
 
   // onChange
   const updateEditor = editorState => {
+    // console.log(JSON.stringify(convertToRaw(editorState.getCurrentContent())));
     if (!readOnly) setEditorState(editorState);
   };
 
