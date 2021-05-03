@@ -89,7 +89,7 @@ export const mapKeyToEditorCommand = (e, config, dispatch, pageUuid) => {
 const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
-    return;
+    return false;
   }
 
   // Constants

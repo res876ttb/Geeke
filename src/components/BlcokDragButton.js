@@ -36,13 +36,15 @@ const BlockDargButton = props => {
   // Props
   const blockKey = props.blockKey;
   const pageUuid = props.pageUuid;
+  const readOnly = props.readOnly;
 
   // Reducers
   const editorMiscPages = useSelector(state => state.editorMisc.pages);
   const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
+  const className = 'geeke-draggableWrapper' + (readOnly ? '' : ' geeke-draggableCursor') + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible');
 
   return (
-    <div className={'geeke-draggableWrapper' + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible')} contentEditable={false}>
+    <div className={className} contentEditable={false}>
       <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
     </div>
   )

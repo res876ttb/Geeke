@@ -66,7 +66,11 @@ const BasicBlock = props => {
 
   const onDragStart = e => {
     e.stopPropagation();
-    if (!readOnly) setReadOnly(true);
+    if (!readOnly) {
+      setReadOnly(true);
+    } else {
+      e.preventDefault();
+    }
   }
 
   const onDragEnd = e => {
@@ -89,7 +93,7 @@ const BasicBlock = props => {
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
     >
-      <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} />
+      <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} readOnly={readOnly} />
       <EditorBlock {...props} />
     </div>
   )
