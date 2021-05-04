@@ -25,8 +25,6 @@ import {
 import {blockDataKeys} from '../constant';
 export const defaultKeyboardHandlingConfig = {
   indentBlock: true,
-  createNewBlock: true,
-  insertNewLine: true,
 };
 
 const keyCommandConst = {
@@ -70,7 +68,7 @@ const mapKeyToEditorCommand_tab = (e, config) => {
 
   if (e.shiftKey) return keyCommandConst.lessIndent;
   else return keyCommandConst.moreIndent;
-}
+};
 
 export const mapKeyToEditorCommand = (e, config, dispatch, pageUuid) => {
   unsetMouseOverBlockKey(dispatch, pageUuid);
@@ -240,9 +238,17 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   const contentState = editorState.getCurrentContent();
   const selectionState = editorState.getSelection();
   const originalBlockKey = selectionState.getEndKey();
+  const hasShift = e.shiftKey;
 
   // If selection is not collapsed... return false!
   if (!selectionState.isCollapsed()) return false;
+
+  // If shift is pressed, then insert soft new line
+  if (hasShift) {
+    const newEditorState = RichUtils.insertSoftNewline(editorState);
+    dispatcher.setEditorState(newEditorState);
+    return true;
+  }
 
   // Get all block data from current block
   const curBlock = contentState.getBlockMap().get(originalBlockKey);

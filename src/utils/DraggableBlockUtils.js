@@ -40,6 +40,7 @@ export const onDragStart = (e, readOnly, setReadOnly) => {
   const cursorY = e.nativeEvent.clientY;
   const sourceElement = document.elementFromPoint(cursorX, cursorY);
 
+  // Make sure that only user can only drag the block with the drag button
   if (sourceElement.draggable === true) {
     e.preventDefault();
     return;

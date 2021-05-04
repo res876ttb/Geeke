@@ -3,7 +3,7 @@
   position: absolute;
   transition-duration: 0.3s;
   left: 1.6rem;
-  top: 0.3rem;
+  top: 0.2rem;
 }
 
 .geeke-draggableWrapperInner {
@@ -42,7 +42,8 @@
 
 .geeke-blockWrapper {
   position: relative;
-  padding: 0.5rem 3rem;
+  padding: 0.3rem 3rem;
+  line-height: 1.4rem;
 }
 
 .geeke-editorWrapper {
