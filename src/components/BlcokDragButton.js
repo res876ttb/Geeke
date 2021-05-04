@@ -44,8 +44,10 @@ const BlockDargButton = props => {
   const className = 'geeke-draggableWrapper' + (readOnly ? '' : ' geeke-draggableCursor') + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible');
 
   return (
-    <div className={className} contentEditable={false}>
-      <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
+    <div className={className} contentEditable={false} draggable="false">
+      <div className='geeke-draggableWrapperInner'>
+        <img className='geeke-draggableButton' draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
+      </div>
     </div>
   )
 }

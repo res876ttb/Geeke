@@ -80,7 +80,9 @@ const BasicBlock = props => {
       onDragEnter={onDragEnter}
     >
       <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} readOnly={readOnly} />
-      <EditorBlock {...props} />
+      <div onDragStart={e => {e.preventDefault(); e.stopPropagation();}} draggable='true'>
+        <EditorBlock {...props} />
+      </div>
     </div>
   )
 }

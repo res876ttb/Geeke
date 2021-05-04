@@ -35,6 +35,16 @@ export const onMouseLeave = (e, dispatch, pageUuid) => {
 
 export const onDragStart = (e, readOnly, setReadOnly) => {
   e.stopPropagation();
+
+  const cursorX = e.nativeEvent.clientX;
+  const cursorY = e.nativeEvent.clientY;
+  const sourceElement = document.elementFromPoint(cursorX, cursorY);
+
+  if (sourceElement.draggable === true) {
+    e.preventDefault();
+    return;
+  }
+
   if (!readOnly) {
     setReadOnly(true);
   } else {
@@ -48,7 +58,7 @@ export const onDragEnter = (e) => {
   const clientY = e.clientY;
   const mouseOverElement = document.elementFromPoint(clientX, clientY);
 
-  console.log(mouseOverElement);
+  // console.log(mouseOverElement);
 };
 
 export const onDragEnd = (e, setReadOnly) => {

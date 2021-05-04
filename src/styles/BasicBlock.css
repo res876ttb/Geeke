@@ -2,7 +2,26 @@
   height: 0px;
   position: absolute;
   transition-duration: 0.3s;
-  left: 2rem;
+  left: 1.6rem;
+  top: 0.3rem;
+}
+
+.geeke-draggableWrapperInner {
+  height: 1.6rem;
+  width: 1.2rem;
+  text-align: center;
+  transition-duration: 0.15s;
+  position: relative;
+  border-radius: 20%;
+}
+
+.geeke-draggableButton {
+  position: relative;
+  top: 0.25rem;
+}
+
+.geeke-draggableWrapperInner:hover {
+  background-color: rgba(124, 124, 124, 0.5)
 }
 
 .geeke-draggableCursor {
