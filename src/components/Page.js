@@ -32,6 +32,7 @@ import {
  *************************************************/
 import PageTitle from './PageTitle';
 import BasicBlock from './BasicBlock';
+import PageDragShadow from './PageDragShadow';
 
 /*************************************************
  * Styles
@@ -54,9 +55,11 @@ const Page = props => {
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(EditorState.createWithContent(convertFromRaw(JSON.parse(testString))));
   const [readOnly, setReadOnly] = useState(false);
+  const [dragShadowPos, setDragShadowPos] = useState([-1, -1, false]);
   const editor = useRef(null);
 
   // Constant
+  const dargShadowId = `geeke-render-${uuid}`;
   const commandConfig = {
     ...defaultKeyboardHandlingConfig,
   };
@@ -64,6 +67,8 @@ const Page = props => {
     pageUuid: uuid,
     setReadOnly,
     readOnly,
+    dargShadowId,
+    setDragShadowPos,
   };
 
   // onChange
@@ -111,6 +116,7 @@ const Page = props => {
         readOnly={readOnly}
         // placeholder={'Write something here...'}
       />
+      <PageDragShadow elementId={dargShadowId} dragShadowPos={dragShadowPos} setDragShadowPos={setDragShadowPos} setReadOnly={setReadOnly} />
       <div className='geeke-pageBottom'></div>
       <button onClick={e => {
         copyTextToClipboard(JSON.stringify(convertToRaw(editorState.getCurrentContent())));

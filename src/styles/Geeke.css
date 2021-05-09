@@ -21,3 +21,8 @@
   height: 0px;
   overflow: hidden;
 }
+
+#geeke-drag {
+  opacity: 0.4;
+  position: fixed;
+}

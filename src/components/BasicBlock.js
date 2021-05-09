@@ -16,9 +16,6 @@ import { useDispatch } from 'react-redux';
 import {
   onMouseOver as _onMouseOver,
   onMouseLeave as _onMouseLeave,
-  onDragStart as _onDragStart,
-  onDragEnd as _onDragEnd,
-  onDragEnter as _onDragEnter,
 } from '../utils/DraggableBlockUtils';
 
 /*************************************************
@@ -49,6 +46,8 @@ const BasicBlock = props => {
   const blockKey = props.block.key;
   const setReadOnly = props.blockProps.setReadOnly;
   const readOnly = props.blockProps.readOnly;
+  const dargShadowId = props.blockProps.dargShadowId;
+  const setDragShadowPos = props.blockProps.setDragShadowPos;
 
   // Reducers
   const dispatch = useDispatch();
@@ -59,9 +58,6 @@ const BasicBlock = props => {
   // Functions
   const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
   const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
-  const onDragStart = e => _onDragStart(e, readOnly, setReadOnly);
-  const onDragEnd = e => _onDragEnd(e, setReadOnly);
-  const onDragEnter = e => _onDragEnter(e);
 
   if (blockData.has(blockDataKeys.indentLevel)) {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -70,16 +66,13 @@ const BasicBlock = props => {
   return (
     <div
       className='geeke-blockWrapper'
-      draggable={true}
       style={{marginLeft: `${indentWidth * indentLevel}rem`}}
+      geeke='true'
 
       onMouseOver={onMouseOver}
       onMouseLeave={onMouseLeave}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragEnter={onDragEnter}
     >
-      <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} readOnly={readOnly} />
+      <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} readOnly={readOnly} setReadOnly={setReadOnly} dargShadowId={dargShadowId} setDragShadowPos={setDragShadowPos} />
       <div onDragStart={e => {e.preventDefault(); e.stopPropagation();}} draggable='true'>
         <EditorBlock {...props} />
       </div>
