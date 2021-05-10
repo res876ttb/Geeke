@@ -16,9 +16,6 @@ import { useSelector } from 'react-redux';
 /*************************************************
  * Import Components
  *************************************************/
-import {
-  onDragStart as _onDragStart,
-} from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Styles
@@ -40,17 +37,12 @@ const BlockDargButton = props => {
   const blockKey = props.blockKey;
   const pageUuid = props.pageUuid;
   const readOnly = props.readOnly;
-  const setReadOnly = props.setReadOnly;
-  const dargShadowId = props.dargShadowId;
-  const setDragShadowPos = props.setDragShadowPos;
+  const handleBlockDargStart = props.handleBlockDargStart;
 
   // Reducers
   const editorMiscPages = useSelector(state => state.editorMisc.pages);
   const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
   const className = 'geeke-draggableWrapper' + (readOnly ? '' : ' geeke-draggableCursor') + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible');
-
-  // Functions
-  const onDragStart = e => _onDragStart(e, readOnly, setReadOnly, dargShadowId, setDragShadowPos);
 
   return (
     <div
@@ -58,7 +50,7 @@ const BlockDargButton = props => {
       contentEditable={false}
       draggable='true'
 
-      onDragStart={onDragStart}
+      onDragStart={handleBlockDargStart}
     >
       <div className='geeke-draggableWrapperInner'>
         <img className='geeke-draggableButton' draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>

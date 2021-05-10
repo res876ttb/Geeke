@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Editor,
@@ -38,6 +38,7 @@ import PageDragShadow from './PageDragShadow';
  * Styles
  *************************************************/
 import '../styles/Page.css';
+import { onDragStart } from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Constants
@@ -56,20 +57,35 @@ const Page = props => {
   const [editorState, setEditorState] = useState(EditorState.createWithContent(convertFromRaw(JSON.parse(testString))));
   const [readOnly, setReadOnly] = useState(false);
   const [dragShadowPos, setDragShadowPos] = useState([-1, -1, false]);
+  const [triggerDrag, setTriggerDrag] = useState(false);
   const editor = useRef(null);
 
-  // Constant
+  // Constants
   const dargShadowId = `geeke-render-${uuid}`;
   const commandConfig = {
     ...defaultKeyboardHandlingConfig,
   };
+
+  // handleBlockDargStart
+  const handleBlockDargStart = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTriggerDrag(e);
+  };
+
   const defaultBlockProps = {
     pageUuid: uuid,
-    setReadOnly,
     readOnly,
-    dargShadowId,
-    setDragShadowPos,
+    handleBlockDargStart,
   };
+
+  // useEffect for onDragStart
+  useEffect(() => {
+    if (!triggerDrag) return;
+
+    setTriggerDrag(false);
+    onDragStart(triggerDrag, readOnly, setReadOnly, dargShadowId, setDragShadowPos, editorState);
+  }, [triggerDrag, editorState]); // eslint-disable-line
 
   // onChange
   const updateEditor = editorState => {

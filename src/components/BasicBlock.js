@@ -44,10 +44,8 @@ const BasicBlock = props => {
   const pageUuid = props.blockProps.pageUuid;
   const blockData = props.block.getData();
   const blockKey = props.block.key;
-  const setReadOnly = props.blockProps.setReadOnly;
   const readOnly = props.blockProps.readOnly;
-  const dargShadowId = props.blockProps.dargShadowId;
-  const setDragShadowPos = props.blockProps.setDragShadowPos;
+  const handleBlockDargStart = props.blockProps.handleBlockDargStart;
 
   // Reducers
   const dispatch = useDispatch();
@@ -72,7 +70,12 @@ const BasicBlock = props => {
       onMouseOver={onMouseOver}
       onMouseLeave={onMouseLeave}
     >
-      <BlockDargButton blockKey={blockKey} pageUuid={pageUuid} readOnly={readOnly} setReadOnly={setReadOnly} dargShadowId={dargShadowId} setDragShadowPos={setDragShadowPos} />
+      <BlockDargButton
+        blockKey={blockKey}
+        pageUuid={pageUuid}
+        readOnly={readOnly}
+        handleBlockDargStart={handleBlockDargStart}
+      />
       <div onDragStart={e => {e.preventDefault(); e.stopPropagation();}} draggable='true'>
         <EditorBlock {...props} />
       </div>

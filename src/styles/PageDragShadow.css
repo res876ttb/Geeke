@@ -1,4 +1,9 @@
 .geeke-pageDragShadow {
   position: fixed;
   opacity: 0.4;
+
+  outline: none;
+  user-select: text;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
