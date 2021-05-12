@@ -38,11 +38,12 @@ const PageDragShadow = props => {
   const setDragShadowPos = props.setDragShadowPos;
   const setReadOnly = props.setReadOnly;
 
-  // States & Reducers
-  const [mousePosition, setMousePosition] = useState([-10000, -10000]);
-
   // Constants
   const enable = dragShadowPos && dragShadowPos.length >= 2 && dragShadowPos[2];
+  const initShadowPos = [window.innerWidth * 2, window.innerHeight * 2];
+
+  // States & Reducers
+  const [mousePosition, setMousePosition] = useState(initShadowPos);
 
   // Functions
   const getMousePosition = e => {
@@ -57,7 +58,7 @@ const PageDragShadow = props => {
     } else {
       document.onmousemove = null;
       document.onmouseup = null;
-      setMousePosition([-10000, -10000]);
+      setMousePosition(initShadowPos);
     }
   }, [enable]); // eslint-disable-line
 
