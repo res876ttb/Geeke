@@ -56,12 +56,12 @@ const Page = props => {
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(EditorState.createWithContent(convertFromRaw(JSON.parse(testString))));
   const [readOnly, setReadOnly] = useState(false);
-  const [dragShadowPos, setDragShadowPos] = useState([-1, -1, false]);
+  const [dragShadowPos, setDragShadowPos] = useState([-1, -1, false, null]); // [offset x, offset y, enable shadow, callback function]
   const [triggerDrag, setTriggerDrag] = useState(false);
   const editor = useRef(null);
 
   // Constants
-  const dargShadowId = `geeke-render-${uuid}`;
+  const dargShadowId = `geeke-dragShadow-${uuid}`;
   const commandConfig = {
     ...defaultKeyboardHandlingConfig,
   };
@@ -91,6 +91,7 @@ const Page = props => {
   const updateEditor = editorState => {
     if (!readOnly) setEditorState(editorState);
   };
+  const updateEditorButIgnoreReadOnly = editorState => setEditorState(editorState);
 
   // keyBindingFn
   const mapKeyToEditorCommand = e => _mapKeyToEditorCommand(e, commandConfig, dispatch, uuid);
@@ -120,24 +121,38 @@ const Page = props => {
   return (
     <div>
       <PageTitle uuid={uuid} />
-      <Editor
-        ref={editor}
+      <div id={`geeke-editor-${uuid}`}>
+        <Editor
+          ref={editor}
+          editorState={editorState}
+          onChange={updateEditor}
+          keyBindingFn={mapKeyToEditorCommand}
+          handleKeyCommand={handleKeyCommand}
+          handleReturn={handleReturn}
+          blockRendererFn={blockDecorator}
+          spellCheck={true}
+          readOnly={readOnly}
+          // placeholder={'Write something here...'}
+        />
+      </div>
+
+      <PageDragShadow
+        pageUuid={uuid}
+        elementId={dargShadowId}
         editorState={editorState}
-        onChange={updateEditor}
-        keyBindingFn={mapKeyToEditorCommand}
-        handleKeyCommand={handleKeyCommand}
-        handleReturn={handleReturn}
-        blockRendererFn={blockDecorator}
-        spellCheck={true}
-        readOnly={readOnly}
-        // placeholder={'Write something here...'}
+        dragShadowPos={dragShadowPos}
+        setDragShadowPos={setDragShadowPos}
+        setReadOnly={setReadOnly}
+        updateEditor={updateEditorButIgnoreReadOnly}
       />
-      <PageDragShadow elementId={dargShadowId} dragShadowPos={dragShadowPos} setDragShadowPos={setDragShadowPos} setReadOnly={setReadOnly} />
+
+      {/* TODO: make it work: drop on bottom of a page */}
       <div className='geeke-pageBottom'></div>
+
+      {/* For debug only */}
       <button onClick={e => {
         copyTextToClipboard(JSON.stringify(convertToRaw(editorState.getCurrentContent())));
       }}>Copy content</button>
-      {/* TODO: make it work: drop on bottom of a page */}
     </div>
   )
 }

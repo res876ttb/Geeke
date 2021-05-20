@@ -133,6 +133,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     }
 
     if (curIndentLevel <= prevIndentLevel) curIndentLevel += 1;
+    prevIndentLevel = curIndentLevel;
 
     newContent = Modifier.setBlockData(newContent, new SelectionState({
       anchorKey: keyArray[i],
@@ -142,8 +143,11 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     }), Immutable.Map({[blockDataKeys.indentLevel]: curIndentLevel}));
   }
 
+  // Push state
+  const newEditorState = EditorState.push(editorState, newContent, "more-indent");
+
   // Update editorState
-  dispatcher.setEditorState(EditorState.createWithContent(newContent));
+  dispatcher.setEditorState(newEditorState);
 };
 
 const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
@@ -193,8 +197,11 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
     }), Immutable.Map({[blockDataKeys.indentLevel]: curIndentLevel}));
   }
 
+  // Push state
+  const newEditorState = EditorState.push(editorState, newContent, "less-indent");
+
   // Update editorState
-  dispatcher.setEditorState(EditorState.createWithContent(newContent));
+  dispatcher.setEditorState(newEditorState);
 };
 
 const handleKeyCommand_default = (editorState, command, dispatcher) => {

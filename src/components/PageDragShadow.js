@@ -33,10 +33,13 @@ import '../styles/PageDragShadow.css';
  *************************************************/
 const PageDragShadow = props => {
   // Props
+  const pageUuid = props.pageUuid;
   const elementId = props.elementId;
   const dragShadowPos = props.dragShadowPos;
   const setDragShadowPos = props.setDragShadowPos;
   const setReadOnly = props.setReadOnly;
+  const updateEditor = props.updateEditor;
+  const editorState = props.editorState;
 
   // Constants
   const enable = dragShadowPos && dragShadowPos.length >= 2 && dragShadowPos[2];
@@ -49,7 +52,12 @@ const PageDragShadow = props => {
   const getMousePosition = e => {
     setMousePosition([e.clientX, e.clientY]);
   }
-  const onDragEnd = e => _onDragEnd(e, setReadOnly, elementId, setDragShadowPos);
+  const onDragEnd = e => {
+    const handleDrop = dragShadowPos && dragShadowPos.length >= 3 && dragShadowPos[3] ? dragShadowPos[3] : null;
+    if (handleDrop) updateEditor(handleDrop(e, pageUuid, editorState));
+
+    _onDragEnd(e, setReadOnly, elementId, setDragShadowPos);
+  }
 
   useEffect(() => {
     if (enable) {
