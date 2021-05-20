@@ -46,10 +46,13 @@ const getElementAtDropPosition = (x, y) => {
 
 const getBlockElement = target => {
   let curElement = target;
+
+  if (curElement.nodeName === 'HTML') return null;
   while (!curElement.hasAttribute('geeke')) {
     if (curElement === document.body) return null;
     curElement = curElement.parentNode;
   }
+
   return curElement;
 }
 
