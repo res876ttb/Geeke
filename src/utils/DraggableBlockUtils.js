@@ -97,6 +97,9 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
   const targetBlockKey = insertBeforeFirstBlock ? null : getBlockKeyFromBlockElement(target);
   const isInsertFirstBlock = targetBlockKey === null;
 
+  // Check whether the drop position is the selected blocks
+  if (selectedBlocks.indexOf(targetBlockKey) !== -1) return editorState;
+
   // Set block moving setting
   let previousKey = targetBlockKey;
   let insertionMode = 'after';
