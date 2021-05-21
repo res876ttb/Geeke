@@ -40,6 +40,7 @@ const PageDragShadow = props => {
   const setReadOnly = props.setReadOnly;
   const updateEditor = props.updateEditor;
   const editorState = props.editorState;
+  const focusEditor = props.focusEditor;
 
   // Constants
   const enable = dragShadowPos && dragShadowPos.length >= 2 && dragShadowPos[2];
@@ -57,6 +58,7 @@ const PageDragShadow = props => {
     if (handleDrop) updateEditor(handleDrop(e, pageUuid, editorState));
 
     _onDragEnd(e, setReadOnly, elementId, setDragShadowPos);
+    focusEditor();
   }
 
   useEffect(() => {

@@ -106,6 +106,9 @@ const Page = props => {
     setEditorState,
   });
 
+  // handleFocusEditor
+  const handleFocusEditor = () => editor.current.focus();
+
   // blockRendererFn
   const blockDecorator = (contentBlock) => {
     const blockType = contentBlock.getType();
@@ -144,6 +147,7 @@ const Page = props => {
         setDragShadowPos={setDragShadowPos}
         setReadOnly={setReadOnly}
         updateEditor={updateEditorButIgnoreReadOnly}
+        focusEditor={handleFocusEditor}
       />
 
       {/* TODO: make it work: drop on bottom of a page */}
