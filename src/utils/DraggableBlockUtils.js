@@ -217,6 +217,11 @@ export const onDragStart = (e, readOnly, setReadOnly, renderEleId, setDragShadow
   const target = getBlockElement(e.target);
   const targetBlockKey = getBlockKeyFromBlockElement(target);
 
+  // Get size of the cloned object
+  const targetRect = target.getBoundingClientRect();
+  const targetWidth = targetRect.width;
+  const targetHeight = targetRect.height;
+
   // Find all selected blocks
   const endBlockKey = selectionState.getEndKey();
   let curBlock = contentState.getBlockForKey(selectionState.getStartKey());
@@ -234,14 +239,44 @@ export const onDragStart = (e, readOnly, setReadOnly, renderEleId, setDragShadow
 
   // Calculate X offset
   const computedEle = window.getComputedStyle(target, null);
-  const marginLeft = parseInt(computedEle.getPropertyValue('margin-left').replace('px', ''));
-  const offsetX = marginLeft + remToPx(editorLeftPadding - editorDraggableButtonLeftPadding + editorDraggableButtonWidth / 2);
+  const targetMarginLeft = parseFloat(computedEle.getPropertyValue('margin-left').replace('px', ''));
+  const targetPaddingLeft = parseFloat(computedEle.getPropertyValue('padding-left').replace('px', ''));
+  const targetPaddingRight = parseFloat(computedEle.getPropertyValue('padding-right').replace('px', ''));
+  const offsetX = targetMarginLeft + remToPx(editorLeftPadding - editorDraggableButtonLeftPadding + editorDraggableButtonWidth / 2);
+  const offsetXBackground = targetMarginLeft + remToPx(editorLeftPadding - editorDraggableButtonLeftPadding);
+  const targetTextWidth = targetWidth - targetPaddingLeft - targetPaddingRight + remToPx(editorDraggableButtonLeftPadding);
 
   // Clone the target component
   let clone = target.cloneNode(true);
 
-  // Render the cloned component
+  // Set size of cloned component
+  clone.style.width = `${targetWidth}px`;
+  clone.style.height = `${targetHeight}px`;
+  clone.style.lineHeight = `1.4rem`;
+
+  // Create a block represents there are multiple blocks when dragging
+  let moreBlocks = document.createElement('div');
+  moreBlocks.innerHTML = '<b>...</b>';
+  moreBlocks.style.position = 'absolute';
+  moreBlocks.style.left = `${remToPx(editorDraggableButtonLeftPadding)}px`;
+  moreBlocks.style.bottom = `0.2rem`;
+
+  // Create background component
+  let background = document.createElement('div');
+  background.style.left = `${offsetXBackground}px`;
+  background.style.position = 'absolute';
+  background.style.width = `${targetTextWidth}px`;
+  background.style.height = `${targetHeight + (selectedBlocks.length > 1 ? remToPx(1.4) : 0)}px`;
+  background.style.top = `0px`;
+  background.style.background = 'rgba(114, 199, 255, 0.5)';
+  background.style.borderRadius = '0.2rem';
+
+  // Render the background and the cloned component
   let dragShadowEle = document.getElementById(renderEleId);
+  if (selectedBlocks.length > 1) {
+    background.appendChild(moreBlocks);
+  }
+  dragShadowEle.appendChild(background);
   dragShadowEle.appendChild(clone);
 
   // Start mouse tracker
