@@ -37,27 +37,30 @@ enableMapSet();
 /*************************************************
  * Renderer
  *************************************************/
-const store = createStore(combineReducers({
-  editorMisc
-}));
+if (window.event) alert('IE not supported!')
+else {
+  const store = createStore(combineReducers({
+    editorMisc
+  }));
 
-ReactDOM.render(
-  <Provider store={store}>
-    <React.StrictMode>
-      <Geeke />
-    </React.StrictMode>
-  </Provider>,
-  document.getElementById('root')
-);
+  ReactDOM.render(
+    <Provider store={store}>
+      <React.StrictMode>
+        <Geeke />
+      </React.StrictMode>
+    </Provider>,
+    document.getElementById('root')
+  );
 
-// Disable animation when release dragged component
-// Source: https://stackoverflow.com/questions/42725321/prevent-html5-drag-ghost-image-flying-back
-document.ondragover = e => {
-  e.preventDefault();
+  // Disable animation when release dragged component
+  // Source: https://stackoverflow.com/questions/42725321/prevent-html5-drag-ghost-image-flying-back
+  document.ondragover = e => {
+    e.preventDefault();
+  }
+
+  // If you want to start measuring performance in your app, pass a function
+  // to log results (for example: reportWebVitals(console.log))
+  // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+  reportWebVitals();
+  // reportWebVitals(console.log);
 }
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
-// reportWebVitals(console.log);
