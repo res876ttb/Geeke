@@ -343,7 +343,6 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
     top: `${targetbottom - remToPx(dragMaskHeight)}px`,
     depth: depth,
   };
-  console.log(dragMaskParam);
 
   return dragMaskParam;
 };
