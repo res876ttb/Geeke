@@ -65,6 +65,25 @@ const getBlockKeyFromBlockElement = element => {
   return blockKey;
 }
 
+// TODO: Move the following two functions to other files... they are not suitable here
+const getFirstBlockKey = contentState => {
+  const blockMap = contentState.getBlockMap();
+  return blockMap.keys().next().value;
+}
+const getLastBlockKey = contentState => {
+  const blockMap = contentState.getBlockMap();
+  return Array.from(blockMap.keys()).pop();
+}
+
+const getBlockDepthFromBlockKey = (key, contentState) => {
+  let depth = 0;
+  const block = contentState.getBlockForKey(key);
+  const blockData = block.getData();
+  depth = blockData.has(blockDataKeys.indentLevel) ? blockData.get(blockDataKeys.indentLevel) : 0;
+
+  return depth;
+}
+
 const moveAtomicBlock = (contentState, atomicBlock, targetRange, insertionMode) => {
   const editorState = EditorState.createWithContent(contentState);
   const newEditorState = AtomicBlockUtils.moveAtomicBlock(editorState, atomicBlock, targetRange, insertionMode);
@@ -107,7 +126,8 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
   let previousKey = targetBlockKey;
   let insertionMode = 'after';
   if (targetBlockKey === null) {
-    previousKey = blockMap.keys().next().value;
+    // Get key of the first block (get first value from a map)
+    previousKey = getFirstBlockKey(contentState);
     insertionMode = 'before';
   }
 
@@ -309,14 +329,45 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
   const dropComponent = getElementAtDropPosition(mouseX, mouseY);
   if (dropComponent === null) return null;
 
+  // Constants
+  const contentState = editorState.getCurrentContent();
+
   // Check whether drop above the editor. TODO: check whether first block or last block...
   const editorId = `geeke-editor-${pageUuid}`;
   const editorTopFromPageTop = document.getElementById(editorId).getBoundingClientRect().top;
+  const editorBottomFromPageTop = document.getElementById(editorId).getBoundingClientRect().bottom;
   const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
+  const insertAfterLastBlock = mouseY >= editorBottomFromPageTop;
+
+  // Calculate X offset
+  const editorRect = document.getElementById(editorId).getBoundingClientRect();
+  const offsetX = editorRect.left;
+  const editorTop = editorRect.top;
+  const editorBottom = editorRect.bottom;
+
+  // Check whether mouse is over any editor block. If not, handle it
+  if (insertBeforeFirstBlock) {
+    return {
+      left: `${offsetX}px`,
+      top: `${editorTop}px`,
+      depth: -1,
+    };
+  } else if (insertAfterLastBlock) {
+    // Get depth of the last block
+    const lastBlockKey = getLastBlockKey(contentState)
+    const depth = getBlockDepthFromBlockKey(lastBlockKey, contentState);
+
+    // Return result!
+    return {
+      left: `${offsetX}px`,
+      top: `${editorBottom - remToPx(dragMaskHeight)}px`,
+      depth: depth,
+    };
+  }
 
   // Get target block key
   const target = getBlockElement(dropComponent);
-  const targetBlockKey = insertBeforeFirstBlock ? null : getBlockKeyFromBlockElement(target);
+  const targetBlockKey = getBlockKeyFromBlockElement(target);
 
   // Check whether target block is selected. If so, do not show mask.
   if (selectedBlocks.indexOf(targetBlockKey) !== -1 || targetBlockKey === null) return null;
@@ -325,24 +376,13 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
   const targetRect = target.getBoundingClientRect();
   const targetbottom = targetRect.bottom;
 
-  // Calculate X offset
-  const offsetX = document.getElementById(editorId).getBoundingClientRect().left;
-
   // Get depth of the target block
-  let depth = 0;
-  if (!insertBeforeFirstBlock) {
-    const contentState = editorState.getCurrentContent();
-    const targetBlock = contentState.getBlockForKey(targetBlockKey);
-    const targetBlockData = targetBlock.getData();
-    depth = targetBlockData.has(blockDataKeys.indentLevel) ? targetBlockData.get(blockDataKeys.indentLevel) : 0;
-  }
+  const depth = getBlockDepthFromBlockKey(targetBlockKey, contentState);
 
   // Create the position and size parameters for the drag mask
-  const dragMaskParam = {
+  return {
     left: `${offsetX}px`,
     top: `${targetbottom - remToPx(dragMaskHeight)}px`,
     depth: depth,
   };
-
-  return dragMaskParam;
 };
