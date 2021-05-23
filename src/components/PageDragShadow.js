@@ -7,17 +7,20 @@
  * React Components
  *************************************************/
 import React, { useEffect, useState } from 'react';
+import throttle from 'lodash/throttle';
 
 /*************************************************
  * Utils & States
  *************************************************/
 import {
-  onDragEnd as _onDragEnd
+  onDragEnd as _onDragEnd,
+  createDragMaskParam,
 } from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Import Components
  *************************************************/
+import BlockDragMask from './BlockDragMask';
 
 /*************************************************
  * Styles
@@ -48,10 +51,15 @@ const PageDragShadow = props => {
 
   // States & Reducers
   const [mousePosition, setMousePosition] = useState(initShadowPos);
+  const [dragMaskParam, setDragMaskParam] = useState(null);
 
   // Functions
+  const createDragMask = throttle((x, y) => {
+    setDragMaskParam(createDragMaskParam(x, y, pageUuid, editorState, dragShadowPos.length >= 5 ? dragShadowPos[4] : []));
+  }, 100);
   const getMousePosition = e => {
     setMousePosition([e.clientX, e.clientY]);
+    createDragMask(e.clientX, e.clientY);
   }
   const onDragEnd = e => {
     const handleDrop = dragShadowPos && dragShadowPos.length >= 3 && dragShadowPos[3] ? dragShadowPos[3] : null;
@@ -69,11 +77,15 @@ const PageDragShadow = props => {
       document.onmousemove = null;
       document.onmouseup = null;
       setMousePosition(initShadowPos);
+      setDragMaskParam(null);
     }
   }, [enable]); // eslint-disable-line
 
   return (
+    <>
+    <BlockDragMask dragMaskParam={dragMaskParam} />
     <div id={elementId} className='geeke-pageDragShadow' style={{left: mousePosition[0] - dragShadowPos[0], top: mousePosition[1] - dragShadowPos[1]}}></div>
+    </>
   );
 }
 

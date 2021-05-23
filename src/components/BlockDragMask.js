@@ -7,8 +7,7 @@
  * React Components
  *************************************************/
 import React from 'react';
-import { useSelector } from 'react-redux';
- 
+
 /*************************************************
  * Utils & States
  *************************************************/
@@ -28,7 +27,6 @@ import '../styles/BlockDragMask.css';
 import {
   indentWidth,
   editorLeftPadding,
-  dragMaskHeight,
   dragMaskIndentInterval,
 } from '../constant';
 
@@ -37,41 +35,36 @@ import {
  *************************************************/
 const BlockDragMask = props => {
   // Props
-  const pageUuid = props.pageId;
+  const dragMaskParam = props.dragMaskParam;
 
-  // States & Reducers
-  const state = useSelector(state => state.editor);
+  // Check whether dragMaskParam is not empty
+  if (dragMaskParam === null) return null;
 
-  // Constants
-  const draggedBlock = state.draggedBlock[pageUuid];
-  const show = (draggedBlock ? draggedBlock.blockUuid ? true : false : false) && draggedBlock.bottom;
-  if (!show) return null;
-  const depth = parseInt(draggedBlock.depth) + 1;
-  
-  // Variables
-  let bottom = draggedBlock.bottom;
-  let left = draggedBlock.left;
-  let nopacity = 0.8;
+  // Extract dragMaskParam
+  const left = dragMaskParam.left;
+  const top = dragMaskParam.top;
+  const depth = dragMaskParam.depth;
 
   // Generate masks
-  let leftPadding = <div key='-1' className='geeke-inlineBlock' 
+  let nopacity = 0.8;
+  let leftPadding = <div key='-1' className='geeke-inlineBlock'
                          style={{paddingLeft: `${editorLeftPadding}rem`}}></div>;
   let masks = [leftPadding];
-  for (let i = 0; i < depth; i++) {
-    let mask = <div key={`${i}`} className='geeke-dragMask' 
-                    style={{left: `${editorLeftPadding + indentWidth * i}rem`, 
-                            backgroundColor: `rgba(2, 141, 255, ${1 - nopacity})`, 
+  for (let i = 0; i <= depth; i++) {
+    let mask = <div key={`${i}`} className='geeke-dragMask'
+                    style={{left: `${editorLeftPadding + indentWidth * i}rem`,
+                            backgroundColor: `rgba(2, 141, 255, ${1 - nopacity})`,
                             width: `${indentWidth - dragMaskIndentInterval}rem`}}></div>;
     nopacity *= nopacity;
     masks.push(mask);
   }
-  masks.push(<div key='-2' className='geeke-dragMaskRight' 
-                  style={{left: `${editorLeftPadding + indentWidth * depth}rem`, 
+  masks.push(<div key='-2' className='geeke-dragMaskRight'
+                  style={{left: `${editorLeftPadding + indentWidth * (depth + 1)}rem`,
                           backgroundColor: `rgba(2, 141, 255, ${1 - nopacity})`}}></div>);
 
   return (
     <div className='geeke-blockDragMask'
-         style={{left: left, top: bottom - dragMaskHeight}}>
+         style={{left: left, top: top}}>
       {masks}
     </div>
   )

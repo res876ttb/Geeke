@@ -16,13 +16,13 @@ import {
  *************************************************/
 import Immutable from 'immutable';
 import {
-//   indentWidth,
   editorLeftPadding,
   editorDraggableButtonWidth,
   editorDraggableButtonLeftPadding,
   remToPx,
   oneRem,
   blockDataKeys,
+  dragMaskHeight,
 } from '../constant';
 import {
   EditorState,
@@ -90,7 +90,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
   let newEditorState = editorState;
   let newContentState = contentState;
 
-  // Check whether drop above the editor
+  // Check whether drop above the editor. TODO: check whether first block or last block...
   const editorId = `geeke-editor-${pageUuid}`;
   const editorTopFromPageTop = document.getElementById(editorId).getBoundingClientRect().top;
   const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
@@ -282,7 +282,7 @@ export const onDragStart = (e, readOnly, setReadOnly, renderEleId, setDragShadow
   // Start mouse tracker
   setDragShadowPos([offsetX, oneRem / 2, true, (e, pageUuid, editorState, depth) => {
     return handleDropCallback(e, pageUuid, editorState, selectedBlocks, depth);
-  }]);
+  }, selectedBlocks]);
 };
 
 export const onDragEnd = (e, setReadOnly, renderEleId, setDragShadowPos) => {
@@ -298,5 +298,52 @@ export const onDragEnd = (e, setReadOnly, renderEleId, setDragShadowPos) => {
   dragShadowEle.innerHTML = '';
 
   // Disable drag event listener
-  setDragShadowPos([-1, -1, false, null]);
+  setDragShadowPos([-1, -1, false, null, []]);
+};
+
+export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selectedBlocks) => {
+  // Sanity check if there are any selected blocks
+  if (selectedBlocks.length === 0) return null;
+
+  // Get block at current cursor position
+  const dropComponent = getElementAtDropPosition(mouseX, mouseY);
+  if (dropComponent === null) return null;
+
+  // Check whether drop above the editor. TODO: check whether first block or last block...
+  const editorId = `geeke-editor-${pageUuid}`;
+  const editorTopFromPageTop = document.getElementById(editorId).getBoundingClientRect().top;
+  const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
+
+  // Get target block key
+  const target = getBlockElement(dropComponent);
+  const targetBlockKey = insertBeforeFirstBlock ? null : getBlockKeyFromBlockElement(target);
+
+  // Check whether target block is selected. If so, do not show mask.
+  if (selectedBlocks.indexOf(targetBlockKey) !== -1 || targetBlockKey === null) return null;
+
+  // Get size of the cloned object
+  const targetRect = target.getBoundingClientRect();
+  const targetbottom = targetRect.bottom;
+
+  // Calculate X offset
+  const offsetX = document.getElementById(editorId).getBoundingClientRect().left;
+
+  // Get depth of the target block
+  let depth = 0;
+  if (!insertBeforeFirstBlock) {
+    const contentState = editorState.getCurrentContent();
+    const targetBlock = contentState.getBlockForKey(targetBlockKey);
+    const targetBlockData = targetBlock.getData();
+    depth = targetBlockData.has(blockDataKeys.indentLevel) ? targetBlockData.get(blockDataKeys.indentLevel) : 0;
+  }
+
+  // Create the position and size parameters for the drag mask
+  const dragMaskParam = {
+    left: `${offsetX}px`,
+    top: `${targetbottom - remToPx(dragMaskHeight)}px`,
+    depth: depth,
+  };
+  console.log(dragMaskParam);
+
+  return dragMaskParam;
 };

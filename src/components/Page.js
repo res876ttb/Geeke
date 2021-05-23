@@ -56,7 +56,7 @@ const Page = props => {
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState(EditorState.createWithContent(convertFromRaw(JSON.parse(testString))));
   const [readOnly, setReadOnly] = useState(false);
-  const [dragShadowPos, setDragShadowPos] = useState([-1, -1, false, null]); // [offset x, offset y, enable shadow, callback function]
+  const [dragShadowPos, setDragShadowPos] = useState([-1, -1, false, null, []]); // [offset x, offset y, enable shadow, callback function, arrays of selected blocks]
   const [triggerDrag, setTriggerDrag] = useState(false);
   const editor = useRef(null);
 

@@ -18,7 +18,7 @@ export const editorTopPadding = 0.3; // Unit: rem
 export const editorDraggableButtonLeftPadding = 1.6; // Unit: rem
 export const editorDraggableButtonWidth = 1.6; // Unit: rem
 
-export const dragMaskHeight = 3; // Unit: px
+export const dragMaskHeight = 0.25; // Unit: rem
 export const dragMaskIndentInterval = 0.15; // Unit: rem
 
 export const blockDataKeys = {
