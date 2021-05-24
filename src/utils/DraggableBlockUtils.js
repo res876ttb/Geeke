@@ -351,6 +351,7 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
   const editorRect = document.getElementById(editorId).getBoundingClientRect();
   const editorTopFromPageTop = editorRect.top;
   const editorBottomFromPageTop = editorRect.bottom;
+  const editorRightFromPageLeft = editorRect.right;
   const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
   const insertAfterLastBlock = mouseY >= editorBottomFromPageTop;
 
@@ -377,12 +378,13 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
     return {
       left: `${offsetX}px`,
       top: `${editorBottom - remToPx(dragMaskHeight)}px`,
+      width: `${editorWidth}px`,
       depth: depth,
     };
   }
 
   // Get target block key
-  const target = getBlockElementFromAnyDomEle(dropComponent);
+  const target = getBlockElementFromAnyDomEle(getElementAtDropPosition(editorRightFromPageLeft - remToPx(editorLeftPadding), mouseY));
   const targetBlockKey = getBlockKeyFromBlockElement(target);
 
   // Check whether target block is selected. If so, do not show mask.
