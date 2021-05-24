@@ -42,10 +42,11 @@ const getElementAtDropPosition = (x, y) => {
       return elements[i + 1];
     }
   }
-  return null;
+  return elements[0];
 }
 
 const getBlockElementFromAnyDomEle = target => {
+  if (!target) return null;
   let curElement = target;
 
   if (curElement.nodeName === 'HTML') return null;
@@ -115,6 +116,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   const editorRect = document.getElementById(editorId).getBoundingClientRect();
   const editorTopFromPageTop = editorRect.top;
   const editorBottomFromPageTop = editorRect.bottom;
+  const editorRightFromPageLeft = editorRect.right;
   const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
   const insertAfterLastBlock = mouseY >= editorBottomFromPageTop;
 
@@ -130,7 +132,10 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   } else if (insertAfterLastBlock) {
     targetBlockKey = getLastBlockKey(contentState);
   } else {
-    targetBlockKey = getBlockKeyFromBlockElement(getBlockElementFromAnyDomEle(dropComponent));
+    const dropComponent = getElementAtDropPosition(editorRightFromPageLeft - remToPx(editorLeftPadding), mouseY);
+    const blockElement = getBlockElementFromAnyDomEle(dropComponent);
+    targetBlockKey = getBlockKeyFromBlockElement(blockElement);
+    console.log(targetBlockKey, editorRightFromPageLeft - remToPx(editorLeftPadding), mouseY, dropComponent);
   }
 
   // Check whether the drop position is the selected blocks

@@ -41,7 +41,10 @@ const Geeke = () => {
   return (
     <div>
       {/* For debug convenience */}
-      {editorMiscPages.has(fakePageUuid) ? <Page dataId={fakePageUuid} /> : null}
+      <div style={{display: 'inline-block', width: '123px'}}></div>
+      <div style={{display: 'inline-block', width: '789px', outline: 'solid 1px black'}}>
+        {editorMiscPages.has(fakePageUuid) ? <Page dataId={fakePageUuid} /> : null}
+      </div>
     </div>
   )
 }
