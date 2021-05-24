@@ -44,7 +44,7 @@ const getElementAtDropPosition = (x, y) => {
   return null;
 }
 
-const getBlockElement = target => {
+const getBlockElementFromAnyDomEle = target => {
   let curElement = target;
 
   if (curElement.nodeName === 'HTML') return null;
@@ -112,24 +112,26 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
   // Check whether drop above the editor. TODO: check whether first block or last block...
   const editorId = `geeke-editor-${pageUuid}`;
   const editorTopFromPageTop = document.getElementById(editorId).getBoundingClientRect().top;
+  const editorBottomFromPageTop = document.getElementById(editorId).getBoundingClientRect().bottom;
   const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
+  const insertAfterLastBlock = mouseY >= editorBottomFromPageTop;
 
   // Get target block id
-  const target = getBlockElement(dropComponent);
-  const targetBlockKey = insertBeforeFirstBlock ? null : getBlockKeyFromBlockElement(target);
-  const isInsertFirstBlock = targetBlockKey === null;
+  let targetBlockKey = null;
+  if (insertBeforeFirstBlock) {
+    targetBlockKey = getFirstBlockKey(contentState);
+  } else if (insertAfterLastBlock) {
+    targetBlockKey = getLastBlockKey(contentState);
+  } else {
+    targetBlockKey = getBlockKeyFromBlockElement(getBlockElementFromAnyDomEle(dropComponent));
+  }
 
   // Check whether the drop position is the selected blocks
   if (selectedBlocks.indexOf(targetBlockKey) !== -1) return editorState;
 
   // Set block moving setting
   let previousKey = targetBlockKey;
-  let insertionMode = 'after';
-  if (targetBlockKey === null) {
-    // Get key of the first block (get first value from a map)
-    previousKey = getFirstBlockKey(contentState);
-    insertionMode = 'before';
-  }
+  let insertionMode = insertBeforeFirstBlock ? 'before' : 'after';
 
   // Check whether the block position is changed
   if (targetBlockKey !== previousBlockKey) {
@@ -148,7 +150,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
         }),
         insertionMode
       );
-      if (!isInsertFirstBlock) previousKey = blockKeyToBeMoved;
+      if (!insertBeforeFirstBlock) previousKey = blockKeyToBeMoved;
     }
 
     // Push state (before modifying indent level)
@@ -162,7 +164,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
   // Modify block data (just like indentLevel)
   // Set prevIndentLevel
   let prevIndentLevel = -1;
-  if (!isInsertFirstBlock) {
+  if (!insertBeforeFirstBlock) {
     let blockData = blockMap.get(targetBlockKey).getData();
     if (blockData.has(blockDataKeys.indentLevel)) {
       prevIndentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -234,7 +236,7 @@ export const onDragStart = (e, readOnly, setReadOnly, renderEleId, setDragShadow
   const contentState = editorState.getCurrentContent();
 
   // Find target DOM element and get the block key of the dragged block
-  const target = getBlockElement(e.target);
+  const target = getBlockElementFromAnyDomEle(e.target);
   const targetBlockKey = getBlockKeyFromBlockElement(target);
 
   // Get size of the cloned object
@@ -366,7 +368,7 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
   }
 
   // Get target block key
-  const target = getBlockElement(dropComponent);
+  const target = getBlockElementFromAnyDomEle(dropComponent);
   const targetBlockKey = getBlockKeyFromBlockElement(target);
 
   // Check whether target block is selected. If so, do not show mask.
