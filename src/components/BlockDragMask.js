@@ -28,6 +28,7 @@ import {
   indentWidth,
   editorLeftPadding,
   dragMaskIndentInterval,
+  remToPx,
 } from '../constant';
 
 /*************************************************
@@ -44,6 +45,7 @@ const BlockDragMask = props => {
   const left = dragMaskParam.left;
   const top = dragMaskParam.top;
   const depth = dragMaskParam.depth;
+  const width = parseInt(dragMaskParam.width);
 
   // Generate masks
   let nopacity = 0.8;
@@ -58,8 +60,10 @@ const BlockDragMask = props => {
     nopacity *= nopacity;
     masks.push(mask);
   }
+  let lastMaskLeft = remToPx(editorLeftPadding + indentWidth * (depth + 1));
   masks.push(<div key='-2' className='geeke-dragMaskRight'
-                  style={{left: `${editorLeftPadding + indentWidth * (depth + 1)}rem`,
+                  style={{left: `${lastMaskLeft}px`,
+                          width: `${width - lastMaskLeft - remToPx(editorLeftPadding)}px`,
                           backgroundColor: `rgba(2, 141, 255, ${1 - nopacity})`}}></div>);
 
   return (

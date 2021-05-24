@@ -135,7 +135,6 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     const dropComponent = getElementAtDropPosition(editorRightFromPageLeft - remToPx(editorLeftPadding), mouseY);
     const blockElement = getBlockElementFromAnyDomEle(dropComponent);
     targetBlockKey = getBlockKeyFromBlockElement(blockElement);
-    console.log(targetBlockKey, editorRightFromPageLeft - remToPx(editorLeftPadding), mouseY, dropComponent);
   }
 
   // Check whether the drop position is the selected blocks
@@ -359,12 +358,14 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
   const offsetX = editorRect.left;
   const editorTop = editorRect.top;
   const editorBottom = editorRect.bottom;
+  const editorWidth = editorRect.width;
 
   // Check whether mouse is over any editor block. If not, handle it
   if (insertBeforeFirstBlock) {
     return {
       left: `${offsetX}px`,
       top: `${editorTop}px`,
+      width: `${editorWidth}px`,
       depth: -1,
     };
   } else if (insertAfterLastBlock) {
@@ -398,6 +399,7 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
   return {
     left: `${offsetX}px`,
     top: `${targetbottom - remToPx(dragMaskHeight)}px`,
+    width: `${editorWidth}px`,
     depth: depth,
   };
 };
