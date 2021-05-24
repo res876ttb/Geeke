@@ -23,6 +23,7 @@ import {
   oneRem,
   blockDataKeys,
   dragMaskHeight,
+  indentWidth,
 } from '../constant';
 import {
   EditorState,
@@ -90,7 +91,7 @@ const moveAtomicBlock = (contentState, atomicBlock, targetRange, insertionMode) 
   return newEditorState.getCurrentContent();
 }
 
-const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=null) => {
+const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   const mouseX = e.clientX, mouseY = e.clientY;
   const dropComponent = getElementAtDropPosition(mouseX, mouseY);
   if (dropComponent === null) return editorState;
@@ -111,10 +112,16 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
 
   // Check whether drop above the editor. TODO: check whether first block or last block...
   const editorId = `geeke-editor-${pageUuid}`;
-  const editorTopFromPageTop = document.getElementById(editorId).getBoundingClientRect().top;
-  const editorBottomFromPageTop = document.getElementById(editorId).getBoundingClientRect().bottom;
+  const editorRect = document.getElementById(editorId).getBoundingClientRect();
+  const editorTopFromPageTop = editorRect.top;
+  const editorBottomFromPageTop = editorRect.bottom;
   const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
   const insertAfterLastBlock = mouseY >= editorBottomFromPageTop;
+
+  // Calculate target depth
+  const dragMaskLeft = editorRect.left + remToPx(editorLeftPadding);
+  const cursorDeltaX = mouseX - dragMaskLeft;
+  const depth = Math.floor(cursorDeltaX / remToPx(indentWidth));
 
   // Get target block id
   let targetBlockKey = null;
@@ -172,7 +179,8 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks, depth=
       prevIndentLevel = 0;
     }
   }
-  if (depth !== null) prevIndentLevel = depth - 1;
+  if (depth < 0) prevIndentLevel = 0;
+  else prevIndentLevel = Math.min(prevIndentLevel + 1, depth);
 
   // Get indentLevel of first selected block
   const firstSelectedBlockData = blockMap.get(selectedBlocks[0]).getData();
@@ -302,8 +310,8 @@ export const onDragStart = (e, readOnly, setReadOnly, renderEleId, setDragShadow
   dragShadowEle.appendChild(clone);
 
   // Start mouse tracker
-  setDragShadowPos([offsetX, oneRem / 2, true, (e, pageUuid, editorState, depth) => {
-    return handleDropCallback(e, pageUuid, editorState, selectedBlocks, depth);
+  setDragShadowPos([offsetX, oneRem / 2, true, (e, pageUuid, editorState) => {
+    return handleDropCallback(e, pageUuid, editorState, selectedBlocks);
   }, selectedBlocks]);
 };
 
@@ -336,13 +344,13 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
 
   // Check whether drop above the editor. TODO: check whether first block or last block...
   const editorId = `geeke-editor-${pageUuid}`;
-  const editorTopFromPageTop = document.getElementById(editorId).getBoundingClientRect().top;
-  const editorBottomFromPageTop = document.getElementById(editorId).getBoundingClientRect().bottom;
+  const editorRect = document.getElementById(editorId).getBoundingClientRect();
+  const editorTopFromPageTop = editorRect.top;
+  const editorBottomFromPageTop = editorRect.bottom;
   const insertBeforeFirstBlock = mouseY <= editorTopFromPageTop;
   const insertAfterLastBlock = mouseY >= editorBottomFromPageTop;
 
   // Calculate X offset
-  const editorRect = document.getElementById(editorId).getBoundingClientRect();
   const offsetX = editorRect.left;
   const editorTop = editorRect.top;
   const editorBottom = editorRect.bottom;
