@@ -56,7 +56,7 @@ const PageDragShadow = props => {
   // Functions
   const createDragMask = throttle((x, y) => {
     setDragMaskParam(createDragMaskParam(x, y, pageUuid, editorState, dragShadowPos.length >= 5 ? dragShadowPos[4] : []));
-  }, 100);
+  }, 100, {'trailing': false});
   const getMousePosition = e => {
     setMousePosition([e.clientX, e.clientY]);
     createDragMask(e.clientX, e.clientY);
@@ -74,6 +74,7 @@ const PageDragShadow = props => {
       document.onmousemove = getMousePosition;
       document.onmouseup = onDragEnd;
     } else {
+      createDragMask.cancel();
       document.onmousemove = null;
       document.onmouseup = null;
       setMousePosition(initShadowPos);
