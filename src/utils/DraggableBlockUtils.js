@@ -191,6 +191,12 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   const firstSelectedIndentLevel = firstSelectedBlockData.has(blockDataKeys.indentLevel) ? firstSelectedBlockData.get(blockDataKeys.indentLevel) : 0;
   const indentLevelDelta = prevIndentLevel - firstSelectedIndentLevel;
 
+  // Check whether indent level should be updated
+  if (indentLevelDelta === 0) {
+    newEditorState = EditorState.acceptSelection(newEditorState, newSelectionState);
+    return newEditorState;
+  }
+
   // Update indent level for each block
   newContentState = newEditorState.getCurrentContent();
   for (let i = 0; i < selectedBlocks.length; i++) {
@@ -220,8 +226,8 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     selectionBefore: selectionState,
     selectionAfter: newSelectionState.set('hasFocus', true),
   });
-  newEditorState = EditorState.push(newEditorState, newContentState, 'drag-and-drop-blocks');
   newEditorState = EditorState.acceptSelection(newEditorState, newSelectionState);
+  newEditorState = EditorState.push(newEditorState, newContentState, 'drag-and-drop-blocks');
 
   return newEditorState;
 };
