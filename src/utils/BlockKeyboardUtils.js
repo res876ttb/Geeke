@@ -285,6 +285,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
 
   // Perform split block operation
   let newContentState = Modifier.splitBlock(contentState, selectionState);
+  // Use push to get a new editorState with a new selectionState for merging block data
   let newEditorState = EditorState.push(editorState, newContentState, "split-block");
   const newSelectionState = newEditorState.getSelection();
 
@@ -296,7 +297,8 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   );
 
   // Push copy block data action into editorState & update selection state
-  newEditorState = EditorState.push(newEditorState, newContentState, 'split-block');
+  // Note: to ignore the push we used for generating a new selectionState, use original editorState to push undo stack
+  newEditorState = EditorState.push(editorState, newContentState, 'split-block');
   newEditorState = EditorState.forceSelection(newEditorState, newSelectionState);
 
   // Render current change
