@@ -132,6 +132,11 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
     }
 
+    // Check whether the first selected block can be indented
+    if (i === startIndex && curIndentLevel === prevIndentLevel + 1) {
+      return;
+    }
+
     if (curIndentLevel <= prevIndentLevel) curIndentLevel += 1;
     prevIndentLevel = curIndentLevel;
 
@@ -179,6 +184,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   }));
 
   // Update indent level for each block
+  let updated = 0;
   for (let i = startIndex; i <= endIndex; i++) {
     let block = blockMap.get(keyArray[i]);
     let blockData = block.getData();
@@ -187,7 +193,10 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
     }
 
-    if (curIndentLevel > 0) curIndentLevel -= 1;
+    if (curIndentLevel > 0) {
+      curIndentLevel -= 1;
+      updated += 1;
+    }
 
     newContent = Modifier.setBlockData(newContent, new SelectionState({
       anchorKey: keyArray[i],
@@ -196,6 +205,9 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
       focusOffset: 0,
     }), Immutable.Map({[blockDataKeys.indentLevel]: curIndentLevel}));
   }
+
+  // Check whether the editor is updated by reducing the indent level of some blocks
+  if (updated === 0) return;
 
   // Push state
   const newEditorState = EditorState.push(editorState, newContent, "less-indent");
