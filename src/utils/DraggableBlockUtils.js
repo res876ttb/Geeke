@@ -236,10 +236,8 @@ export const onMouseLeave = (e, dispatch, pageUuid) => {
   unsetMouseOverBlockKey(dispatch, pageUuid);
 };
 
-export const onDragStart = (e, readOnly, setReadOnly, renderEleId, setDragShadowPos, editorState, handleDropCallback=handleDrop_normalBlock) => {
-  if (!readOnly) {
-    setReadOnly(true);
-  } else {
+export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorState, handleDropCallback=handleDrop_normalBlock) => {
+  if (readOnly) {
     return;
   }
 

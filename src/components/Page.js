@@ -84,7 +84,7 @@ const Page = props => {
     if (!triggerDrag) return;
 
     setTriggerDrag(false);
-    onDragStart(triggerDrag, readOnly, setReadOnly, dargShadowId, setDragShadowPos, editorState);
+    onDragStart(triggerDrag, readOnly, dargShadowId, setDragShadowPos, editorState);
   }, [triggerDrag, editorState]); // eslint-disable-line
 
   // onChange
