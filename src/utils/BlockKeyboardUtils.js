@@ -287,7 +287,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   });
   const rangeToRemove = new SelectionState({
     focusKey: focusKey,
-    focusOffset: caretPosition,
+    focusOffset: caretPosition + 1, // Including the extra space charactor
     anchorKey: focusKey,
     anchorOffset: 0,
   });
@@ -304,13 +304,19 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
       break;
   }
 
+  // If not a valid keyword, then just insert a space
   if (!newType) {
     insertSpaceToCurrentSelection();
     return true;
   }
 
+  // Before conver the block into another type, insert a space first for a better undo
   let newContentState = contentState;
   let newEditorState = editorState;
+  newContentState = Modifier.insertText(contentState, selectionState, ' ');
+  newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
+
+  // Convert the type of the block
   newContentState = Modifier.setBlockType(newContentState, selectionState, newType);
   newContentState = Modifier.removeRange(newContentState, rangeToRemove, 'forward');
   newEditorState = EditorState.push(newEditorState, newContentState, 'change-block-type');
