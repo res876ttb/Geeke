@@ -33,6 +33,7 @@ import {
 import PageTitle from './PageTitle';
 import BasicBlock from './BasicBlock';
 import PageDragShadow from './PageDragShadow';
+import BulletListBlock from './BulletListBlock';
 
 /*************************************************
  * Styles
@@ -43,11 +44,16 @@ import { onDragStart } from '../utils/DraggableBlockUtils';
 /*************************************************
  * Constants
  *************************************************/
-const testString = `{"blocks":[{"key":"feut4","text":"This is block 1","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"4uump","text":"This is block 2","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7tegj","text":"This is block 3","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7cl1n","text":"This is block 4\\nThis is the second line in block 4","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":2}},{"key":"dn4hc","text":"This is block 5","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`;
+import {
+  constBlockType,
+} from '../constant';
 
 /*************************************************
  * Main components
  *************************************************/
+// For debug only
+const testString = `{"blocks":[{"key":"feut4","text":"This is block 1","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"4uump","text":"This is block 2","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7tegj","text":"This is block 3","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7cl1n","text":"This is block 4\\nThis is the second line in block 4","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":2}},{"key":"dn4hc","text":"This is block 5","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`;
+
 const Page = props => {
   // Props
   const uuid = props.dataId;
@@ -113,6 +119,12 @@ const Page = props => {
   const blockDecorator = (contentBlock) => {
     const blockType = contentBlock.getType();
     switch (blockType) {
+      case constBlockType.bulletList:
+        return {
+          component: BulletListBlock,
+          props: {...defaultBlockProps},
+        };
+
       default:
         return {
           component: BasicBlock,

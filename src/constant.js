@@ -24,3 +24,10 @@ export const dragMaskIndentInterval = 0.15; // Unit: rem
 export const blockDataKeys = {
   indentLevel: 'indentLevel',
 };
+
+export const constBlockType = {
+  default: 'default',
+  bulletList: 'bullet-list',
+  numberList: 'number-list',
+  checkList: 'check-list',
+};

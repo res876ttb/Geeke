@@ -22,15 +22,21 @@ import {
 /*************************************************
  * CONST
  *************************************************/
-import {blockDataKeys} from '../constant';
+import {
+  blockDataKeys,
+  constBlockType,
+} from '../constant';
+
 export const defaultKeyboardHandlingConfig = {
   indentBlock: true,
+  convertBlockTypeInline: true,
 };
 
 const keyCommandConst = {
   doNothing: 0,
   moreIndent: 1,
   lessIndent: 2,
+  checkBlockTypeConversion: 3,
 };
 
 /**
@@ -70,12 +76,20 @@ const mapKeyToEditorCommand_tab = (e, config) => {
   else return keyCommandConst.moreIndent;
 };
 
+const mapKeyToEditorCommand_space = (e, config) => {
+  if (!config.convertBlockTypeInline) return getDefaultKeyBinding(e);
+  return keyCommandConst.checkBlockTypeConversion;
+};
+
 export const mapKeyToEditorCommand = (e, config, dispatch, pageUuid) => {
   unsetMouseOverBlockKey(dispatch, pageUuid);
 
   switch (e.keyCode) {
     case 9: // Tab
       return mapKeyToEditorCommand_tab(e, config);
+
+    case 32: // Space
+      return mapKeyToEditorCommand_space(e, config);
 
     default:
       return getDefaultKeyBinding(e);
@@ -229,6 +243,82 @@ const handleKeyCommand_default = (editorState, command, dispatcher) => {
   return true;
 };
 
+// TODO: this implementation may have performance issue if user enter space continuously...
+const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatcher) => {
+  if (!dispatcher.setEditorState) {
+    console.error(dispatcherNotFoundConst.setEditorState);
+    return false;
+  }
+
+  // Get current caret position. Absolutely, if selectionState is not collapse, this feature must not work.
+  const selectionState = editorState.getSelection();
+  const caretPosition = selectionState.getFocusOffset();
+  if (!selectionState.isCollapsed()) return handleKeyCommand_default(editorState, command, dispatcher);
+
+  // Get current block content and find the position of the first space
+  const contentState = editorState.getCurrentContent();
+  const focusKey = selectionState.getFocusKey();
+  const focusBlock = contentState.getBlockForKey(focusKey);
+  const blockText = focusBlock.getText();
+  const firstSpaceIndex__ = blockText.indexOf(' ');
+  const firstSpaceIndex = firstSpaceIndex__ > -1 ? firstSpaceIndex__ : focusBlock.getLength();
+
+  // Check whether current caret position is before the first space. If not, this is not the type conversion case, and insert a space back
+  const insertSpaceToCurrentSelection = () => {
+    let newContentState = Modifier.insertText(contentState, selectionState, ' ');
+    let newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
+    dispatcher.setEditorState(newEditorState);
+  };
+
+  if (caretPosition >= firstSpaceIndex && caretPosition !== focusBlock.getLength()) {
+    insertSpaceToCurrentSelection();
+    return true;
+  }
+
+  // Get text befoer first space
+  let keyword = blockText.slice(0, caretPosition);
+
+  // Chech the conversion type and convert
+  const newSelectionState = new SelectionState({
+    focusKey: focusKey,
+    focusOffset: 0,
+    anchorKey: focusKey,
+    anchorOffset: 0,
+  });
+  const rangeToRemove = new SelectionState({
+    focusKey: focusKey,
+    focusOffset: caretPosition,
+    anchorKey: focusKey,
+    anchorOffset: 0,
+  });
+
+  // Get new type
+  let newType = null;
+  switch (keyword) {
+    case '*':
+    case '-':
+      newType = constBlockType.bulletList;
+      break;
+
+    default:
+      break;
+  }
+
+  if (!newType) {
+    insertSpaceToCurrentSelection();
+    return true;
+  }
+
+  let newContentState = contentState;
+  let newEditorState = editorState;
+  newContentState = Modifier.setBlockType(newContentState, selectionState, newType);
+  newContentState = Modifier.removeRange(newContentState, rangeToRemove, 'forward');
+  newEditorState = EditorState.push(newEditorState, newContentState, 'change-block-type');
+  newEditorState = EditorState.forceSelection(newEditorState, newSelectionState);
+  dispatcher.setEditorState(newEditorState);
+  return true;
+};
+
 export const handleKeyCommand = (editorState, command, dispatcher) => {
   switch (command) {
     case keyCommandConst.moreIndent:
@@ -239,6 +329,9 @@ export const handleKeyCommand = (editorState, command, dispatcher) => {
 
     case keyCommandConst.doNothing:
       return false;
+
+    case keyCommandConst.checkBlockTypeConversion:
+      return handleKeyCommand_checkBlockTypeConversion(editorState, command, dispatcher);
 
     default:
       return handleKeyCommand_default(editorState, command, dispatcher);
