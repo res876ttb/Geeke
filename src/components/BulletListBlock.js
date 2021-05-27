@@ -82,7 +82,7 @@ const BulletListBlock = props => {
           •
         </div>
       </div>
-      <div className='geeke-bulletListEditor' onDragStart={e => {e.preventDefault(); e.stopPropagation();}} draggable='true'>
+      <div className='geeke-bulletListEditor'>
         <EditorBlock {...props} />
       </div>
     </div>

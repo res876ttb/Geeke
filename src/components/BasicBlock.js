@@ -76,9 +76,7 @@ const BasicBlock = props => {
         readOnly={readOnly}
         handleBlockDargStart={handleBlockDargStart}
       />
-      <div onDragStart={e => {e.preventDefault(); e.stopPropagation();}} draggable='true'>
-        <EditorBlock {...props} />
-      </div>
+      <EditorBlock {...props} />
     </div>
   )
 }
