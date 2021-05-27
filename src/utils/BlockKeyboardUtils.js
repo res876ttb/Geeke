@@ -318,12 +318,26 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   // Get new type
   let newType = null;
   switch (keyword) {
+    // Check whether is bullet list
     case '*':
     case '-':
       if (focusBlockType !== constBlockType.bulletList) newType = constBlockType.bulletList;
       break;
 
+    // Check whether is bullet list
+    case '[]':
+      if (focusBlockType !== constBlockType.checkList) newType = constBlockType.checkList;
+      break;
+
+    // Other cases
     default:
+      // Chech whether match numbered list
+      if (keyword.match(/^\d+\./) && focusBlockType !== constBlockType.numberList) {
+        newType = constBlockType.numberList;
+        break;
+      }
+
+      // Default: null
       break;
   }
 

@@ -1,0 +1,17 @@
+.geeke-numberedListMark {
+  height: 0px;
+  position: absolute;
+  left: 3rem;
+  top: 0.25rem;
+}
+
+.geeke-numberedListMarkInner {
+  text-align: right;
+  position: relative;
+  min-width: 1.6rem;
+  right: 0.6rem;
+}
+
+.geeke-numberedListEditor {
+  margin-left: 1.6rem;
+}
