@@ -259,6 +259,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   const contentState = editorState.getCurrentContent();
   const focusKey = selectionState.getFocusKey();
   const focusBlock = contentState.getBlockForKey(focusKey);
+  const focusBlockType = focusBlock.getType();
   const blockText = focusBlock.getText();
   const firstSpaceIndex__ = blockText.indexOf(' ');
   const firstSpaceIndex = firstSpaceIndex__ > -1 ? firstSpaceIndex__ : focusBlock.getLength();
@@ -297,7 +298,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   switch (keyword) {
     case '*':
     case '-':
-      newType = constBlockType.bulletList;
+      if (focusBlockType !== constBlockType.bulletList) newType = constBlockType.bulletList;
       break;
 
     default:

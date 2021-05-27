@@ -27,6 +27,7 @@ import BlockDargButton from './BlcokDragButton';
  * Styles
  *************************************************/
 import '../styles/BasicBlock.css';
+import '../styles/BulletListBlock.css';
 
 /*************************************************
  * Constant
@@ -64,7 +65,7 @@ const BulletListBlock = props => {
   return (
     <div
       className='geeke-blockWrapper'
-      style={{marginLeft: `${indentWidth * indentLevel + 1}rem`}}
+      style={{marginLeft: `${indentWidth * indentLevel}rem`}}
       geeke='true'
 
       onMouseOver={onMouseOver}
@@ -76,8 +77,12 @@ const BulletListBlock = props => {
         readOnly={readOnly}
         handleBlockDargStart={handleBlockDargStart}
       />
-      <div contentEditable={false}>*</div>
-      <div onDragStart={e => {e.preventDefault(); e.stopPropagation();}} draggable='true'>
+      <div className='geeke-bulletListMark noselect' contentEditable={false}>
+        <div className='geeke-bulletListMarkInner'>
+          •
+        </div>
+      </div>
+      <div className='geeke-bulletListEditor' onDragStart={e => {e.preventDefault(); e.stopPropagation();}} draggable='true'>
         <EditorBlock {...props} />
       </div>
     </div>
