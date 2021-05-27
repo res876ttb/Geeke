@@ -275,6 +275,19 @@ export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorSt
     selectedBlocks = [targetBlockKey];
   }
 
+  // Find all child blocks of the dragged blocks
+  let curChild = true;
+  let curBlockData = curBlock.getData();
+  let baseBlockDepth = curBlockData.has(blockDataKeys.indentLevel) ? curBlockData.get(blockDataKeys.indentLevel) : 0;
+  curBlock = contentState.getBlockForKey(targetBlockKey);
+  while (curBlock && curChild) {
+    curBlock = contentState.getBlockAfter(curBlock.getKey());
+    if (!curBlock) break;
+    curBlockData = curBlock.getData();
+    curChild = curBlockData.has(blockDataKeys.indentLevel) ? curChild ? curBlockData.get(blockDataKeys.indentLevel) > baseBlockDepth : false : false;
+    if (curChild && selectedBlocks.indexOf(curBlock.getKey()) < 0) selectedBlocks.push(curBlock.getKey());
+  }
+
   // Calculate X offset
   const computedEle = window.getComputedStyle(target, null);
   const targetMarginLeft = parseFloat(computedEle.getPropertyValue('margin-left').replace('px', ''));
