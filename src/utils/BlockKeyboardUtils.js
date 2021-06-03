@@ -1,6 +1,7 @@
 /**
  * @file BlockKeyboardUtils.js
  * @description Utilities for handling keyboard input.
+ * Keyword: "/// Start"
  */
 
 /*************************************************
@@ -9,6 +10,7 @@
 import {
   EditorState,
   getDefaultKeyBinding,
+  KeyBindingUtil,
   Modifier,
   RichUtils,
   SelectionState,
@@ -18,6 +20,10 @@ import Immutable from 'immutable';
 import {
   unsetMouseOverBlockKey,
 } from '../states/editorMisc';
+import {
+  trimNumberListWithSameDepth,
+  findPreviousBlockWithSameDepth,
+} from './NumberListUtils';
 
 /*************************************************
  * CONST
@@ -30,13 +36,20 @@ import {
 export const defaultKeyboardHandlingConfig = {
   indentBlock: true,
   convertBlockTypeInline: true,
+  numberList: true,
+  bulletList: true,
 };
+
+const isOSX = navigator.userAgent.indexOf('Mac') !== -1;
 
 const keyCommandConst = {
   doNothing: 0,
   moreIndent: 1,
   lessIndent: 2,
   checkBlockTypeConversion: 3,
+  handleBackspace: 4,
+  handleDelete: 5,
+  multiCommands: 6,
 };
 
 /**
@@ -62,6 +75,7 @@ const blockDataPreserveConstant = {
  */
 const blockDataPreserveConfig = {
   [blockDataKeys.indentLevel]: [blockDataPreserveConstant.all],
+  [blockDataKeys.numberListOrder]: [constBlockType.numberList],
 }
 
 /*************************************************
@@ -81,7 +95,99 @@ const mapKeyToEditorCommand_space = (e, config) => {
   return keyCommandConst.checkBlockTypeConversion;
 };
 
-export const mapKeyToEditorCommand = (e, config, dispatch, pageUuid) => {
+const mapKeyToEditorCommand_backspace = (e, config, editorState) => {
+  // Default backspace function
+  const defaultBackspaceFunciton = () => {
+    if (KeyBindingUtil.isOptionKeyCommand(e) ||
+        (!isOSX && KeyBindingUtil.isCtrlKeyCommand(e))) {
+      return 'backspace-word';
+    } else if (KeyBindingUtil.hasCommandModifier(e)) {
+      return 'backspace-to-start-of-line';
+    } else {
+      return 'backspace';
+    }
+  }
+
+  // If number list is not enabled, just run the default backspace function
+  if (!config.numberList) return defaultBackspaceFunciton();
+
+  const contentState = editorState.getCurrentContent();
+  const selectionState = editorState.getSelection();
+  const endKey = selectionState.getEndKey();
+
+  // If selectionState is not collapsed, then perform delete action
+  if (!selectionState.isCollapsed()) {
+    return defaultBackspaceFunciton();
+  }
+
+  // Check whether current caret position is at the start of the block. If not, this backspace will not remove a block, and no need to trim the numberListOrder
+  if (selectionState.getFocusOffset() !== 0) {
+    return defaultBackspaceFunciton();
+  }
+
+  // Get first previous block with the same indent level
+  const curBlock = contentState.getBlockForKey(endKey);
+  const curBlockData = curBlock.getData();
+  const baseIndentLevel = curBlockData.has(blockDataKeys.indentLevel) ? curBlockData.get(blockDataKeys.indentLevel) : 0;
+  let prevBlock = findPreviousBlockWithSameDepth(contentState, endKey, baseIndentLevel);
+
+  // Check whether this block and the previous block are not number list blocks
+  if (prevBlock && curBlock.getType() !== constBlockType.numberList && prevBlock.getType() !== constBlockType.numberList) {
+    return defaultBackspaceFunciton();
+  }
+
+  // Make sure that prevBlock is a numberListBlock
+  if (prevBlock && prevBlock.getType() !== constBlockType.numberList) prevBlock = null;
+
+  return [keyCommandConst.multiCommands, keyCommandConst.handleBackspace, prevBlock ? prevBlock.getKey() : null];
+};
+
+const mapKeyToEditorCommand_delete = (e, config, editorState) => {
+  // Default delete function
+  const defaultDeleteFunciton = () => {
+    if (KeyBindingUtil.isOptionKeyCommand(e) ||
+        (!isOSX && KeyBindingUtil.isCtrlKeyCommand(e))) {
+      return 'delete-word';
+    } else if (KeyBindingUtil.hasCommandModifier(e)) {
+      return 'delete-to-end-of-block';
+    } else {
+      return 'delete';
+    }
+  };
+
+  // if number list is not enabled, just run the default delete function
+  if (!config.numberList) return defaultDeleteFunciton();
+
+  const contentState = editorState.getCurrentContent();
+  const selectionState = editorState.getSelection();
+  const endKey = selectionState.getEndKey();
+  const curBlock = contentState.getBlockForKey(endKey);
+  const nextBlock = contentState.getBlockAfter(endKey);
+
+  // If selectionState is not collapsed, then perform delete action
+  if (!selectionState.isCollapsed()) {
+    return defaultDeleteFunciton();
+  }
+
+  // Check whether current caret position is at the end of the block. If not, this delete will not remove a block, and no need to trim the numberListOrder
+  if (selectionState.getFocusOffset() !== contentState.getBlockForKey(endKey).getLength()) {
+    return defaultDeleteFunciton();
+  }
+
+  // If next block does not exists, then just use the default delete function
+  if (!nextBlock) {
+    return defaultDeleteFunciton();
+  }
+
+  // If this block and the next block are not number lists, then no need to trim the block as well
+  if (curBlock.getType() !== constBlockType.numberList && nextBlock.getType() !== constBlockType.numberList) {
+    return defaultDeleteFunciton();
+  }
+
+  return [keyCommandConst.multiCommands, keyCommandConst.handleDelete, endKey];
+};
+
+export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid) => {
   unsetMouseOverBlockKey(dispatch, pageUuid);
 
   switch (e.keyCode) {
@@ -91,7 +197,14 @@ export const mapKeyToEditorCommand = (e, config, dispatch, pageUuid) => {
     case 32: // Space
       return mapKeyToEditorCommand_space(e, config);
 
+    case 8: // Backspace
+      return mapKeyToEditorCommand_backspace(e, config, editorState);
+
+    case 46: // Delete
+      return mapKeyToEditorCommand_delete(e, config, editorState);
+
     default:
+      // console.log(getDefaultKeyBinding(e));
       return getDefaultKeyBinding(e);
   }
 };
@@ -101,7 +214,7 @@ export const mapKeyToEditorCommand = (e, config, dispatch, pageUuid) => {
 const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
-    return false;
+    return 'not-handled';
   }
 
   // Constants
@@ -255,21 +368,21 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
 const handleKeyCommand_default = (editorState, command, dispatcher) => {
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
-    return false;
+    return 'not-handled';
   }
 
   const newEditorState = RichUtils.handleKeyCommand(editorState, command);
-  if (!newEditorState) return false;
+  if (!newEditorState) return 'not-handled';
 
   dispatcher.setEditorState(newEditorState);
-  return true;
+  return 'handled';
 };
 
 // TODO: this implementation may have performance issue if user enter space continuously...
 const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatcher) => {
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
-    return false;
+    return 'not-handled';
   }
 
   // Get current caret position. Absolutely, if selectionState is not collapse, this feature must not work.
@@ -286,6 +399,36 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   const firstSpaceIndex__ = blockText.indexOf(' ');
   const firstSpaceIndex = firstSpaceIndex__ > -1 ? firstSpaceIndex__ : focusBlock.getLength();
 
+  // handleConvertToNumberList
+  const handleConvertToNumberList = () => {
+    // Before conver the block into another type, insert a space first for a better undo
+    let newContentState = contentState;
+    let newEditorState = editorState;
+    newContentState = Modifier.insertText(contentState, selectionState, ' ');
+    newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
+
+    // Convert the type of the block
+    newContentState = Modifier.setBlockType(newContentState, selectionState, constBlockType.numberList);
+    newContentState = Modifier.removeRange(newContentState, rangeToRemove, 'forward');
+
+    // Find previous block with the same depth
+    const focusBlockData = focusBlock.getData();
+    const curIndentLevel = focusBlockData.has(blockDataKeys.indentLevel) ? focusBlockData.get(blockDataKeys.indentLevel) : 0;
+    const prevBlock = findPreviousBlockWithSameDepth(newContentState, focusKey, curIndentLevel);
+    if (prevBlock && prevBlock.getType() === constBlockType.numberList) {
+      const prevBlockData = prevBlock.getData();
+      const prevBlockNumberListOrder = prevBlockData.has(blockDataKeys.numberListOrder) ? prevBlockData.get(blockDataKeys.numberListOrder) : 1;
+      newContentState = trimNumberListWithSameDepth(newContentState, prevBlock.getKey(), curIndentLevel, prevBlockNumberListOrder);
+    } else {
+      newContentState = trimNumberListWithSameDepth(newContentState, focusKey, curIndentLevel);
+    }
+
+    // Update change via dispatcher
+    newEditorState = EditorState.push(newEditorState, newContentState, 'change-block-type');
+    newEditorState = EditorState.forceSelection(newEditorState, newSelectionState);
+    dispatcher.setEditorState(newEditorState);
+  };
+
   // Check whether current caret position is before the first space. If not, this is not the type conversion case, and insert a space back
   const insertSpaceToCurrentSelection = () => {
     let newContentState = Modifier.insertText(contentState, selectionState, ' ');
@@ -295,7 +438,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
 
   if (caretPosition >= firstSpaceIndex && caretPosition !== focusBlock.getLength()) {
     insertSpaceToCurrentSelection();
-    return true;
+    return 'handled';
   }
 
   // Get text befoer first space
@@ -333,8 +476,8 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
     default:
       // Chech whether match numbered list
       if (keyword.match(/^\d+\./) && focusBlockType !== constBlockType.numberList) {
-        newType = constBlockType.numberList;
-        break;
+        handleConvertToNumberList();
+        return 'handled';
       }
 
       // Default: null
@@ -344,7 +487,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   // If not a valid keyword, then just insert a space
   if (!newType) {
     insertSpaceToCurrentSelection();
-    return true;
+    return 'handled';
   }
 
   // Before conver the block into another type, insert a space first for a better undo
@@ -356,10 +499,165 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   // Convert the type of the block
   newContentState = Modifier.setBlockType(newContentState, selectionState, newType);
   newContentState = Modifier.removeRange(newContentState, rangeToRemove, 'forward');
+
+  // Remove from block data according to its block type
+  switch (focusBlockType) {
+    case constBlockType.numberList: {
+      // Remove numberListOrder from current block
+      let focusBlockData = new Map(focusBlock.getData());
+      let removeSelectionState = new SelectionState({
+        focusKey: focusKey,
+        focusOffset: 0,
+        anchorKey: focusKey,
+        anchorOffset: 0,
+      });
+      focusBlockData.delete(blockDataKeys.numberListOrder);
+      newContentState = Modifier.mergeBlockData(newContentState, removeSelectionState, focusBlockData);
+
+      // Trim the following blocks
+      let baseIndentLevel = focusBlockData.has(blockDataKeys.indentLevel) ? focusBlockData.get(blockDataKeys.indentLevel) : 0;
+      let nextBlock = newContentState.getBlockAfter(focusKey);
+      if (nextBlock) {
+        newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), baseIndentLevel);
+      }
+    } break;
+
+    default:
+      break;
+  }
+
+  // Update editorState
   newEditorState = EditorState.push(newEditorState, newContentState, 'change-block-type');
   newEditorState = EditorState.forceSelection(newEditorState, newSelectionState);
   dispatcher.setEditorState(newEditorState);
-  return true;
+  return 'handled';
+};
+
+export const handleKeyCommand_backspace = (editorState, command, dispatcher) => {
+  if (!dispatcher.setEditorState) {
+    console.error(dispatcherNotFoundConst.setEditorState);
+    return 'not-handled';
+  }
+
+  // Constants
+  const prevBlockKeyWithSameDepth = command[2];
+  let newEditorState = editorState;
+  let newContentState = newEditorState.getCurrentContent();
+  let newSelectionState = newEditorState.getSelection();
+  let focusKey = newSelectionState.getFocusKey();
+  let focusBlock = newContentState.getBlockForKey(focusKey);
+  let focusBlockData = focusBlock.getData();
+  let baseIndentLevel = focusBlockData.has(blockDataKeys.indentLevel) ? focusBlockData.get(blockDataKeys.indentLevel) : 0;
+
+  // Check current block type. If it has type, remove it. If it does not have type, remove this block and append all text after caret to the previous block.
+  if (focusBlock.getType() !== 'unstyled') {
+    newContentState = Modifier.setBlockType(newContentState, newSelectionState, 'unstyled');
+
+    // Update block data: remove numberListOrder from block data
+    let focusBlockData = new Map(focusBlock.getData());
+    if (focusBlockData.has(blockDataKeys.numberListOrder)) {
+      focusBlockData.delete(blockDataKeys.numberListOrder);
+      newContentState = Modifier.mergeBlockData(newContentState, newSelectionState, focusBlockData);
+    }
+
+    // Trim the next list
+    let nextBlock = newContentState.getBlockAfter(focusBlock.getKey());
+    if (nextBlock) {
+      newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), baseIndentLevel);
+      newSelectionState = null; // No need to set new selection state
+    }
+  } else {
+    const selectionState = newEditorState.getSelection();
+    const curBlock = newContentState.getBlockForKey(selectionState.getFocusKey());
+    let prevBlock = newContentState.getBlockBefore(selectionState.getFocusKey());
+    if (!prevBlock) return 'not-handled';
+
+    // Remove the block
+    prevBlock = newContentState.getBlockForKey(prevBlock.getKey());
+    const removeSelectionState = new SelectionState({
+      focusKey: curBlock.getKey(),
+      focusOffset: 0,
+      anchorKey: prevBlock.getKey(),
+      anchorOffset: prevBlock.getLength(),
+    });
+    newContentState = Modifier.removeRange(newContentState, removeSelectionState, 'backward');
+
+    // Set newSelectionState
+    newSelectionState = new SelectionState({
+      focusKey: prevBlock.getKey(),
+      focusOffset: prevBlock.getLength(),
+      anchorKey: prevBlock.getKey(),
+      anchorOffset: prevBlock.getLength(),
+    });
+
+    // Update focusKey, because current block is removed
+    focusKey = prevBlock.getKey();
+    focusBlock = newContentState.getBlockForKey(focusKey);
+
+    // Update block data: trim the numbered list (start from the prevBlock)
+    if (prevBlockKeyWithSameDepth) {
+      let prevBlock = newContentState.getBlockForKey(prevBlockKeyWithSameDepth);
+      let prevBlockData = prevBlock.getData();
+      let prevNumberListOrder = prevBlockData.has(blockDataKeys.numberListOrder) ? prevBlockData.get(blockDataKeys.numberListOrder) : 1;
+      newContentState = trimNumberListWithSameDepth(newContentState, prevBlockKeyWithSameDepth, baseIndentLevel, prevNumberListOrder);
+    } else {
+      newContentState = trimNumberListWithSameDepth(newContentState, focusKey, baseIndentLevel);
+    }
+  }
+
+  // Apply update to editorState
+  newEditorState = EditorState.push(editorState, newContentState, 'change-block-type');
+  console.assert(newEditorState !== null, 'newEditorState is null when handling backspace!');
+  if (newSelectionState) {
+    newEditorState = EditorState.forceSelection(newEditorState, newSelectionState);
+  }
+  dispatcher.setEditorState(newEditorState);
+
+  return 'handled';
+};
+
+const handleKeyCommand_delete = (editorState, command, dispatcher) => {
+  if (!dispatcher.setEditorState) {
+    console.error(dispatcherNotFoundConst.setEditorState);
+    return 'not-handled';
+  }
+
+  // Constants
+  const selectionState = editorState.getSelection();
+  const curBlockKey = command[2];
+  let newEditorState = editorState;
+  let newContentState = editorState.getCurrentContent();
+  const curBlock = newContentState.getBlockForKey(curBlockKey);
+  const nextBlock = newContentState.getBlockAfter(curBlockKey);
+  const curBlockData = curBlock.getData();
+  const nextBlockData = nextBlock.getData();
+  const baseIndentLevel = curBlockData.has(blockDataKeys.indentLevel) ? curBlockData.get(blockDataKeys.indentLevel) : 0;
+  const nextIndentLevel = nextBlockData.has(blockDataKeys.indentLevel) ? nextBlockData.get(blockDataKeys.indentLevel) : 0;
+  const baseNumberListOrder = curBlockData.has(blockDataKeys.numberListOrder) ? curBlockData.get(blockDataKeys.numberListOrder) : 1;
+
+  // Remove block
+  const removeSelectionState = new SelectionState({
+    anchorKey: curBlockKey,
+    anchorOffset: curBlock.getLength(),
+    focusKey: nextBlock.getKey(),
+    focusOffset: 0,
+  });
+  newContentState = Modifier.removeRange(newContentState, removeSelectionState, 'backward');
+
+  // Trim the following blocks
+  if (curBlock.getType() === constBlockType.numberList && baseIndentLevel === nextIndentLevel) {
+    newContentState = trimNumberListWithSameDepth(newContentState, curBlockKey, baseIndentLevel, baseNumberListOrder);
+  } else {
+    let nextBlock = newContentState.getBlockAfter(curBlockKey);
+    newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), nextIndentLevel, 1);
+  }
+
+  // Update editorState
+  newEditorState = EditorState.push(editorState, newContentState, 'delete-number-list');
+  newEditorState = EditorState.forceSelection(newEditorState, selectionState);
+  dispatcher.setEditorState(newEditorState);
+
+  return 'handled';
 };
 
 export const handleKeyCommand = (editorState, command, dispatcher) => {
@@ -377,6 +675,18 @@ export const handleKeyCommand = (editorState, command, dispatcher) => {
       return handleKeyCommand_checkBlockTypeConversion(editorState, command, dispatcher);
 
     default:
+      if (typeof(command) === typeof([]) && command[0] === keyCommandConst.multiCommands) {
+        switch(command[1]) {
+          case keyCommandConst.handleBackspace:
+            return handleKeyCommand_backspace(editorState, command, dispatcher);
+
+          case keyCommandConst.handleDelete:
+            return handleKeyCommand_delete(editorState, command, dispatcher);
+
+          default:
+            break;
+        }
+      }
       return handleKeyCommand_default(editorState, command, dispatcher);
   }
 }
@@ -395,12 +705,16 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   const originalBlockKey = selectionState.getEndKey();
   const hasShift = e.shiftKey;
 
+  // Variables
+  let newEditorState = editorState;
+  let newContentState = contentState;
+
   // If selection is not collapsed... return false!
   if (!selectionState.isCollapsed()) return false;
 
   // If shift is pressed, then insert soft new line
   if (hasShift) {
-    const newEditorState = RichUtils.insertSoftNewline(editorState);
+    newEditorState = RichUtils.insertSoftNewline(newEditorState);
     dispatcher.setEditorState(newEditorState);
     return true;
   }
@@ -409,6 +723,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   const curBlock = contentState.getBlockMap().get(originalBlockKey);
   const curBlockType = curBlock.getType();
   const blockData = curBlock.getData();
+  const indentLevel = blockData.has(blockDataKeys.indentLevel) ? blockData.get(blockDataKeys.indentLevel) : 0;
 
   // Copy only necessary block data
   let newMap = new Map();
@@ -420,9 +735,9 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   });
 
   // Perform split block operation
-  let newContentState = Modifier.splitBlock(contentState, selectionState);
+  newContentState = Modifier.splitBlock(newContentState, selectionState);
   // Use push to get a new editorState with a new selectionState for merging block data
-  let newEditorState = EditorState.push(editorState, newContentState, "split-block");
+  newEditorState = EditorState.push(newEditorState, newContentState, "split-block");
   const newSelectionState = newEditorState.getSelection();
 
   // Merge block data
@@ -431,6 +746,14 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
     newSelectionState,
     newMap
   );
+
+  // If current block is number list block, modify the number list order after this block
+  if (curBlockType === constBlockType.numberList) {
+    let focusBlock = newContentState.getBlockForKey(selectionState.getFocusKey());
+    let focusBlockData = focusBlock.getData();
+    let baseNumberListOrder = focusBlockData.has(blockDataKeys.numberListOrder) ? focusBlockData.get(blockDataKeys.numberListOrder) : 1;
+    newContentState = trimNumberListWithSameDepth(newContentState, selectionState.getFocusKey(), indentLevel, baseNumberListOrder);
+  }
 
   // Push copy block data action into editorState & update selection state
   // Note: to ignore the push we used for generating a new selectionState, use original editorState to push undo stack

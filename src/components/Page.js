@@ -8,7 +8,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Editor,
@@ -53,7 +53,7 @@ import {
  * Main components
  *************************************************/
 // For debug only
-const testString = `{"blocks":[{"key":"feut4","text":"This numbered list 1","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"b07s5","text":"This numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"f3aen","text":"This numbered list 3","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"cl513","text":"This is numbered list 4","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"d54n0","text":"This is a normal list","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"754a9","text":"This is the second section of numbered list","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"6b75g","text":"This is the second section of numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"6puud","text":"This is block 1","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"4uump","text":"This is block 2","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7tegj","text":"This is block 3","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7cl1n","text":"This is block 4\\nThis is the second line in block 4","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":2}},{"key":"dn4hc","text":"This is block 5","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"8idd4","text":"This is bullet list 1","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"9btli","text":"This is bullet list 2","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"45f6v","text":"This is bullet list 3","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}}],"entityMap":{}}`;
+const testString = `{"blocks":[{"key":"feut4","text":"This numbered list 1","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"numberListOrder":1}},{"key":"3i7b3","text":"This numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"numberListOrder":2}},{"key":"9bbfj","text":"This numbered list 3","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":1}},{"key":"1ljkf","text":"This is numbered list 4","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":2}},{"key":"d54n0","text":"This is a normal list","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"cqoo","text":"This is the second section of numbered list","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":1}},{"key":"be498","text":"This is the second section of numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":2}},{"key":"6puud","text":"This is block 1","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"4uump","text":"This is block 2","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7tegj","text":"This is block 3","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7cl1n","text":"This is block 4","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":2}},{"key":"dn4hc","text":"This is block 5","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"8idd4","text":"This is bullet list 1","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"9btli","text":"This is bullet list 2","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"45f6v","text":"This is bullet list 3","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}}],"entityMap":{}}`;
 
 const Page = props => {
   // Props
@@ -101,7 +101,9 @@ const Page = props => {
   const updateEditorButIgnoreReadOnly = editorState => setEditorState(editorState);
 
   // keyBindingFn
-  const mapKeyToEditorCommand = e => _mapKeyToEditorCommand(e, commandConfig, dispatch, uuid);
+  const mapKeyToEditorCommand = useCallback(
+    e => _mapKeyToEditorCommand(e, commandConfig, dispatch, editorState, uuid),
+    [editorState]); // eslint-disable-line
 
   // handleKeyCommand
   const handleKeyCommand = (command, editorState) => _handleKeyCommand(editorState, command, {

@@ -35,7 +35,6 @@ import '../styles/NumberedListBlock.css';
 import {
   blockDataKeys,
   indentWidth,
-  constBlockType,
 } from '../constant';
 
 /*************************************************
@@ -48,7 +47,6 @@ const NumberedListBlock = props => {
   const blockKey = props.block.key;
   const readOnly = props.blockProps.readOnly;
   const handleBlockDargStart = props.blockProps.handleBlockDargStart;
-  const contentState = props.contentState;
 
   // Reducers
   const dispatch = useDispatch();
@@ -66,18 +64,9 @@ const NumberedListBlock = props => {
   }
 
   // Get the number of this list
-  let curBlock = props.block;
-  let curBlockData = null;
-  let curBlockIndentLevel = 0;
-  let numberCounter = 1;
-  while (curBlock) {
-    curBlock = contentState.getBlockBefore(curBlock.getKey());
-    if (!curBlock) break;
-    curBlockData = curBlock.getData();
-    curBlockIndentLevel = curBlockData.has(blockDataKeys.indentLevel) ? curBlockData.get(blockDataKeys.indentLevel) : 0;
-    if (curBlock.getType() === constBlockType.numberList && curBlockIndentLevel === indentLevel) numberCounter += 1;
-    else break;
-  }
+  const curBlock = props.block;
+  const curBlockData = curBlock.getData();
+  const numberListOrder = curBlockData.has(blockDataKeys.numberListOrder) ? curBlockData.get(blockDataKeys.numberListOrder) : 1;
 
   return (
     <div
@@ -96,7 +85,7 @@ const NumberedListBlock = props => {
       />
       <div className='geeke-numberedListMark noselect' contentEditable={false}>
         <div className='geeke-numberedListMarkInner'>
-          {numberCounter}.
+          {numberListOrder}.
         </div>
       </div>
       <div className='geeke-numberedListEditor'>
