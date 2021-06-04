@@ -274,10 +274,10 @@ export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorSt
   }
 
   // Find all child blocks of the dragged blocks
+  curBlock = contentState.getBlockForKey(targetBlockKey);
   let curChild = true;
   let curBlockData = curBlock.getData();
   let baseBlockDepth = curBlockData.has(blockDataKeys.indentLevel) ? curBlockData.get(blockDataKeys.indentLevel) : 0;
-  curBlock = contentState.getBlockForKey(targetBlockKey);
   while (curBlock && curChild) {
     curBlock = contentState.getBlockAfter(curBlock.getKey());
     if (!curBlock) break;
