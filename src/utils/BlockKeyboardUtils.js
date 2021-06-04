@@ -21,6 +21,7 @@ import {
   unsetMouseOverBlockKey,
 } from '../states/editorMisc';
 import {
+  trimNumberListInWholePage,
   trimNumberListWithSameDepth,
   findPreviousBlockWithSameDepth,
 } from './NumberListUtils';
@@ -243,7 +244,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   }
 
   // Initialize new content
-  let newContent = Modifier.setBlockData(curContent, new SelectionState({
+  let newContentState = Modifier.setBlockData(curContent, new SelectionState({
     anchorKey: keyArray[startIndex],
     anchorOffset: 0,
     focusKey: keyArray[startIndex],
@@ -270,7 +271,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     if (curIndentLevel <= prevIndentLevel) curIndentLevel += 1;
     prevIndentLevel = curIndentLevel;
 
-    newContent = Modifier.setBlockData(newContent, new SelectionState({
+    newContentState = Modifier.setBlockData(newContentState, new SelectionState({
       anchorKey: keyArray[i],
       anchorOffset: 0,
       focusKey: keyArray[i],
@@ -279,7 +280,8 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   }
 
   // Push state
-  let newEditorState = EditorState.push(editorState, newContent, "more-indent");
+  newContentState = trimNumberListInWholePage(newContentState);
+  let newEditorState = EditorState.push(editorState, newContentState, "more-indent");
   if (focusBlockLength === 0) {
     newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
       focusKey: focusBlockKey,
@@ -314,7 +316,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   const startBlock = blockMap.get(keyArray[startIndex]);
 
   // Initialize new content
-  let newContent = Modifier.setBlockData(curContent, new SelectionState({
+  let newContentState = Modifier.setBlockData(curContent, new SelectionState({
     anchorKey: keyArray[startIndex],
     anchorOffset: 0,
     focusKey: keyArray[startIndex],
@@ -339,7 +341,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
       updated += 1;
     }
 
-    newContent = Modifier.setBlockData(newContent, new SelectionState({
+    newContentState = Modifier.setBlockData(newContentState, new SelectionState({
       anchorKey: keyArray[i],
       anchorOffset: 0,
       focusKey: keyArray[i],
@@ -351,7 +353,8 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   if (updated === 0) return;
 
   // Push state
-  let newEditorState = EditorState.push(editorState, newContent, "less-indent");
+  newContentState = trimNumberListInWholePage(newContentState);
+  let newEditorState = EditorState.push(editorState, newContentState, "less-indent");
   if (focusBlockLength === 0) {
     newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
       focusKey: focusBlockKey,

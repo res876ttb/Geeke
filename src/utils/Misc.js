@@ -6,6 +6,7 @@
 /*************************************************
  * IMPORT LIBRARIES
  *************************************************/
+import { Modifier, SelectionState } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
 
 /*************************************************
@@ -18,4 +19,24 @@ const uuidBytes = [0x6e, 0xc0, 0xbd, 0x7f, 0x11, 0xc0, 0x43, 0xda, 0x97, 0x5e, 0
  *************************************************/
 export function newBlockId() {
   return uuidv4(uuidBytes);
+}
+
+export const getFirstBlockKey = contentState => {
+  const blockMap = contentState.getBlockMap();
+  return blockMap.keys().next().value;
+}
+
+export const getLastBlockKey = contentState => {
+  const blockMap = contentState.getBlockMap();
+  return Array.from(blockMap.keys()).pop();
+}
+
+export const updateBlockData = (contentState, blockKey, blockData) => {
+  let selectionState = new SelectionState({
+    focusKey: blockKey,
+    focusOffset: 0,
+    anchorKey: blockKey,
+    anchorOffset: 0,
+  });
+  return Modifier.mergeBlockData(contentState, selectionState, blockData);
 }

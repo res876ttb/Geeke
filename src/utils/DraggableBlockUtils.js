@@ -10,6 +10,11 @@ import {
   setMouseOverBlockKey,
   unsetMouseOverBlockKey,
 } from '../states/editorMisc';
+import {
+  getFirstBlockKey,
+  getLastBlockKey,
+} from '../utils/Misc';
+import { trimNumberListInWholePage } from './NumberListUtils';
 
 /*************************************************
  * CONST
@@ -65,16 +70,6 @@ const getBlockKeyFromBlockElement = element => {
   const blockKey = elementParent.getAttribute('data-offset-key').split('-')[0];
 
   return blockKey;
-}
-
-// TODO: Move the following two functions to other files... they are not suitable here
-const getFirstBlockKey = contentState => {
-  const blockMap = contentState.getBlockMap();
-  return blockMap.keys().next().value;
-}
-const getLastBlockKey = contentState => {
-  const blockMap = contentState.getBlockMap();
-  return Array.from(blockMap.keys()).pop();
 }
 
 const getBlockDepthFromBlockKey = (key, contentState) => {
@@ -169,7 +164,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
       selectionBefore: selectionState,
       selectionAfter: newSelectionState.set('hasFocus', true),
     });
-    newEditorState = EditorState.push(newEditorState, newContentState, 'drag-and-drop-blocks');
+    newEditorState = EditorState.push(editorState, newContentState, 'drag-and-drop-blocks');
   }
 
   // Modify block data (just like indentLevel)
@@ -191,8 +186,10 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   const firstSelectedIndentLevel = firstSelectedBlockData.has(blockDataKeys.indentLevel) ? firstSelectedBlockData.get(blockDataKeys.indentLevel) : 0;
   const indentLevelDelta = prevIndentLevel - firstSelectedIndentLevel;
 
-  // Check whether indent level should be updated
+  // Check whether indent level should be updated. If not, trim the whole page and return directly
   if (indentLevelDelta === 0) {
+    newContentState = trimNumberListInWholePage(newContentState);
+    newEditorState = EditorState.push(editorState, newContentState, 'drag-and-drop-blocks');
     newEditorState = EditorState.acceptSelection(newEditorState, newSelectionState);
     return newEditorState;
   }
@@ -221,11 +218,12 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     }), Immutable.Map({[blockDataKeys.indentLevel]: curIndentLevel}));
   }
 
-  // Push state
+  // Trim the whole page and push state to undo stack
   newContentState = newContentState.merge({
     selectionBefore: selectionState,
     selectionAfter: newSelectionState.set('hasFocus', true),
   });
+  newContentState = trimNumberListInWholePage(newContentState);
   newEditorState = EditorState.acceptSelection(newEditorState, newSelectionState);
   newEditorState = EditorState.push(newEditorState, newContentState, 'drag-and-drop-blocks');
 

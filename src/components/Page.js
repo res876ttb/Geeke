@@ -26,6 +26,9 @@ import {
   handleReturn as _handleReturn,
   defaultKeyboardHandlingConfig,
 } from '../utils/BlockKeyboardUtils';
+import {
+  trimNumberListInWholePage,
+} from '../utils/NumberListUtils';
 
 /*************************************************
  * Import Components
@@ -61,7 +64,7 @@ const Page = props => {
 
   // Status & Reducers
   const dispatch = useDispatch();
-  const [editorState, setEditorState] = useState(EditorState.createWithContent(convertFromRaw(JSON.parse(testString))));
+  const [editorState, setEditorState] = useState(EditorState.createWithContent(trimNumberListInWholePage(convertFromRaw(JSON.parse(testString)))));
   const [readOnly, setReadOnly] = useState(false);
   const [dragShadowPos, setDragShadowPos] = useState([-1, -1, false, null, []]); // [offset x, offset y, enable shadow, callback function, arrays of selected blocks]
   const [triggerDrag, setTriggerDrag] = useState(false);

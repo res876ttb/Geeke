@@ -14,6 +14,10 @@ import {
 import {
   blockDataKeys, constBlockType,
 } from '../constant';
+import {
+  getFirstBlockKey,
+  updateBlockData,
+} from '../utils/Misc';
 
 /*************************************************
  * CONST
@@ -122,6 +126,67 @@ export const trimNumberListWithSameDepth = (contentState, blockKey, indentLevel,
       }),
       newBlockData
     );
+  }
+
+  return newContentState;
+};
+
+export const trimNumberListInWholePage = contentState => {
+  let numberListOrderMap = new Map([[0, 0]]);
+  let curDepth = 0;
+  let newContentState = contentState
+  let firstBlockKey = getFirstBlockKey(newContentState);
+  let curBlock = newContentState.getBlockForKey(firstBlockKey);
+
+  while (curBlock) {
+    // Get depth & type
+    let blockData = curBlock.getData();
+    let blockDepth = blockData.has(blockDataKeys.indentLevel) ? blockData.get(blockDataKeys.indentLevel) : 0;
+    let blockType = curBlock.getType();
+
+    // If current depth is change, move depth pointer: curDepth, and modify numberListOrderMap
+    if (blockDepth > curDepth) {
+      while (curDepth < blockDepth) {
+        curDepth += 1;
+        numberListOrderMap.set(curDepth, 0);
+      }
+    } else if (curDepth > blockDepth) {
+      curDepth = blockDepth;
+    }
+
+    // If current block is number list
+    if (blockType === constBlockType.numberList) {
+      // If current list is the first number list, set numberListOrderMap start from 1
+      if (numberListOrderMap.get(curDepth) === 0) {
+        // When numerListOrderMap[curDepth] = 0, there are no list before.
+        numberListOrderMap.set(curDepth, 1);
+      }
+
+      // Get numberListOrder of this block
+      let numberListOrder = blockData.get(blockDataKeys.numberListOrder);
+
+      // Check numberListOrder of this block. If it is not correct,
+      if (numberListOrder !== numberListOrderMap.get(curDepth)) {
+        let newBlockData = new Map(blockData);
+        newBlockData.set(blockDataKeys.numberListOrder, numberListOrderMap.get(curDepth));
+        newContentState = updateBlockData(newContentState, curBlock.getKey(), newBlockData);
+      }
+
+      // Update numberListOrderMap
+      numberListOrderMap.set(curDepth, numberListOrderMap.get(curDepth) + 1);
+    } else {
+      // If improper number list data exists in a block, remove it!
+      if (blockData.has(blockDataKeys.numberListOrder)) {
+        let newBlockData = new Map(blockData);
+        newBlockData.delete(blockDataKeys.numberListOrder);
+        newContentState = updateBlockData(newContentState, curBlock.getKey(), newBlockData);
+      }
+
+      numberListOrderMap.set(curDepth, 0);
+    }
+
+    // Go to the next block
+    curBlock = newContentState.getBlockAfter(curBlock.getKey());
   }
 
   return newContentState;
