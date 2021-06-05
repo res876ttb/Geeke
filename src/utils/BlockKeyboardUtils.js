@@ -224,6 +224,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   const startBlockKey = curSelection.getStartKey();
   const endBlockKey = curSelection.getEndKey();
   const focusBlockKey = curSelection.getFocusKey();
+  const focusOffset = curSelection.getFocusOffset();
   const focusBlock = curContent.getBlockForKey(focusBlockKey);
   const focusBlockLength = focusBlock.getLength();
   const blockMap = curContent.getBlockMap();
@@ -282,14 +283,12 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   // Push state
   newContentState = trimNumberListInWholePage(newContentState);
   let newEditorState = EditorState.push(editorState, newContentState, "more-indent");
-  if (focusBlockLength === 0) {
-    newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
-      focusKey: focusBlockKey,
-      focusOffset: 1,
-      anchorKey: focusBlockKey,
-      anchorOffset: 1,
-    }));
-  }
+  newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
+    focusKey: focusBlockKey,
+    focusOffset: focusBlockLength === 0 ? 1 : focusOffset,
+    anchorKey: focusBlockKey,
+    anchorOffset: focusBlockLength === 0 ? 1 : focusOffset,
+  }));
 
   // Update editorState
   dispatcher.setEditorState(newEditorState);
@@ -307,6 +306,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   const startBlockKey = curSelection.getStartKey();
   const endBlockKey = curSelection.getEndKey();
   const focusBlockKey = curSelection.getFocusKey();
+  const focusOffset = curSelection.getFocusOffset();
   const focusBlock = curContent.getBlockForKey(focusBlockKey);
   const focusBlockLength = focusBlock.getLength();
   const blockMap = curContent.getBlockMap();
@@ -355,14 +355,12 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   // Push state
   newContentState = trimNumberListInWholePage(newContentState);
   let newEditorState = EditorState.push(editorState, newContentState, "less-indent");
-  if (focusBlockLength === 0) {
-    newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
-      focusKey: focusBlockKey,
-      focusOffset: 1,
-      anchorKey: focusBlockKey,
-      anchorOffset: 1,
-    }));
-  }
+  newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
+    focusKey: focusBlockKey,
+    focusOffset: focusBlockLength === 0 ? 1 : focusOffset,
+    anchorKey: focusBlockKey,
+    anchorOffset: focusBlockLength === 0 ? 1 : focusOffset,
+  }));
 
   // Update editorState
   dispatcher.setEditorState(newEditorState);
