@@ -37,6 +37,7 @@ const BlockDargButton = props => {
   const blockKey = props.blockKey;
   const pageUuid = props.pageUuid;
   const readOnly = props.readOnly;
+  const paddingLeft = props.paddingLeft;
   const handleBlockDargStart = props.handleBlockDargStart;
 
   // Reducers
@@ -49,6 +50,7 @@ const BlockDargButton = props => {
       className={className}
       contentEditable={false}
       draggable='true'
+      style={{paddingLeft: `${paddingLeft}px`}}
 
       onDragStart={handleBlockDargStart}
     >

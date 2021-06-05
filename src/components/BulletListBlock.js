@@ -34,7 +34,9 @@ import '../styles/BulletListBlock.css';
  *************************************************/
 import {
   blockDataKeys,
+  editorLeftPadding,
   indentWidth,
+  remToPx,
 } from '../constant';
 
 /*************************************************
@@ -62,10 +64,12 @@ const BulletListBlock = props => {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
   }
 
+  const paddingLeft = remToPx(indentWidth * indentLevel);
+
   return (
     <div
       className='geeke-blockWrapper'
-      style={{marginLeft: `${indentWidth * indentLevel}rem`}}
+      style={{paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`}}
       geeke='true'
 
       onMouseOver={onMouseOver}
@@ -76,8 +80,9 @@ const BulletListBlock = props => {
         pageUuid={pageUuid}
         readOnly={readOnly}
         handleBlockDargStart={handleBlockDargStart}
+        paddingLeft={paddingLeft}
       />
-      <div className='geeke-bulletListMark noselect' contentEditable={false}>
+      <div className='geeke-bulletListMark noselect' contentEditable={false} style={{paddingLeft: `${paddingLeft}px`}}>
         <div className='geeke-bulletListMarkInner'>
           •
         </div>

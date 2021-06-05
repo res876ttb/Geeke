@@ -34,7 +34,9 @@ import '../styles/NumberedListBlock.css';
  *************************************************/
 import {
   blockDataKeys,
+  editorLeftPadding,
   indentWidth,
+  remToPx,
 } from '../constant';
 
 /*************************************************
@@ -63,6 +65,8 @@ const NumberedListBlock = props => {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
   }
 
+  const paddingLeft = remToPx(indentWidth * indentLevel);
+
   // Get the number of this list
   const curBlock = props.block;
   const curBlockData = curBlock.getData();
@@ -71,7 +75,7 @@ const NumberedListBlock = props => {
   return (
     <div
       className='geeke-blockWrapper'
-      style={{marginLeft: `${indentWidth * indentLevel}rem`}}
+      style={{paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`}}
       geeke='true'
 
       onMouseOver={onMouseOver}
@@ -82,8 +86,9 @@ const NumberedListBlock = props => {
         pageUuid={pageUuid}
         readOnly={readOnly}
         handleBlockDargStart={handleBlockDargStart}
+        paddingLeft={paddingLeft}
       />
-      <div className='geeke-numberedListMark noselect' contentEditable={false}>
+      <div className='geeke-numberedListMark noselect' contentEditable={false} style={{paddingLeft: `${paddingLeft}px`}}>
         <div className='geeke-numberedListMarkInner'>
           {numberListOrder}.
         </div>

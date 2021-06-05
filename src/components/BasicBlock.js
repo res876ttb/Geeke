@@ -33,7 +33,9 @@ import '../styles/BasicBlock.css';
  *************************************************/
 import {
   blockDataKeys,
+  editorLeftPadding,
   indentWidth,
+  remToPx,
 } from '../constant';
 
 /*************************************************
@@ -61,10 +63,12 @@ const BasicBlock = props => {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
   }
 
+  const paddingLeft = remToPx(indentWidth * indentLevel);
+
   return (
     <div
       className='geeke-blockWrapper'
-      style={{marginLeft: `${indentWidth * indentLevel}rem`}}
+      style={{paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`}}
       geeke='true'
 
       onMouseOver={onMouseOver}
@@ -75,6 +79,7 @@ const BasicBlock = props => {
         pageUuid={pageUuid}
         readOnly={readOnly}
         handleBlockDargStart={handleBlockDargStart}
+        paddingLeft={paddingLeft}
       />
       <EditorBlock {...props} />
     </div>
