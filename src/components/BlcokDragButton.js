@@ -18,11 +18,6 @@ import { useSelector } from 'react-redux';
  *************************************************/
 
 /*************************************************
- * Styles
- *************************************************/
-import '../styles/BasicBlock.css';
-
-/*************************************************
  * Constant
  *************************************************/
 import {
@@ -55,7 +50,7 @@ const BlockDargButton = props => {
       onDragStart={handleBlockDargStart}
     >
       <div className='geeke-draggableWrapperInner'>
-        <img className='geeke-draggableButton' draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
+        <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
       </div>
     </div>
   )

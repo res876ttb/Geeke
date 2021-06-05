@@ -24,12 +24,6 @@ import {
 import BlockDargButton from './BlcokDragButton';
 
 /*************************************************
- * Styles
- *************************************************/
-import '../styles/BasicBlock.css';
-import '../styles/NumberedListBlock.css';
-
-/*************************************************
  * Constant
  *************************************************/
 import {
@@ -68,9 +62,7 @@ const NumberedListBlock = props => {
   const paddingLeft = remToPx(indentWidth * indentLevel);
 
   // Get the number of this list
-  const curBlock = props.block;
-  const curBlockData = curBlock.getData();
-  const numberListOrder = curBlockData.has(blockDataKeys.numberListOrder) ? curBlockData.get(blockDataKeys.numberListOrder) : 1;
+  const numberListOrder = blockData.has(blockDataKeys.numberListOrder) ? blockData.get(blockDataKeys.numberListOrder) : 1;
 
   return (
     <div

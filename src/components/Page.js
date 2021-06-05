@@ -29,6 +29,9 @@ import {
 import {
   trimNumberListInWholePage,
 } from '../utils/NumberListUtils';
+import {
+  onDragStart
+} from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Import Components
@@ -40,23 +43,19 @@ import BulletListBlock from './BulletListBlock';
 import NumberedListBlock from './NumberedListBlock';
 
 /*************************************************
- * Styles
- *************************************************/
-import '../styles/Page.css';
-import { onDragStart } from '../utils/DraggableBlockUtils';
-
-/*************************************************
  * Constants
  *************************************************/
 import {
   constBlockType,
 } from '../constant';
+import { toggleCheckList } from '../utils/CheckListUtils';
+import CheckListBlock from './CheckListBlock';
 
 /*************************************************
  * Main components
  *************************************************/
 // For debug only
-const testString = `{"blocks":[{"key":"feut4","text":"This numbered list 1","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"numberListOrder":1}},{"key":"3i7b3","text":"This numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"numberListOrder":2}},{"key":"9bbfj","text":"This numbered list 3","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":1}},{"key":"1ljkf","text":"This is numbered list 4","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":2}},{"key":"d54n0","text":"This is a normal list","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"cqoo","text":"This is the second section of numbered list","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":1}},{"key":"be498","text":"This is the second section of numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":2}},{"key":"6puud","text":"This is block 1","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"4uump","text":"This is block 2","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7tegj","text":"This is block 3","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7cl1n","text":"This is block 4","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":2}},{"key":"dn4hc","text":"This is block 5","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"8idd4","text":"This is bullet list 1","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"9btli","text":"This is bullet list 2","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"45f6v","text":"This is bullet list 3","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}}],"entityMap":{}}`;
+const testString = `{"blocks":[{"key":"feut4","text":"This numbered list 1","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"numberListOrder":1}},{"key":"3i7b3","text":"This numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"numberListOrder":2}},{"key":"9bbfj","text":"This numbered list 3","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":1}},{"key":"1ljkf","text":"This is numbered list 4","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":2}},{"key":"d54n0","text":"This is a normal list","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"cqoo","text":"This is the second section of numbered list","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":1}},{"key":"be498","text":"This is the second section of numbered list 2","type":"number-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"numberListOrder":2}},{"key":"6puud","text":"This is block 1","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"4uump","text":"This is block 2","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7tegj","text":"This is block 3","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"7cl1n","text":"This is block 4","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":2}},{"key":"dn4hc","text":"This is block 5","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"8idd4","text":"This is bullet list 1","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"9btli","text":"This is bullet list 2","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"45f6v","text":"This is bullet list 3","type":"bullet-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}},{"key":"3vfhs","text":"This is check list 1","type":"check-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":0,"checkListCheck":true}},{"key":"5ur9n","text":"This is check list 2","type":"check-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":0}},{"key":"1960r","text":"This is check list 3","type":"check-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1,"checkListCheck":true}},{"key":"368b5","text":"This is check list 4","type":"check-list","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{"indentLevel":1}}],"entityMap":{}}`;
 
 const Page = props => {
   // Props
@@ -76,12 +75,24 @@ const Page = props => {
     ...defaultKeyboardHandlingConfig,
   };
 
+  // onChange
+  const updateEditor = editorState => {
+    if (!readOnly) setEditorState(editorState);
+  };
+  const updateEditorButIgnoreReadOnly = editorState => setEditorState(editorState);
+
   // handleBlockDargStart
   const handleBlockDargStart = e => {
     e.preventDefault();
     e.stopPropagation();
     setTriggerDrag(e);
   };
+
+  // handleToggleCheckList
+  const handleToggleCheckList = useCallback(blockKey => {
+    updateEditor(toggleCheckList(editorState, blockKey));
+    setTimeout(() => editor.current.focus(), 10);
+  }, [editorState]); // eslint-disable-line
 
   const defaultBlockProps = {
     pageUuid: uuid,
@@ -97,16 +108,11 @@ const Page = props => {
     onDragStart(triggerDrag, readOnly, dargShadowId, setDragShadowPos, editorState);
   }, [triggerDrag, editorState]); // eslint-disable-line
 
-  // onChange
-  const updateEditor = editorState => {
-    if (!readOnly) setEditorState(editorState);
-  };
-  const updateEditorButIgnoreReadOnly = editorState => setEditorState(editorState);
-
   // keyBindingFn
-  const mapKeyToEditorCommand = useCallback(
-    e => _mapKeyToEditorCommand(e, commandConfig, dispatch, editorState, uuid),
-    [editorState]); // eslint-disable-line
+  const mapKeyToEditorCommand = useCallback(e => {
+    if (!readOnly) return _mapKeyToEditorCommand(e, commandConfig, dispatch, editorState, uuid)
+    return 'not-handled';
+  }, [editorState]); // eslint-disable-line
 
   // handleKeyCommand
   const handleKeyCommand = (command, editorState) => _handleKeyCommand(editorState, command, {
@@ -135,6 +141,12 @@ const Page = props => {
         return {
           component: NumberedListBlock,
           props: {...defaultBlockProps},
+        };
+
+      case constBlockType.checkList:
+        return {
+          component: CheckListBlock,
+          props: {...defaultBlockProps, handleToggleCheckList},
         };
 
       default:

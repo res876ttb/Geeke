@@ -77,6 +77,7 @@ const blockDataPreserveConstant = {
 const blockDataPreserveConfig = {
   [blockDataKeys.indentLevel]: [blockDataPreserveConstant.all],
   [blockDataKeys.numberListOrder]: [constBlockType.numberList],
+  [blockDataKeys.checkListCheck]: [blockDataPreserveConstant.none],
 }
 
 /*************************************************

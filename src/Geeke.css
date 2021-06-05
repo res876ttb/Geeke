@@ -1,0 +1,245 @@
+/* Variables */
+:root {
+  --fontSize: 1rem;
+  --fontSizePageTitle: calc(var(--fontSize) * 3);
+
+  --lineHeight: calc(var(--fontSize) * 1.4);
+
+  --indentWidth: 1.6rem;
+  --editorLeftPadding: 3rem;
+  --editorTopPadding: 0.3rem;
+  --dragButtonHoverColor: rgba(124, 124, 124, 0.5);
+  --dragMaskHeight: 0.25rem;
+}
+
+
+/* General Geeke styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  font-size: var(--fontSize);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.geeke-disableDrag {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+.geeke-invisible {
+  opacity: 0;
+}
+
+.geeke-inlineBlock {
+  display: inline-block;
+}
+
+#geeke-getRem {
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+}
+
+#geeke-drag {
+  opacity: 0.4;
+  position: fixed;
+}
+
+/* Copied from https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+
+/* Basic Block */
+.geeke-draggableWrapper {
+  height: 0px;
+  position: absolute;
+  transition-duration: 0.3s;
+  left: 1.6rem;
+  top: 0.2rem;
+}
+
+.geeke-draggableWrapperInner {
+  height: 1.6rem;
+  width: 1.2rem;
+  text-align: center;
+  transition-duration: 0.15s;
+  position: relative;
+  border-radius: 20%;
+}
+
+.geeke-draggableWrapperInner:hover {
+  background-color: var(--dragButtonHoverColor);
+}
+
+.geeke-draggableCursor {
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  cursor: -o-grab;
+  cursor: -ms-grab;
+  cursor: grab;
+}
+
+.geeke-draggableCursor:active {
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+  cursor: -o-grabbing;
+  cursor: -ms-grabbing;
+  cursor: grabbing;
+}
+
+.geeke-blockWrapper {
+  position: relative;
+  padding: var(--editorTopPadding) var(--editorLeftPadding); /* editorTopPadding, editorLeftPadding */
+  line-height: var(--lineHeight);
+}
+
+.geeke-editorWrapper {
+  padding: 0.4rem 3rem;
+}
+
+.geeke-editorDragMask {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  border: black 2px solid;
+  z-index: 1;
+}
+
+
+/* BlockDragMask */
+.geeke-blockDragMask {
+  position: fixed;
+  bottom: 0px;
+  height: 10px;
+  left: 0px;
+  right: 0px;
+  height: var(--dragMaskHeight);
+  z-index: -1;
+}
+
+.geeke-dragMask {
+  display: inline-block;
+  position: absolute;
+  height: var(--dragMaskHeight);
+}
+
+.geeke-dragMaskRight {
+  display: inline-block;
+  height: var(--dragMaskHeight);
+  position: absolute;
+}
+
+
+/* BlockSelector */
+.geeke-selector {
+  height: 0px;
+  width: 0px;
+  overflow: hidden;
+}
+
+
+/* BulletListBlock */
+.geeke-bulletListMark {
+  height: 0px;
+  position: absolute;
+  left: var(--editorLeftPadding);
+  top: 0.15rem;
+}
+
+.geeke-bulletListMarkInner {
+  height: 1.6rem;
+  width: 1.6rem;
+  font-size: calc(var(--fontSize) * 1.6);
+  text-align: center;
+  position: relative;
+}
+
+.geeke-bulletListEditor {
+  margin-left: var(--indentWidth);
+}
+
+
+/* NumberedListBlock */
+.geeke-numberedListMark {
+  height: 0px;
+  position: absolute;
+  left: var(--editorLeftPadding);
+  top: 0.25rem;
+}
+
+.geeke-numberedListMarkInner {
+  text-align: right;
+  position: relative;
+  min-width: var(--indentWidth);
+  right: 0.4rem;
+}
+
+.geeke-numberedListEditor {
+  margin-left: var(--indentWidth);
+}
+
+
+/* CheckListBlock */
+.geeke-checkListMark {
+  height: 0px;
+  position: absolute;
+  left: var(--editorLeftPadding);
+  top: 0.25rem;
+}
+
+.geeke-checkListMarkInner {
+  text-align: right;
+  position: relative;
+  min-width: var(--indentWidth);
+  right: 0.4rem;
+}
+
+.geeke-checkListEditor {
+  margin-left: var(--indentWidth);
+}
+
+
+/* Page */
+.geeke-pageBottom {
+  height: 50%; /* TODO: To be adjusted */
+}
+
+
+/* PageDragShadow */
+.geeke-pageDragShadow {
+  position: fixed;
+  opacity: 0.4;
+
+  outline: none;
+  user-select: text;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+
+/* PageTitle */
+.Geeke-Page-Title {
+  font-size: var(--fontSizePageTitle);
+}

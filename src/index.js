@@ -24,11 +24,6 @@ import {editorMisc} from './states/editorMisc';
 import Geeke from './components/Geeke';
 
 /*************************************************
- * Styles
- *************************************************/
-import './styles/index.css';
-
-/*************************************************
  * Setup libraries
  *************************************************/
 // Immer: enable support for MapSet

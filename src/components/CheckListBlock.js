@@ -1,6 +1,6 @@
 /*************************************************
- * @file BulletListBlock.js
- * @description Blocks in bullet list.
+ * @file CheckListBlock.js
+ * @description Blocks in check list.
  *************************************************/
 
 /*************************************************
@@ -36,13 +36,14 @@ import {
 /*************************************************
  * Main components
  *************************************************/
-const BulletListBlock = props => {
+const CheckListBlock = props => {
   // Props
   const pageUuid = props.blockProps.pageUuid;
   const blockData = props.block.getData();
   const blockKey = props.block.key;
   const readOnly = props.blockProps.readOnly;
   const handleBlockDargStart = props.blockProps.handleBlockDargStart;
+  const handleToggleCheckList = props.blockProps.handleToggleCheckList;
 
   // Reducers
   const dispatch = useDispatch();
@@ -54,11 +55,15 @@ const BulletListBlock = props => {
   const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
   const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
 
+  // Get indent level from block data
   if (blockData.has(blockDataKeys.indentLevel)) {
     indentLevel = blockData.get(blockDataKeys.indentLevel);
   }
 
   const paddingLeft = remToPx(indentWidth * indentLevel);
+
+  // Get the number of this list
+  const checkListCheck = blockData.has(blockDataKeys.checkListCheck) ? blockData.get(blockDataKeys.checkListCheck) : false;
 
   return (
     <div
@@ -76,16 +81,16 @@ const BulletListBlock = props => {
         handleBlockDargStart={handleBlockDargStart}
         paddingLeft={paddingLeft}
       />
-      <div className='geeke-bulletListMark noselect' contentEditable={false} style={{paddingLeft: `${paddingLeft}px`}}>
-        <div className='geeke-bulletListMarkInner'>
-          •
+      <div className='geeke-checkListMark noselect' contentEditable={false} style={{paddingLeft: `${paddingLeft}px`}}>
+        <div className='geeke-checkListMarkInner'>
+          <input className='form-check-input' type='checkbox' checked={checkListCheck} onClick={() => handleToggleCheckList(blockKey)} onChange={() => {}} />
         </div>
       </div>
-      <div className='geeke-bulletListEditor'>
+      <div className='geeke-checkListEditor'>
         <EditorBlock {...props} />
       </div>
     </div>
   )
 }
 
-export default BulletListBlock;
+export default CheckListBlock;

@@ -8,7 +8,7 @@
  *************************************************/
 import React, {useEffect, useRef, useState} from 'react';
 import {
-  Editor, 
+  Editor,
   EditorState,
 } from 'draft-js';
 import {useDispatch, useSelector} from 'react-redux';
@@ -28,11 +28,6 @@ import {
 /*************************************************
  * Import Components
  *************************************************/
-
-/*************************************************
- * Styles
- *************************************************/
-import '../styles/BlockSelector.css';
 
 /*************************************************
  * Constant
@@ -71,11 +66,11 @@ const BasicBlock = props => {
       case 38: // Arrow key Up
         if (e.shiftKey)
           return keyCommandConst.selectUp;
-        
+
       // if shift is not pressed, then go to the first block
       if (isSelectionDirectionUp(state, pageUuid))
         return keyCommandConst.selectFocus;
-      else 
+      else
         return keyCommandConst.selectAnchor;
 
       case 39: // Arrow key right
@@ -84,11 +79,11 @@ const BasicBlock = props => {
       case 40: // Arrow key Down
         if (e.shiftKey)
           return keyCommandConst.selectDown;
-      
+
       // if shift is not pressed, then go to the last block
       if (isSelectionDirectionUp(state, pageUuid))
         return keyCommandConst.selectAnchor;
-      else 
+      else
         return keyCommandConst.selectFocus;
 
       case 27: // Escape
@@ -108,7 +103,7 @@ const BasicBlock = props => {
       <div className='geeke-selector'>
         {
           editorState === '' ? null :
-          <Editor 
+          <Editor
             ref={editor}
             editorState={editorState}
             onChange={setEditorState}
@@ -123,4 +118,3 @@ const BasicBlock = props => {
 }
 
 export default BasicBlock;
- 
