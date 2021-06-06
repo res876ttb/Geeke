@@ -221,6 +221,42 @@ code {
 }
 
 
+/* ToggleListBlock */
+.geeke-toggleListMark {
+  height: 0px;
+  position: absolute;
+  left: var(--editorLeftPadding);
+  top: 0.2rem;
+}
+
+.geeke-toggleListMarkInner {
+  text-align: right;
+  position: relative;
+  min-width: var(--indentWidth);
+  right: 0.45rem;
+}
+
+.geeke-toggleListImg {
+  width: calc(var(--fontSize) * 0.7);
+  height: calc(var(--fontSize) * 0.7);
+  transition: transform 0.1s;
+  cursor: pointer;
+}
+
+.geeke-toggleListImgOpen {
+  transform: rotate(90deg);
+}
+
+.geeke-toggleListImgEmpty {
+  /* Change color: https://stackoverflow.com/questions/22252472/how-to-change-the-color-of-an-svg-element */
+  filter: invert(57%) sepia(4%) saturate(0%) hue-rotate(350deg) brightness(94%) contrast(87%);
+}
+
+.geeke-toggleListEditor {
+  margin-left: var(--indentWidth);
+}
+
+
 /* Page */
 .geeke-pageBottom {
   height: 50%; /* TODO: To be adjusted */

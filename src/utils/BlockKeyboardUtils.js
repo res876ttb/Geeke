@@ -260,6 +260,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   for (let i = startIndex; i <= endIndex; i++) {
     let block = blockMap.get(keyArray[i]);
     let blockData = block.getData();
+    let newBlockData = new Map(blockData);
     let curIndentLevel = 0;
     if (blockData.has(blockDataKeys.indentLevel)) {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -272,13 +273,14 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
 
     if (curIndentLevel <= prevIndentLevel) curIndentLevel += 1;
     prevIndentLevel = curIndentLevel;
+    newBlockData.set(blockDataKeys.indentLevel, curIndentLevel);
 
     newContentState = Modifier.setBlockData(newContentState, new SelectionState({
       anchorKey: keyArray[i],
       anchorOffset: 0,
       focusKey: keyArray[i],
       focusOffset: 0,
-    }), Immutable.Map({[blockDataKeys.indentLevel]: curIndentLevel}));
+    }), newBlockData);
   }
 
   // Push state
@@ -332,13 +334,14 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   for (let i = startIndex; i <= endIndex; i++) {
     let block = blockMap.get(keyArray[i]);
     let blockData = block.getData();
+    let newBlockData = new Map(blockData);
     let curIndentLevel = 0;
     if (blockData.has(blockDataKeys.indentLevel)) {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
     }
 
     if (curIndentLevel > 0) {
-      curIndentLevel -= 1;
+      newBlockData.set(blockDataKeys.indentLevel, curIndentLevel - 1);
       updated += 1;
     }
 
@@ -347,7 +350,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
       anchorOffset: 0,
       focusKey: keyArray[i],
       focusOffset: 0,
-    }), Immutable.Map({[blockDataKeys.indentLevel]: curIndentLevel}));
+    }), newBlockData);
   }
 
   // Check whether the editor is updated by reducing the indent level of some blocks
@@ -463,20 +466,25 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   // Get new type
   let newType = null;
   switch (keyword) {
-    // Check whether is bullet list
+    // Bullet list
     case '*':
     case '-':
       if (focusBlockType !== constBlockType.bulletList) newType = constBlockType.bulletList;
       break;
 
-    // Check whether is bullet list
+    // Check list
     case '[]':
       if (focusBlockType !== constBlockType.checkList) newType = constBlockType.checkList;
       break;
 
+    // Toggle list
+    case '>':
+      if (focusBlockType !== constBlockType.toggleList) newType = constBlockType.toggleList;
+      break;
+
     // Other cases
     default:
-      // Chech whether match numbered list
+      // Numbered list
       if (keyword.match(/^\d+\./) && focusBlockType !== constBlockType.numberList) {
         handleConvertToNumberList();
         return 'handled';

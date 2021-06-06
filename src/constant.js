@@ -25,6 +25,7 @@ export const blockDataKeys = {
   indentLevel: 'indentLevel',
   numberListOrder: 'numberListOrder',
   checkListCheck: 'checkListCheck',
+  toggleListToggle: 'toggleListToggle',
 };
 
 export const constBlockType = {
@@ -32,4 +33,5 @@ export const constBlockType = {
   bulletList: 'bullet-list',
   numberList: 'number-list',
   checkList: 'check-list',
+  toggleList: 'toggle-list',
 };
