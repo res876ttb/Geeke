@@ -101,6 +101,12 @@ describe('Test BlockList', () => {
     expect(blockList.getValue(5)).toBe('e');
     expect(blockList.getValue(6)).toBe('f');
 
+    blockList.delete(100);
+    expect(blockList.getSize()).toBe(4);
+
+    blockList.delete([100, 101]);
+    expect(blockList.getSize()).toBe(4);
+
     blockList.delete([2]);
     expect(blockList.getSize()).toBe(3);
     expect(blockList.getIndex(2)).toBeNull();

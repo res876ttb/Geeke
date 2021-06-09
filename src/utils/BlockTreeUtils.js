@@ -14,16 +14,45 @@
 /*************************************************
  * FUNCTIONS
  *************************************************/
+class IntuitiveMap {
+  constructor() {
+    this.map = new Map();
+
+    return new Proxy(this, {
+      set: (_, key, value) => {
+        return this.map.set(key, value);
+      },
+      get: (_, key) => {
+        // if (key === 'getMap') return this.getMap;
+        return this.map.get(key);
+      },
+      has: (_, key) => {
+        return this.map.has(key);
+      },
+      deleteProperty: (_, key) => {
+        if (this.map.has(key)) {
+          return this.map.delete(key);
+        }
+        return false;
+      },
+    });
+  }
+
+  getMap() {
+    return this.map
+  }
+}
 
 export class BlockList {
-  indexHash = new Map(); // key: key, value: index of key
+  indexHash = new IntuitiveMap(); // key: key, value: index of key
   valueArray = [];
   keyArray = [];
+  type = 'unstyled';
 
   constructor() {}
 
   clear() {
-    this.indexHash = new Map();
+    this.indexHash = new IntuitiveMap();
     this.valueArray = [];
     this.keyArray = [];
   }
@@ -33,12 +62,12 @@ export class BlockList {
   }
 
   getIndex(key) {
-    if (this.indexHash.has(key)) return this.indexHash.get(key);
+    if (key in this.indexHash) return this.indexHash[key];
     return null;
   }
 
   getValue(key) {
-    if (this.indexHash.has(key)) return this.valueArray[this.indexHash.get(key)];
+    if (key in this.indexHash) return this.valueArray[this.indexHash[key]];
     return null;
   }
 
@@ -47,13 +76,21 @@ export class BlockList {
     return this.valueArray.length;
   }
 
+  getType() {
+    return this.type;
+  }
+
+  setType(newType) {
+    this.type = newType;
+  }
+
   append(key, keyArray, valueArray) {
-    let curIndex = this.indexHash.has(key) ? (this.indexHash.get(key) + 1) : 0;
+    let curIndex = key in this.indexHash ? (this.indexHash[key] + 1) : 0;
     let appendSize = valueArray.length;
 
     // Update index of original array
     for (let i = curIndex; i < this.keyArray.length; i++) {
-      this.indexHash.set(this.keyArray[i], this.indexHash.get(this.keyArray[i]) + appendSize);
+      this.indexHash[this.keyArray[i]] += appendSize;
     }
 
     // Insert values into valueArray
@@ -64,7 +101,7 @@ export class BlockList {
 
     // Update index of newly add keys
     for (let i = 0; i < appendSize; i++, curIndex++) {
-      this.indexHash.set(keyArray[i], curIndex);
+      this.indexHash[keyArray[i]] = curIndex;
     }
   }
 
@@ -73,12 +110,13 @@ export class BlockList {
       // Note: this keys array must contain continuous keys.
       // Sanity check whether the keys array is empty
       if (keys.length === 0) return;
+      if (!(keys[0] in this.indexHash)) return;
 
-      let firstKeyIndex = this.indexHash.get(keys[0]);
+      let firstKeyIndex = this.indexHash[keys[0]];
 
       // Update index after the deleted items
       for (let i = firstKeyIndex + keys.length; i < this.valueArray.length; i++) {
-        this.indexHash.set(this.keyArray[i], this.indexHash.get(this.keyArray[i]) - keys.length);
+        this.indexHash[this.keyArray[i]] -= keys.length;
       }
 
       // Remove items from array
@@ -87,14 +125,15 @@ export class BlockList {
 
       // Remove items from indexHash
       for (let i = 0; i < keys.length; i++) {
-        this.indexHash.delete(keys[i]);
+        delete this.indexHash[keys[i]];
       }
     } else {
-      let keyIndex = this.indexHash.get(keys);
+      if (!(keys in this.indexHash)) return undefined;
+      let keyIndex = this.indexHash[keys];
 
       // Update index after the deleted item
       for (let i = keyIndex + 1; i < this.valueArray.length; i++) {
-        this.indexHash.set(this.keyArray[i], this.indexHash.get(this.keyArray[i]) - 1);
+        this.indexHash[this.keyArray[i]] -= 1;
       }
 
       // Remove item from array
@@ -102,7 +141,7 @@ export class BlockList {
       this.keyArray.splice(keyIndex, 1);
 
       // Remove item from indexHash
-      this.indexHash.delete(keys);
+      delete this.indexHash[keys];
     }
   }
 }
