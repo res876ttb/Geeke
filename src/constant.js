@@ -26,6 +26,7 @@ export const blockDataKeys = {
   numberListOrder: 'numberListOrder',
   checkListCheck: 'checkListCheck',
   toggleListToggle: 'toggleListToggle',
+  parentKey: 'parentKey',
 };
 
 export const constBlockType = {

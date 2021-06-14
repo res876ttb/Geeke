@@ -133,6 +133,7 @@ export const trimNumberListWithSameDepth = (contentState, blockKey, indentLevel,
 
 export const trimNumberListInWholePage = contentState => {
   let numberListOrderMap = new Map([[0, 0]]);
+  let parentKeyMap = new Map([[-1, null], [0, null]]);
   let curDepth = 0;
   let newContentState = contentState
   let firstBlockKey = getFirstBlockKey(newContentState);
@@ -143,15 +144,28 @@ export const trimNumberListInWholePage = contentState => {
     let blockData = curBlock.getData();
     let blockDepth = blockData.has(blockDataKeys.indentLevel) ? blockData.get(blockDataKeys.indentLevel) : 0;
     let blockType = curBlock.getType();
+    let blockKey = curBlock.getKey();
+    let blockParentKey = blockData.get(blockDataKeys.parentKey);
 
     // If current depth is change, move depth pointer: curDepth, and modify numberListOrderMap
     if (blockDepth > curDepth) {
+      let parentKey = parentKeyMap.get(curDepth);
       while (curDepth < blockDepth) {
         curDepth += 1;
         numberListOrderMap.set(curDepth, 0);
+        parentKeyMap.set(curDepth, parentKey);
       }
     } else if (curDepth > blockDepth) {
       curDepth = blockDepth;
+    }
+    parentKeyMap.set(curDepth, blockKey);
+
+    // Check whether to update parent block
+    if (blockParentKey !== parentKeyMap.get(curDepth - 1)) {
+      let newBlockData = new Map(blockData);
+      newBlockData.set(blockDataKeys.parentKey, parentKeyMap.get(curDepth - 1));
+      newContentState = updateBlockData(newContentState, curBlock.getKey(), newBlockData);
+      blockData = newContentState.getBlockForKey(curBlock.getKey()).getData();
     }
 
     // If current block is number list
