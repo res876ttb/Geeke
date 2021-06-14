@@ -6,6 +6,8 @@
 /*************************************************
  * IMPORT
  *************************************************/
+import { blockDataKeys } from "../constant";
+import { getFirstBlockKey } from "./Misc";
 
 /*************************************************
  * CONST
@@ -15,15 +17,19 @@
  * FUNCTIONS
  *************************************************/
 class IntuitiveMap {
-  constructor() {
-    this.map = new Map();
+  constructor(map) {
+    if (map instanceof Map) {
+      this.map = map;
+    } else {
+      this.map = new Map();
+    }
 
     return new Proxy(this, {
       set: (_, key, value) => {
         return this.map.set(key, value);
       },
       get: (_, key) => {
-        // if (key === 'getMap') return this.getMap;
+        if (key === 'map') return this.getMap();
         return this.map.get(key);
       },
       has: (_, key) => {
@@ -48,8 +54,6 @@ export class BlockList {
   valueArray = [];
   keyArray = [];
   type = 'unstyled';
-
-  constructor() {}
 
   clear() {
     this.indexHash = new IntuitiveMap();
@@ -146,14 +150,143 @@ export class BlockList {
   }
 }
 
+class ParentInfo {
+  key = null;
+  blockListIndex = -1;
+  inListOrder = -1;
+
+  constructor(key, blockListIndex, inListOrder) {
+    this.key = key;
+    this.blockListIndex = blockListIndex;
+    this.inListOrder = inListOrder;
+  }
+}
+
 export class BlockTree {
-  constructor(contentBlock) {
-    tree = this.contentBlockToTree(contentBlock);
+  constructor(contentState) {
+    this.tree = this.contentStateToTree(contentState);
+    this.parentMap = this.createParentMapFromTree(this.tree);
   }
 
-  contentBlockToTree(contentBlock) {
-    tree = new BlockList();
+  contentStateToTree(contentState) {
+    // Iterate through contentState
+    let curBlock = contentState.getBlockForKey(getFirstBlockKey(contentState));
+    let blockTypeDepthMap = new IntuitiveMap();
+    blockTypeDepthMap[0] = curBlock.getType();
 
-    // Iterate through contentBlock
+    // Function to pase a certain level of blocks
+    const parseContentState = curDepth => {
+      let blockLists = [];
+      let blockKeys = [];
+      let children = [];
+
+      while (curBlock) {
+        // Get data about this block
+        let blockType = curBlock.getType();
+        let blockData = curBlock.getData();
+        let blockKey = curBlock.getKey();
+        let blockDepth = blockData.has(blockDataKeys.indentLevel) ? blockData.get(blockDataKeys.indentLevel) : 0;
+
+        if (curDepth < blockDepth) {
+          // This is a child block of previous block.
+          console.assert(curDepth + 1 === blockDepth, `The depth difference between curDepth and blockDepth must be only 1!`);
+          children[children.length - 1] = parseContentState(curDepth + 1);
+
+          if (!curBlock) {
+            let blockList = new BlockList();
+            blockList.append(null, blockKeys, children);
+            blockList.setType(blockTypeDepthMap[curDepth]);
+            blockLists.push(blockList);
+            return blockLists;
+          }
+
+          // Update blockKey
+          blockKey = curBlock.getKey();
+          blockData = curBlock.getData();
+          blockType = curBlock.getType();
+          blockDepth = blockData.has(blockDataKeys.indentLevel) ? blockData.get(blockDataKeys.indentLevel) : 0;
+        }
+
+        if (curDepth > blockDepth) {
+          // No more blocks with the same depth. Just return the result.
+
+          // Check whether there are blocks which are not put into blockLists
+          if (blockKeys.length > 0) {
+            let blockList = new BlockList();
+            blockList.append(null, blockKeys, children);
+            blockList.setType(blockTypeDepthMap[curDepth]);
+            blockLists.push(blockList);
+          }
+
+          // Delete current block type from blockTypeDepthMap
+          delete blockTypeDepthMap[curDepth];
+
+          return blockLists;
+        }
+
+        // This block has the same depth as the previous one.
+
+        // Check whether the blockType is the same as the previous block.
+        if (!blockTypeDepthMap[curDepth]) {
+          // This is the first block in this depth, so just set current blockType to the block type map
+          blockTypeDepthMap[curDepth] = blockType;
+        } else if (blockType !== blockTypeDepthMap[curDepth]) {
+          // Type is mismatch. Put the current result into the blockLists
+          let blockList = new BlockList();
+          blockList.append(null, blockKeys, children);
+          blockList.setType(blockTypeDepthMap[curDepth]);
+          blockLists.push(blockList);
+
+          // Clear blockKeys and children
+          blockKeys = [];
+          children = [];
+
+          // Update blockTypeDepthMap
+          blockTypeDepthMap[curDepth] = blockType;
+        }
+
+        // Update blockKeys and children
+        blockKeys.push(blockKey);
+        children.push([]);
+
+        curBlock = contentState.getBlockAfter(blockKey);
+      }
+
+      if (blockKeys.length > 0) {
+        let blockList = new BlockList();
+        blockList.append(null, blockKeys, children);
+        blockList.setType(blockTypeDepthMap[curDepth]);
+        blockLists.push(blockList);
+      }
+
+      return blockLists;
+    };
+
+    return parseContentState(0);
+  }
+
+  createParentMapFromTree(tree) {
+    let parentMap = new IntuitiveMap();
+
+    const createParentMap = (parentId, nodes) => { // nodes is an array of BlockLists
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = 0; j < nodes[i].valueArray.length; j++) {
+          parentMap[nodes[i].keyArray[j]] = new ParentInfo(parentId, i, j);
+          createParentMap(nodes[i].keyArray[j], nodes[i].valueArray[j]);
+        }
+      }
+    };
+
+    createParentMap(null, tree);
+
+    return parentMap;
+  }
+
+  getParent(key) {
+
+  }
+
+  getParentAndData(contentState, key) {
+    if (!(key in this.parentMap)) return null;
   }
 }

@@ -29,7 +29,7 @@ export const blockDataKeys = {
 };
 
 export const constBlockType = {
-  default: 'default',
+  default: 'unstyled',
   bulletList: 'bullet-list',
   numberList: 'number-list',
   checkList: 'check-list',

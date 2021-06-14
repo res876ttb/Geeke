@@ -225,7 +225,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   });
   newContentState = trimNumberListInWholePage(newContentState);
   newEditorState = EditorState.acceptSelection(newEditorState, newSelectionState);
-  newEditorState = EditorState.push(newEditorState, newContentState, 'drag-and-drop-blocks');
+  newEditorState = EditorState.push(editorState, newContentState, 'drag-and-drop-blocks');
 
   return newEditorState;
 };
