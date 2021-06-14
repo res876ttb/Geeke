@@ -19,7 +19,6 @@ import { trimNumberListInWholePage } from './NumberListUtils';
 /*************************************************
  * CONST
  *************************************************/
-import Immutable from 'immutable';
 import {
   editorLeftPadding,
   editorDraggableButtonWidth,
@@ -200,6 +199,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     const thisKey = selectedBlocks[i];
     const thisBlock = blockMap.get(thisKey);
     const blockData = thisBlock.getData();
+    let newBlockData = new Map(blockData);
     let curIndentLevel = 0;
     if (blockData.has(blockDataKeys.indentLevel)) {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -210,12 +210,13 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     curIndentLevel = Math.max(curIndentLevel, 0);
     prevIndentLevel = curIndentLevel;
 
-    newContentState = Modifier.setBlockData(newContentState, new SelectionState({
+    newBlockData.set(blockDataKeys.indentLevel, curIndentLevel);
+    newContentState = Modifier.mergeBlockData(newContentState, new SelectionState({
       anchorKey: thisKey,
       anchorOffset: 0,
       focusKey: thisKey,
       focusOffset: 0,
-    }), Immutable.Map({[blockDataKeys.indentLevel]: curIndentLevel}));
+    }), newBlockData);
   }
 
   // Trim the whole page and push state to undo stack

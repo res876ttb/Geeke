@@ -15,7 +15,6 @@ import {
   RichUtils,
   SelectionState,
 } from "draft-js";
-import Immutable from 'immutable';
 
 import {
   unsetMouseOverBlockKey,
@@ -33,6 +32,7 @@ import {
   blockDataKeys,
   constBlockType,
 } from '../constant';
+import { updateBlockData } from "./Misc";
 
 export const defaultKeyboardHandlingConfig = {
   indentBlock: true,
@@ -248,15 +248,9 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   }
 
   // Initialize new content
-  let newContentState = Modifier.setBlockData(curContent, new SelectionState({
-    anchorKey: keyArray[startIndex],
-    anchorOffset: 0,
-    focusKey: keyArray[startIndex],
-    focusOffset: 0,
-  }), Immutable.Map({[blockDataKeys.indentLevel]:
-    startBlock.getData().has(blockDataKeys.indentLevel) ?
-    startBlock.getData().get(blockDataKeys.indentLevel) : 0
-  }));
+  let newBlockData = new Map(curContent.getBlockForKey(keyArray[startIndex]).getData());
+  newBlockData.set(blockDataKeys.indentLevel, startBlock.getData().has(blockDataKeys.indentLevel) ? startBlock.getData().get(blockDataKeys.indentLevel) : 0);
+  let newContentState = updateBlockData(curContent, keyArray[startIndex], newBlockData);
 
   // Update indent level for each block
   for (let i = startIndex; i <= endIndex; i++) {
@@ -277,7 +271,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     prevIndentLevel = curIndentLevel;
     newBlockData.set(blockDataKeys.indentLevel, curIndentLevel);
 
-    newContentState = Modifier.setBlockData(newContentState, new SelectionState({
+    newContentState = Modifier.mergeBlockData(newContentState, new SelectionState({
       anchorKey: keyArray[i],
       anchorOffset: 0,
       focusKey: keyArray[i],
@@ -321,15 +315,9 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   const startBlock = blockMap.get(keyArray[startIndex]);
 
   // Initialize new content
-  let newContentState = Modifier.setBlockData(curContent, new SelectionState({
-    anchorKey: keyArray[startIndex],
-    anchorOffset: 0,
-    focusKey: keyArray[startIndex],
-    focusOffset: 0,
-  }), Immutable.Map({[blockDataKeys.indentLevel]:
-    startBlock.getData().has(blockDataKeys.indentLevel) ?
-    startBlock.getData().get(blockDataKeys.indentLevel) : 0
-  }));
+  let newBlockData = new Map(curContent.getBlockForKey(keyArray[startIndex]).getData());
+  newBlockData.set(blockDataKeys.indentLevel, startBlock.getData().has(blockDataKeys.indentLevel) ? startBlock.getData().get(blockDataKeys.indentLevel) : 0);
+  let newContentState = updateBlockData(curContent, keyArray[startIndex], newBlockData);
 
   // Update indent level for each block
   let updated = 0;
@@ -347,7 +335,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
       updated += 1;
     }
 
-    newContentState = Modifier.setBlockData(newContentState, new SelectionState({
+    newContentState = Modifier.mergeBlockData(newContentState, new SelectionState({
       anchorKey: keyArray[i],
       anchorOffset: 0,
       focusKey: keyArray[i],
