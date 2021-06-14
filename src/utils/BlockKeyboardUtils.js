@@ -78,6 +78,8 @@ const blockDataPreserveConfig = {
   [blockDataKeys.indentLevel]: [blockDataPreserveConstant.all],
   [blockDataKeys.numberListOrder]: [constBlockType.numberList],
   [blockDataKeys.checkListCheck]: [blockDataPreserveConstant.none],
+  [blockDataKeys.parentKey]: [blockDataPreserveConstant.all],
+  [blockDataKeys.toggleListToggle]: [blockDataPreserveConstant.none],
 }
 
 /*************************************************
@@ -703,6 +705,7 @@ export const handleKeyCommand = (editorState, command, dispatcher) => {
 /// End handleKeyCommand
 
 /// Start handleReturn
+// TODO: Copy different block data depends on different block
 export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserveConfig) => {
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
