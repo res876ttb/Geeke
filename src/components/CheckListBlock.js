@@ -17,6 +17,7 @@ import {
   onMouseOver as _onMouseOver,
   onMouseLeave as _onMouseLeave,
 } from '../utils/DraggableBlockUtils';
+import { isShowBlock } from '../utils/NumberListUtils';
 
 /*************************************************
  * Import Components
@@ -44,9 +45,15 @@ const CheckListBlock = props => {
   const readOnly = props.blockProps.readOnly;
   const handleBlockDargStart = props.blockProps.handleBlockDargStart;
   const handleToggleCheckList = props.blockProps.handleToggleCheckList;
+  const contentState = props.contentState;
 
   // Reducers
   const dispatch = useDispatch();
+
+  // Check whether to show this block
+  if (!isShowBlock(contentState, blockKey)) {
+    return null;
+  }
 
   // Variables
   let indentLevel = 0;

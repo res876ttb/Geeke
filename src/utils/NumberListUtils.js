@@ -4,6 +4,8 @@
  * Keyword: "/// Start"
  */
 
+// TODO: Rename filename & function name
+
 /*************************************************
  * IMPORT
  *************************************************/
@@ -205,3 +207,24 @@ export const trimNumberListInWholePage = contentState => {
 
   return newContentState;
 };
+
+export const isShowBlock = (contentState, key) => {
+  let curBlock = contentState.getBlockForKey(key);
+  let blockData = curBlock.getData();
+  curBlock = contentState.getBlockForKey(blockData.get(blockDataKeys.parentKey));
+
+  while (curBlock) {
+    blockData = curBlock.getData();
+    if (blockData.has(blockDataKeys.toggleListToggle)) {
+      if (blockData.get(blockDataKeys.toggleListToggle)) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      curBlock = contentState.getBlockForKey(blockData.get(blockDataKeys.parentKey));
+    }
+  }
+
+  return true;
+}
