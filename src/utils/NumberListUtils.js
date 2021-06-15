@@ -216,14 +216,13 @@ export const isShowBlock = (contentState, key) => {
   while (curBlock) {
     blockData = curBlock.getData();
     if (blockData.has(blockDataKeys.toggleListToggle)) {
-      if (blockData.get(blockDataKeys.toggleListToggle)) {
-        return true;
-      } else {
+      if (!blockData.get(blockDataKeys.toggleListToggle)) {
         return false;
       }
-    } else {
-      curBlock = contentState.getBlockForKey(blockData.get(blockDataKeys.parentKey));
+    } else if (curBlock.getType() === constBlockType.toggleList) {
+      return false;
     }
+    curBlock = contentState.getBlockForKey(blockData.get(blockDataKeys.parentKey));
   }
 
   return true;

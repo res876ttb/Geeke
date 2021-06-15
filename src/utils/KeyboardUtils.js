@@ -51,6 +51,7 @@ const keyCommandConst = {
   handleBackspace: 4,
   handleDelete: 5,
   multiCommands: 6,
+  deleteMultipleBlocks: 7,
 };
 
 /**
@@ -121,7 +122,11 @@ const mapKeyToEditorCommand_backspace = (e, config, editorState) => {
 
   // If selectionState is not collapsed, then perform delete action
   if (!selectionState.isCollapsed()) {
-    return defaultBackspaceFunciton();
+    if (selectionState.getFocusKey() === selectionState.getAnchorKey()) {
+      return defaultBackspaceFunciton();
+    } else {
+      return keyCommandConst.deleteMultipleBlocks;
+    }
   }
 
   // Check whether current caret position is at the start of the block. If not, this backspace will not remove a block, and no need to trim the numberListOrder
@@ -136,14 +141,15 @@ const mapKeyToEditorCommand_backspace = (e, config, editorState) => {
   let prevBlock = findPreviousBlockWithSameDepth(contentState, endKey, baseIndentLevel);
 
   // Check whether this block and the previous block are not number list blocks
-  if (prevBlock && curBlock.getType() !== constBlockType.numberList && prevBlock.getType() !== constBlockType.numberList) {
-    return defaultBackspaceFunciton();
-  }
+  let needTrimNumberList = !(prevBlock && curBlock.getType() !== constBlockType.numberList && prevBlock.getType() !== constBlockType.numberList);
+  // if (prevBlock && curBlock.getType() !== constBlockType.numberList && prevBlock.getType() !== constBlockType.numberList) {
+  //   return defaultBackspaceFunciton();
+  // }
 
   // Make sure that prevBlock is a numberListBlock
   if (prevBlock && prevBlock.getType() !== constBlockType.numberList) prevBlock = null;
 
-  return [keyCommandConst.multiCommands, keyCommandConst.handleBackspace, prevBlock ? prevBlock.getKey() : null];
+  return [keyCommandConst.multiCommands, keyCommandConst.handleBackspace, (prevBlock ? prevBlock.getKey() : null), needTrimNumberList];
 };
 
 const mapKeyToEditorCommand_delete = (e, config, editorState) => {
@@ -170,7 +176,11 @@ const mapKeyToEditorCommand_delete = (e, config, editorState) => {
 
   // If selectionState is not collapsed, then perform delete action
   if (!selectionState.isCollapsed()) {
-    return defaultDeleteFunciton();
+    if (selectionState.getFocusKey() === selectionState.getAnchorKey()) {
+      return defaultDeleteFunciton();
+    } else {
+      return keyCommandConst.deleteMultipleBlocks;
+    }
   }
 
   // Check whether current caret position is at the end of the block. If not, this delete will not remove a block, and no need to trim the numberListOrder
@@ -184,11 +194,9 @@ const mapKeyToEditorCommand_delete = (e, config, editorState) => {
   }
 
   // If this block and the next block are not number lists, then no need to trim the block as well
-  if (curBlock.getType() !== constBlockType.numberList && nextBlock.getType() !== constBlockType.numberList) {
-    return defaultDeleteFunciton();
-  }
+  let needTrimNumberList = curBlock.getType() === constBlockType.numberList || nextBlock.getType() === constBlockType.numberList;
 
-  return [keyCommandConst.multiCommands, keyCommandConst.handleDelete, endKey];
+  return [keyCommandConst.multiCommands, keyCommandConst.handleDelete, endKey, needTrimNumberList];
 };
 
 export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid) => {
@@ -253,6 +261,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   let newContentState = updateBlockData(curContent, keyArray[startIndex], newBlockData);
 
   // Update indent level for each block
+  let minIndentLevel = 9999999;
   for (let i = startIndex; i <= endIndex; i++) {
     let block = blockMap.get(keyArray[i]);
     let blockData = block.getData();
@@ -261,6 +270,8 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     if (blockData.has(blockDataKeys.indentLevel)) {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
     }
+
+    minIndentLevel = Math.min(minIndentLevel, curIndentLevel);
 
     // Check whether the first selected block can be indented
     if (i === startIndex && curIndentLevel === prevIndentLevel + 1) {
@@ -279,22 +290,47 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     }), newBlockData);
   }
 
+  // Check whether the indent of all the children blocks are changed.
+  let nextBlock = newContentState.getBlockAfter(endBlockKey);
+  let changeMoreIndent = false;
+  if (nextBlock) {
+    let nextBlockData = nextBlock.getData();
+    if (nextBlockData.has(blockDataKeys.indentLevel) && nextBlockData.get(blockDataKeys.indentLevel) > minIndentLevel) {
+      changeMoreIndent = true;
+    }
+  }
+
+  // If not all the children blocks are chagned, update them
+  while (changeMoreIndent) {
+    if (!nextBlock) break;
+    let nextBlockData = nextBlock.getData();
+    let nextBlockDepth = nextBlockData.has(blockDataKeys.indentLevel) ? nextBlockData.get(blockDataKeys.indentLevel) : 0;
+    if (nextBlockDepth <= minIndentLevel) break;
+
+    let newNextBlockData = new Map(nextBlockData);
+    newNextBlockData.set(blockDataKeys.indentLevel, nextBlockDepth + 1);
+    newContentState = updateBlockData(newContentState, nextBlock.getKey(), newNextBlockData);
+    nextBlock = newContentState.getBlockAfter(nextBlock.getKey());
+  }
+
   // Push state
   newContentState = trimNumberListInWholePage(newContentState);
   let newEditorState = EditorState.push(editorState, newContentState, "more-indent");
-  newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
-    focusKey: focusBlockKey,
-    focusOffset: focusBlockLength === 0 ? 1 : focusOffset,
-    anchorKey: focusBlockKey,
-    anchorOffset: focusBlockLength === 0 ? 1 : focusOffset,
-  }));
+  if (curSelection.isCollapsed()) {
+    newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
+      focusKey: focusBlockKey,
+      focusOffset: focusBlockLength === 0 ? 1 : focusOffset,
+      anchorKey: focusBlockKey,
+      anchorOffset: focusBlockLength === 0 ? 1 : focusOffset,
+    }));
+  }
 
   // Update editorState
   dispatcher.setEditorState(newEditorState);
 };
 
-const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
-  if (!dispatcher.setEditorState) {
+const handleKeyCommand_lessIndent = (editorState, dispatcher, returnResult=false) => {
+  if (!returnResult && !dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
     return;
   }
@@ -320,6 +356,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
   let newContentState = updateBlockData(curContent, keyArray[startIndex], newBlockData);
 
   // Update indent level for each block
+  let minIndentLevel = 9999999;
   let updated = 0;
   for (let i = startIndex; i <= endIndex; i++) {
     let block = blockMap.get(keyArray[i]);
@@ -330,9 +367,13 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
     }
 
+    minIndentLevel = Math.min(curIndentLevel, minIndentLevel);
+
     if (curIndentLevel > 0) {
       newBlockData.set(blockDataKeys.indentLevel, curIndentLevel - 1);
       updated += 1;
+    } else {
+      continue;
     }
 
     newContentState = Modifier.mergeBlockData(newContentState, new SelectionState({
@@ -343,21 +384,49 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher) => {
     }), newBlockData);
   }
 
+  // Check whether the indent of all the children blocks are changed.
+  let nextBlock = newContentState.getBlockAfter(endBlockKey);
+  let changeMoreIndent = false;
+  if (nextBlock) {
+    let nextBlockData = nextBlock.getData();
+    if (nextBlockData.has(blockDataKeys.indentLevel) && nextBlockData.get(blockDataKeys.indentLevel) > minIndentLevel) {
+      changeMoreIndent = true;
+    }
+  }
+
+  // If not all the children blocks are chagned, update them
+  while (changeMoreIndent) {
+    if (!nextBlock) break;
+    let nextBlockData = nextBlock.getData();
+    let nextBlockDepth = nextBlockData.has(blockDataKeys.indentLevel) ? nextBlockData.get(blockDataKeys.indentLevel) : 0;
+    if (nextBlockDepth <= minIndentLevel) break;
+
+    let newNextBlockData = new Map(nextBlockData);
+    newNextBlockData.set(blockDataKeys.indentLevel, nextBlockDepth - 1);
+    newContentState = updateBlockData(newContentState, nextBlock.getKey(), newNextBlockData);
+    nextBlock = newContentState.getBlockAfter(nextBlock.getKey());
+    updated += 1;
+  }
+
   // Check whether the editor is updated by reducing the indent level of some blocks
   if (updated === 0) return;
 
   // Push state
   newContentState = trimNumberListInWholePage(newContentState);
+  if (returnResult) return newContentState;
   let newEditorState = EditorState.push(editorState, newContentState, "less-indent");
-  newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
-    focusKey: focusBlockKey,
-    focusOffset: focusBlockLength === 0 ? 1 : focusOffset,
-    anchorKey: focusBlockKey,
-    anchorOffset: focusBlockLength === 0 ? 1 : focusOffset,
-  }));
+  if (curSelection.isCollapsed()) {
+    newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
+      focusKey: focusBlockKey,
+      focusOffset: focusBlockLength === 0 ? 1 : focusOffset,
+      anchorKey: focusBlockKey,
+      anchorOffset: focusBlockLength === 0 ? 1 : focusOffset,
+    }));
+  }
 
   // Update editorState
   dispatcher.setEditorState(newEditorState);
+  return 'handled';
 };
 
 const handleKeyCommand_default = (editorState, command, dispatcher) => {
@@ -541,6 +610,7 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
 
   // Constants
   const prevBlockKeyWithSameDepth = command[2];
+  const needTrimNumberList = command[3];
   let newEditorState = editorState;
   let newContentState = newEditorState.getCurrentContent();
   let newSelectionState = newEditorState.getSelection();
@@ -563,7 +633,9 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
     // Trim the next list
     let nextBlock = newContentState.getBlockAfter(focusBlock.getKey());
     if (nextBlock) {
-      newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), baseIndentLevel);
+      if (needTrimNumberList) {
+        newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), baseIndentLevel);
+      }
       newSelectionState = null; // No need to set new selection state
     }
   } else {
@@ -572,36 +644,62 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
     let prevBlock = newContentState.getBlockBefore(selectionState.getFocusKey());
     if (!prevBlock) return 'not-handled';
 
-    // Remove the block
-    prevBlock = newContentState.getBlockForKey(prevBlock.getKey());
-    const removeSelectionState = new SelectionState({
-      focusKey: curBlock.getKey(),
-      focusOffset: 0,
-      anchorKey: prevBlock.getKey(),
-      anchorOffset: prevBlock.getLength(),
-    });
-    newContentState = Modifier.removeRange(newContentState, removeSelectionState, 'backward');
-
-    // Set newSelectionState
-    newSelectionState = new SelectionState({
-      focusKey: prevBlock.getKey(),
-      focusOffset: prevBlock.getLength(),
-      anchorKey: prevBlock.getKey(),
-      anchorOffset: prevBlock.getLength(),
-    });
-
-    // Update focusKey, because current block is removed
-    focusKey = prevBlock.getKey();
-    focusBlock = newContentState.getBlockForKey(focusKey);
-
-    // Update block data: trim the numbered list (start from the prevBlock)
-    if (prevBlockKeyWithSameDepth) {
-      let prevBlock = newContentState.getBlockForKey(prevBlockKeyWithSameDepth);
-      let prevBlockData = prevBlock.getData();
-      let prevNumberListOrder = prevBlockData.has(blockDataKeys.numberListOrder) ? prevBlockData.get(blockDataKeys.numberListOrder) : 1;
-      newContentState = trimNumberListWithSameDepth(newContentState, prevBlockKeyWithSameDepth, baseIndentLevel, prevNumberListOrder);
+    // Update parent map & depth
+    // Check whether the previous block is the parent of current block
+    // If true, make the indent less by 1 level if current indent level is not at root
+    if (focusBlockData.get(blockDataKeys.parentKey) === prevBlock.getKey() && baseIndentLevel > 0) {
+      newContentState = handleKeyCommand_lessIndent(editorState, dispatcher, true);
     } else {
-      newContentState = trimNumberListWithSameDepth(newContentState, focusKey, baseIndentLevel);
+      // Update parent for preparing to remove this block...
+      let newParentBlock = findPreviousBlockWithSameDepth(newContentState, focusKey, baseIndentLevel);
+      let newParentBlockKey = newParentBlock.getKey();
+      console.assert(newParentBlock, 'Unhandled condition: newParentBlock is undefined!');
+      let tempBlock = newContentState.getBlockAfter(focusKey);
+      while (true) {
+        if (!tempBlock) break;
+        let tempBlockData = tempBlock.getData();
+        let tempBlockDepth = tempBlockData.has(blockDataKeys.indentLevel) ? tempBlockData.get(blockDataKeys.indentLevel) : 0;
+        if (tempBlockDepth <= baseIndentLevel) break;
+
+        let newTempBlockData = new Map(tempBlockData);
+        newTempBlockData.set(blockDataKeys.parentKey, newParentBlockKey);
+        newContentState = updateBlockData(newContentState, tempBlock.getKey(), newTempBlockData);
+        tempBlock = newContentState.getBlockAfter(tempBlock.getKey());
+      }
+
+      // Remove the block
+      prevBlock = newContentState.getBlockForKey(prevBlock.getKey());
+      const removeSelectionState = new SelectionState({
+        focusKey: curBlock.getKey(),
+        focusOffset: 0,
+        anchorKey: prevBlock.getKey(),
+        anchorOffset: prevBlock.getLength(),
+      });
+      newContentState = Modifier.removeRange(newContentState, removeSelectionState, 'backward');
+
+      // Set newSelectionState
+      newSelectionState = new SelectionState({
+        focusKey: prevBlock.getKey(),
+        focusOffset: prevBlock.getLength(),
+        anchorKey: prevBlock.getKey(),
+        anchorOffset: prevBlock.getLength(),
+      });
+
+      // Update focusKey, because current block is removed
+      focusKey = prevBlock.getKey();
+      focusBlock = newContentState.getBlockForKey(focusKey);
+
+      // Update block data: trim the numbered list (start from the prevBlock)
+      if (needTrimNumberList) {
+        if (prevBlockKeyWithSameDepth) {
+          let prevBlock = newContentState.getBlockForKey(prevBlockKeyWithSameDepth);
+          let prevBlockData = prevBlock.getData();
+          let prevNumberListOrder = prevBlockData.has(blockDataKeys.numberListOrder) ? prevBlockData.get(blockDataKeys.numberListOrder) : 1;
+          newContentState = trimNumberListWithSameDepth(newContentState, prevBlockKeyWithSameDepth, baseIndentLevel, prevNumberListOrder);
+        } else {
+          newContentState = trimNumberListWithSameDepth(newContentState, focusKey, baseIndentLevel);
+        }
+      }
     }
   }
 
@@ -625,15 +723,77 @@ const handleKeyCommand_delete = (editorState, command, dispatcher) => {
   // Constants
   const selectionState = editorState.getSelection();
   const curBlockKey = command[2];
+  const needTrimNumberList = command[3];
   let newEditorState = editorState;
   let newContentState = editorState.getCurrentContent();
   const curBlock = newContentState.getBlockForKey(curBlockKey);
   const nextBlock = newContentState.getBlockAfter(curBlockKey);
+  const nextBlockKey = nextBlock.getKey();
   const curBlockData = curBlock.getData();
   const nextBlockData = nextBlock.getData();
   const baseIndentLevel = curBlockData.has(blockDataKeys.indentLevel) ? curBlockData.get(blockDataKeys.indentLevel) : 0;
   const nextIndentLevel = nextBlockData.has(blockDataKeys.indentLevel) ? nextBlockData.get(blockDataKeys.indentLevel) : 0;
   const baseNumberListOrder = curBlockData.has(blockDataKeys.numberListOrder) ? curBlockData.get(blockDataKeys.numberListOrder) : 1;
+
+  // Check whether the block to be deleted has children.
+  // If no children, then no need to re-organize the parent map.
+  // If has children, update the parent map
+  const nextNextBlock = newContentState.getBlockAfter(nextBlockKey);
+  if (nextNextBlock && nextNextBlock.getData().get(blockDataKeys.parentKey) === nextBlockKey) {
+    // Chech whether current block is the parent of the next block
+    // If yes, then make indent of the children of nextBlock less by 1
+    if (nextBlockData.get(blockDataKeys.parentKey) === curBlockKey) {
+      let tempBlock = newContentState.getBlockAfter(nextBlockKey);
+      while (true) { // Iterate through all block with more depth
+        if (!tempBlock) break;
+        let tempBlockKey = tempBlock.getKey();
+        let tempBlockData = tempBlock.getData();
+        let tempBlockDepth = tempBlockData.has(blockDataKeys.indentLevel) ? tempBlockData.get(blockDataKeys.indentLevel) : 0;
+
+        // Only deal with the children of the deleted block (nextBlock)
+        if (tempBlockDepth - 1 <= baseIndentLevel) break;
+
+        // Update depth
+        let tempData = new Map(tempBlockData);
+        tempData.set(blockDataKeys.indentLevel, tempBlockDepth - 1);
+
+        // If the indent level - 1 is not equal to the nextIndentLevel, then it is not a direct child of next block. No need to process it.
+        if (tempBlockDepth - 1 === nextIndentLevel) {
+          tempData.set(blockDataKeys.parentKey, curBlockKey);
+        }
+
+        // Update block data to contentState
+        newContentState = updateBlockData(newContentState, tempBlockKey, tempData);
+        tempBlock = newContentState.getBlockAfter(tempBlockKey);
+      }
+    } else {
+      // Update parentKey of the children of the nextBlock to curBlock
+      let tempBlock = newContentState.getBlockAfter(nextBlockKey);
+      let previousBlock = findPreviousBlockWithSameDepth(newContentState, nextBlockKey, nextIndentLevel);
+      // In this case, previousBlock must not be undefined
+      console.assert(previousBlock, 'Un-handled case: previousBlock cannot be found!');
+      let previousBlockKey = previousBlock.getKey();
+      console.log(previousBlockKey);
+      while (true) {
+        if (!tempBlock) break;
+        let tempBlockKey = tempBlock.getKey();
+        let tempBlockData = tempBlock.getData();
+        let tempBlockDepth = tempBlockData.has(blockDataKeys.indentLevel) ? tempBlockData.get(blockDataKeys.indentLevel) : 0;
+
+        // Only deal with the children of the deleted block (nextBlock)
+        if (tempBlockDepth <= nextIndentLevel) break;
+
+        // If the indent level - 1 is not equal to the nextIndentLevel, then it is not a direct child of next block. No need to process it.
+        if (tempBlockDepth - 1 === nextIndentLevel) {
+          let tempData = new Map(tempBlockData);
+          tempData.set(blockDataKeys.parentKey, previousBlockKey);
+          newContentState = updateBlockData(newContentState, tempBlockKey, tempData);
+        }
+
+        tempBlock = newContentState.getBlockAfter(tempBlockKey);
+      }
+    }
+  }
 
   // Remove block
   const removeSelectionState = new SelectionState({
@@ -644,12 +804,14 @@ const handleKeyCommand_delete = (editorState, command, dispatcher) => {
   });
   newContentState = Modifier.removeRange(newContentState, removeSelectionState, 'backward');
 
-  // Trim the following blocks
-  if (curBlock.getType() === constBlockType.numberList && baseIndentLevel === nextIndentLevel) {
-    newContentState = trimNumberListWithSameDepth(newContentState, curBlockKey, baseIndentLevel, baseNumberListOrder);
-  } else {
-    let nextBlock = newContentState.getBlockAfter(curBlockKey);
-    newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), nextIndentLevel, 1);
+  if (needTrimNumberList) {
+    // Trim the following blocks
+    if (curBlock.getType() === constBlockType.numberList && baseIndentLevel === nextIndentLevel) {
+      newContentState = trimNumberListWithSameDepth(newContentState, curBlockKey, baseIndentLevel, baseNumberListOrder);
+    } else {
+      const newNextBlock = newContentState.getBlockAfter(curBlockKey);
+      newContentState = trimNumberListWithSameDepth(newContentState, newNextBlock.getKey(), nextIndentLevel, 1);
+    }
   }
 
   // Update editorState
@@ -658,6 +820,64 @@ const handleKeyCommand_delete = (editorState, command, dispatcher) => {
   dispatcher.setEditorState(newEditorState);
 
   return 'handled';
+};
+
+const handleKeyCommand_deleteMultipleBlocks = (editorState, dispatcher) => {
+  if (!dispatcher.setEditorState) {
+    console.error(dispatcherNotFoundConst.setEditorState);
+    return 'not-handled';
+  }
+
+  let newContentState = editorState.getCurrentContent();
+  let selectionState = editorState.getSelection();
+  let startBlockKey = selectionState.getStartKey();
+  let startOffset = selectionState.getStartOffset();
+  let endBlockKey = selectionState.getEndKey();
+  let nextToEndBlock = newContentState.getBlockAfter(endBlockKey);
+
+  // If this is not the end of the editor...
+  if (nextToEndBlock) {
+    let curBlock = nextToEndBlock;
+    let baseBlock = newContentState.getBlockForKey(startBlockKey);
+    let curBlockData = curBlock.getData();
+    let baseBlockData = baseBlock.getData();
+    let curBlockDepth = curBlockData.has(blockDataKeys.indentLevel) ? curBlockData.get(blockDataKeys.indentLevel) : 0;
+    let baseBlockDepth = baseBlockData.has(blockDataKeys.indentLevel) ? baseBlockData.get(blockDataKeys.indentLevel) : 0;
+    let depthDelta = curBlockDepth - baseBlockDepth;
+
+    // Only when depth delta is larger than 0, which means the later block has deeper depth than the base block, we have to update the block depth.
+    if (depthDelta > 0) {
+      let tempBlock = curBlock;
+      while (true) {
+        if (!tempBlock) break;
+        let tempBlockData = curBlock.getData();
+        let tempBlockDepth = tempBlockData.has(blockDataKeys.indentLevel) ? tempBlockData.get(blockDataKeys.indentLevel) : 0;
+        if (tempBlockDepth <= curBlockDepth) break;
+
+        let newTempBlockData = new Map(tempBlockData);
+        newTempBlockData.set(blockDataKeys.indentLevel, tempBlockDepth - depthDelta);
+        newContentState = updateBlockData(newContentState, newTempBlockData);
+        tempBlock = newContentState.getBlockAfter(tempBlock.getKey());
+      }
+    }
+  }
+
+  // Remove the block
+  newContentState = Modifier.removeRange(newContentState, selectionState, 'backward');
+
+  // Trim the page
+  newContentState = trimNumberListInWholePage(newContentState);
+
+  // Push undo stack
+  let newEditorState = EditorState.push(editorState, newContentState, 'delete-block');
+  newEditorState = EditorState.forceSelection(newEditorState, new SelectionState({
+    anchorKey: startBlockKey,
+    anchorOffset: startOffset,
+    focusKey: startBlockKey,
+    focusOffset: startOffset,
+  }));
+
+  dispatcher.setEditorState(newEditorState);
 };
 
 export const handleKeyCommand = (editorState, command, dispatcher) => {
@@ -673,6 +893,9 @@ export const handleKeyCommand = (editorState, command, dispatcher) => {
 
     case keyCommandConst.checkBlockTypeConversion:
       return handleKeyCommand_checkBlockTypeConversion(editorState, command, dispatcher);
+
+    case keyCommandConst.deleteMultipleBlocks:
+      return handleKeyCommand_deleteMultipleBlocks(editorState, dispatcher);
 
     default:
       if (typeof(command) === typeof([]) && command[0] === keyCommandConst.multiCommands) {
@@ -705,12 +928,14 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   const selectionState = editorState.getSelection();
   const originalBlockKey = selectionState.getEndKey();
   const hasShift = e.shiftKey;
+  const toggleToggleList = (!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e);
 
   // Variables
   let newEditorState = editorState;
   let newContentState = contentState;
 
   // If selection is not collapsed... return false!
+  // TODO: handle this kind of case
   if (!selectionState.isCollapsed()) return false;
 
   // If shift is pressed, then insert soft new line
@@ -734,6 +959,20 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
       newMap.set(key, value);
     }
   });
+
+  // Toggle toggleList if current block is a toggleList
+  if (toggleToggleList && curBlockType === constBlockType.toggleList) {
+    // Update block data
+    newMap.set(blockDataKeys.toggleListToggle, !blockData.get(blockDataKeys.toggleListToggle));
+    // Merge block data into contentState
+    newContentState = updateBlockData(newContentState, curBlock.getKey(), newMap);
+    // Update undo stack
+    newEditorState = EditorState.push(editorState, newContentState, 'change-block-data');
+    // Update editor
+    dispatcher.setEditorState(newEditorState);
+
+    return true;
+  }
 
   // Perform split block operation
   newContentState = Modifier.splitBlock(newContentState, selectionState);
