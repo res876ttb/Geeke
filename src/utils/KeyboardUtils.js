@@ -928,7 +928,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   const selectionState = editorState.getSelection();
   const originalBlockKey = selectionState.getEndKey();
   const hasShift = e.shiftKey;
-  const toggleToggleList = (!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e);
+  const toggleBlockData = (!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e);
 
   // Variables
   let newEditorState = editorState;
@@ -960,18 +960,35 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
     }
   });
 
-  // Toggle toggleList if current block is a toggleList
-  if (toggleToggleList && curBlockType === constBlockType.toggleList) {
-    // Update block data
-    newMap.set(blockDataKeys.toggleListToggle, !blockData.get(blockDataKeys.toggleListToggle));
-    // Merge block data into contentState
-    newContentState = updateBlockData(newContentState, curBlock.getKey(), newMap);
-    // Update undo stack
-    newEditorState = EditorState.push(editorState, newContentState, 'change-block-data');
-    // Update editor
-    dispatcher.setEditorState(newEditorState);
+  if (toggleBlockData) {
+    switch (curBlockType) {
+      case constBlockType.toggleList:
+        // Update block data
+        newMap.set(blockDataKeys.toggleListToggle, !blockData.get(blockDataKeys.toggleListToggle));
+        // Merge block data into contentState
+        newContentState = updateBlockData(newContentState, curBlock.getKey(), newMap);
+        // Update undo stack
+        newEditorState = EditorState.push(editorState, newContentState, 'change-block-data');
+        // Update editor
+        dispatcher.setEditorState(newEditorState);
 
-    return true;
+        return true;
+
+      case constBlockType.checkList:
+        // Update block data
+        newMap.set(blockDataKeys.checkListCheck, !blockData.get(blockDataKeys.checkListCheck));
+        // Merge block data into contentState
+        newContentState = updateBlockData(newContentState, curBlock.getKey(), newMap);
+        // Update undo stack
+        newEditorState = EditorState.push(editorState, newContentState, 'change-block-data');
+        // Update editor
+        dispatcher.setEditorState(newEditorState);
+
+        return true;
+
+      default:
+        break;
+    }
   }
 
   // Perform split block operation
