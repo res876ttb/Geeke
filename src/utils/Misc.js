@@ -31,12 +31,15 @@ export const getLastBlockKey = contentState => {
   return Array.from(blockMap.keys()).pop();
 }
 
-export const updateBlockData = (contentState, blockKey, blockData) => {
-  let selectionState = new SelectionState({
-    focusKey: blockKey,
-    focusOffset: 0,
-    anchorKey: blockKey,
-    anchorOffset: 0,
-  });
-  return Modifier.mergeBlockData(contentState, selectionState, blockData);
+export const updateBlockData = (contentState, blockKey, blockData, selectionState=null) => {
+  if (selectionState) {
+    return Modifier.setBlockData(contentState, selectionState, blockData);
+  } else {
+    return Modifier.setBlockData(contentState, new SelectionState({
+      focusKey: blockKey,
+      focusOffset: 0,
+      anchorKey: blockKey,
+      anchorOffset: 0,
+    }), blockData);
+  }
 }

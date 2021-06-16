@@ -282,12 +282,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     prevIndentLevel = curIndentLevel;
     newBlockData.set(blockDataKeys.indentLevel, curIndentLevel);
 
-    newContentState = Modifier.mergeBlockData(newContentState, new SelectionState({
-      anchorKey: keyArray[i],
-      anchorOffset: 0,
-      focusKey: keyArray[i],
-      focusOffset: 0,
-    }), newBlockData);
+    newContentState = updateBlockData(newContentState, keyArray[i], newBlockData);
   }
 
   // Check whether the indent of all the children blocks are changed.
@@ -376,12 +371,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher, returnResult=false
       continue;
     }
 
-    newContentState = Modifier.mergeBlockData(newContentState, new SelectionState({
-      anchorKey: keyArray[i],
-      anchorOffset: 0,
-      focusKey: keyArray[i],
-      focusOffset: 0,
-    }), newBlockData);
+    newContentState = updateBlockData(newContentState, keyArray[i], newBlockData);
   }
 
   // Check whether the indent of all the children blocks are changed.
@@ -579,14 +569,8 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
     case constBlockType.numberList: {
       // Remove numberListOrder from current block
       let focusBlockData = new Map(focusBlock.getData());
-      let removeSelectionState = new SelectionState({
-        focusKey: focusKey,
-        focusOffset: 0,
-        anchorKey: focusKey,
-        anchorOffset: 0,
-      });
       focusBlockData.delete(blockDataKeys.numberListOrder);
-      newContentState = Modifier.mergeBlockData(newContentState, removeSelectionState, focusBlockData);
+      newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
 
       // Trim the following blocks
       let baseIndentLevel = focusBlockData.has(blockDataKeys.indentLevel) ? focusBlockData.get(blockDataKeys.indentLevel) : 0;
@@ -594,6 +578,20 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
       if (nextBlock) {
         newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), baseIndentLevel);
       }
+    } break;
+
+    case constBlockType.toggleList: {
+      // Remove toggleListToggle from current block
+      let focusBlockData = new Map(focusBlock.getData());
+      focusBlockData.delete(blockDataKeys.toggleListToggle);
+      newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
+    } break;
+
+    case constBlockType.checkList: {
+      // Remove checkListCheck from current block
+      let focusBlockData = new Map(focusBlock.getData());
+      focusBlockData.delete(blockDataKeys.checkListCheck);
+      newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
     } break;
 
     default:
@@ -630,9 +628,24 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
 
     // Update block data: remove numberListOrder from block data
     let focusBlockData = new Map(focusBlock.getData());
+    let dataChanged = false;
     if (focusBlockData.has(blockDataKeys.numberListOrder)) {
       focusBlockData.delete(blockDataKeys.numberListOrder);
-      newContentState = Modifier.mergeBlockData(newContentState, newSelectionState, focusBlockData);
+      dataChanged = true;
+    }
+    if (focusBlockData.has(blockDataKeys.toggleListToggle)) {
+      focusBlockData.delete(blockDataKeys.toggleListToggle);
+      dataChanged = true;
+    }
+    if (focusBlockData.has(blockDataKeys.checkListCheck)) {
+      console.log(focusBlockData.get(blockDataKeys.checkListCheck));
+      focusBlockData.delete(blockDataKeys.checkListCheck);
+      console.log(focusBlockData.get(blockDataKeys.checkListCheck));
+      dataChanged = true;
+    }
+    if (dataChanged) {
+      newContentState = updateBlockData(newContentState, focusKey, focusBlockData, newSelectionState);
+      console.log(newContentState.getBlockForKey(focusKey).getData().get(blockDataKeys.checkListCheck));
     }
 
     // Trim the next list
@@ -1002,12 +1015,8 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   newEditorState = EditorState.push(newEditorState, newContentState, "split-block");
   const newSelectionState = newEditorState.getSelection();
 
-  // Merge block data
-  newContentState = Modifier.mergeBlockData(
-    newEditorState.getCurrentContent(),
-    newSelectionState,
-    newMap
-  );
+  // Update block data
+  newContentState = updateBlockData(newContentState, null, newMap, newSelectionState);
 
   // If current block is number list block, modify the number list order after this block
   if (curBlockType === constBlockType.numberList) {
