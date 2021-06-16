@@ -24,6 +24,10 @@ import {
   trimNumberListWithSameDepth,
   findPreviousBlockWithSameDepth,
 } from './NumberListUtils';
+import {
+  GeekeMap,
+  updateBlockData,
+} from "./Misc";
 
 /*************************************************
  * CONST
@@ -31,8 +35,8 @@ import {
 import {
   blockDataKeys,
   constBlockType,
+  headingType,
 } from '../constant';
-import { updateBlockData } from "./Misc";
 
 export const defaultKeyboardHandlingConfig = {
   indentBlock: true,
@@ -81,6 +85,7 @@ const blockDataPreserveConfig = {
   [blockDataKeys.checkListCheck]: [blockDataPreserveConstant.none],
   [blockDataKeys.parentKey]: [blockDataPreserveConstant.all],
   [blockDataKeys.toggleListToggle]: [blockDataPreserveConstant.none],
+  [blockDataKeys.headingType]: [blockDataPreserveConstant.none],
 }
 
 /*************************************************
@@ -253,7 +258,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   }
 
   // Initialize new content
-  let newBlockData = new Map(curContent.getBlockForKey(keyArray[startIndex]).getData());
+  let newBlockData = new GeekeMap(curContent.getBlockForKey(keyArray[startIndex]).getData());
   newBlockData.set(blockDataKeys.indentLevel, startBlock.getData().has(blockDataKeys.indentLevel) ? startBlock.getData().get(blockDataKeys.indentLevel) : 0);
   let newContentState = updateBlockData(curContent, keyArray[startIndex], newBlockData);
 
@@ -262,7 +267,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
   for (let i = startIndex; i <= endIndex; i++) {
     let block = blockMap.get(keyArray[i]);
     let blockData = block.getData();
-    let newBlockData = new Map(blockData);
+    let newBlockData = new GeekeMap(blockData);
     let curIndentLevel = 0;
     if (blockData.has(blockDataKeys.indentLevel)) {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -299,7 +304,7 @@ const handleKeyCommand_moreIndent = (editorState, dispatcher) => {
     let nextBlockDepth = nextBlockData.has(blockDataKeys.indentLevel) ? nextBlockData.get(blockDataKeys.indentLevel) : 0;
     if (nextBlockDepth <= minIndentLevel) break;
 
-    let newNextBlockData = new Map(nextBlockData);
+    let newNextBlockData = new GeekeMap(nextBlockData);
     newNextBlockData.set(blockDataKeys.indentLevel, nextBlockDepth + 1);
     newContentState = updateBlockData(newContentState, nextBlock.getKey(), newNextBlockData);
     nextBlock = newContentState.getBlockAfter(nextBlock.getKey());
@@ -343,7 +348,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher, returnResult=false
   const startBlock = blockMap.get(keyArray[startIndex]);
 
   // Initialize new content
-  let newBlockData = new Map(curContent.getBlockForKey(keyArray[startIndex]).getData());
+  let newBlockData = new GeekeMap(curContent.getBlockForKey(keyArray[startIndex]).getData());
   newBlockData.set(blockDataKeys.indentLevel, startBlock.getData().has(blockDataKeys.indentLevel) ? startBlock.getData().get(blockDataKeys.indentLevel) : 0);
   let newContentState = updateBlockData(curContent, keyArray[startIndex], newBlockData);
 
@@ -353,7 +358,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher, returnResult=false
   for (let i = startIndex; i <= endIndex; i++) {
     let block = blockMap.get(keyArray[i]);
     let blockData = block.getData();
-    let newBlockData = new Map(blockData);
+    let newBlockData = new GeekeMap(blockData);
     let curIndentLevel = 0;
     if (blockData.has(blockDataKeys.indentLevel)) {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
@@ -388,7 +393,7 @@ const handleKeyCommand_lessIndent = (editorState, dispatcher, returnResult=false
     let nextBlockDepth = nextBlockData.has(blockDataKeys.indentLevel) ? nextBlockData.get(blockDataKeys.indentLevel) : 0;
     if (nextBlockDepth <= minIndentLevel) break;
 
-    let newNextBlockData = new Map(nextBlockData);
+    let newNextBlockData = new GeekeMap(nextBlockData);
     newNextBlockData.set(blockDataKeys.indentLevel, nextBlockDepth - 1);
     newContentState = updateBlockData(newContentState, nextBlock.getKey(), newNextBlockData);
     nextBlock = newContentState.getBlockAfter(nextBlock.getKey());
@@ -511,6 +516,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
 
   // Get new type
   let newType = null;
+  let newHeadingType = 1;
   switch (keyword) {
     // Bullet list
     case '*':
@@ -531,6 +537,32 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
     // Quote
     case '"':
       if (focusBlockType !== constBlockType.quote) newType = constBlockType.quote;
+      break;
+
+    // Heading
+    case '#':
+      if (focusBlockType !== constBlockType.heading) newType = constBlockType.heading;
+      newHeadingType = headingType.h1;
+      break;
+    case '##':
+      if (focusBlockType !== constBlockType.heading) newType = constBlockType.heading;
+      newHeadingType = headingType.h2;
+      break;
+    case '###':
+      if (focusBlockType !== constBlockType.heading) newType = constBlockType.heading;
+      newHeadingType = headingType.h3;
+      break;
+    case '####':
+      if (focusBlockType !== constBlockType.heading) newType = constBlockType.heading;
+      newHeadingType = headingType.h4;
+      break;
+    case '#####':
+      if (focusBlockType !== constBlockType.heading) newType = constBlockType.heading;
+      newHeadingType = headingType.h5;
+      break;
+    case '######':
+      if (focusBlockType !== constBlockType.heading) newType = constBlockType.heading;
+      newHeadingType = headingType.h6;
       break;
 
     // Other cases
@@ -565,7 +597,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   switch (focusBlockType) {
     case constBlockType.numberList: {
       // Remove numberListOrder from current block
-      let focusBlockData = new Map(focusBlock.getData());
+      let focusBlockData = new GeekeMap(focusBlock.getData());
       focusBlockData.delete(blockDataKeys.numberListOrder);
       newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
 
@@ -579,20 +611,27 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
 
     case constBlockType.toggleList: {
       // Remove toggleListToggle from current block
-      let focusBlockData = new Map(focusBlock.getData());
+      let focusBlockData = new GeekeMap(focusBlock.getData());
       focusBlockData.delete(blockDataKeys.toggleListToggle);
       newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
     } break;
 
     case constBlockType.checkList: {
       // Remove checkListCheck from current block
-      let focusBlockData = new Map(focusBlock.getData());
+      let focusBlockData = new GeekeMap(focusBlock.getData());
       focusBlockData.delete(blockDataKeys.checkListCheck);
       newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
     } break;
 
     default:
       break;
+  }
+
+  // Set heading type if the new type is heading
+  if (newType === constBlockType.heading) {
+    let focusBlockData = new GeekeMap(focusBlock.getData());
+    focusBlockData.set(blockDataKeys.headingType, newHeadingType);
+    newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
   }
 
   // Update editorState
@@ -624,7 +663,7 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
     newContentState = Modifier.setBlockType(newContentState, newSelectionState, 'unstyled');
 
     // Update block data: remove numberListOrder from block data
-    let focusBlockData = new Map(focusBlock.getData());
+    let focusBlockData = new GeekeMap(focusBlock.getData());
     let dataChanged = false;
     if (focusBlockData.has(blockDataKeys.numberListOrder)) {
       focusBlockData.delete(blockDataKeys.numberListOrder);
@@ -675,7 +714,7 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
         let tempBlockDepth = tempBlockData.has(blockDataKeys.indentLevel) ? tempBlockData.get(blockDataKeys.indentLevel) : 0;
         if (tempBlockDepth <= baseIndentLevel) break;
 
-        let newTempBlockData = new Map(tempBlockData);
+        let newTempBlockData = new GeekeMap(tempBlockData);
         newTempBlockData.set(blockDataKeys.parentKey, newParentBlockKey);
         newContentState = updateBlockData(newContentState, tempBlock.getKey(), newTempBlockData);
         tempBlock = newContentState.getBlockAfter(tempBlock.getKey());
@@ -768,7 +807,7 @@ const handleKeyCommand_delete = (editorState, command, dispatcher) => {
         if (tempBlockDepth - 1 <= baseIndentLevel) break;
 
         // Update depth
-        let tempData = new Map(tempBlockData);
+        let tempData = new GeekeMap(tempBlockData);
         tempData.set(blockDataKeys.indentLevel, tempBlockDepth - 1);
 
         // If the indent level - 1 is not equal to the nextIndentLevel, then it is not a direct child of next block. No need to process it.
@@ -799,7 +838,7 @@ const handleKeyCommand_delete = (editorState, command, dispatcher) => {
 
         // If the indent level - 1 is not equal to the nextIndentLevel, then it is not a direct child of next block. No need to process it.
         if (tempBlockDepth - 1 === nextIndentLevel) {
-          let tempData = new Map(tempBlockData);
+          let tempData = new GeekeMap(tempBlockData);
           tempData.set(blockDataKeys.parentKey, previousBlockKey);
           newContentState = updateBlockData(newContentState, tempBlockKey, tempData);
         }
@@ -868,7 +907,7 @@ const handleKeyCommand_deleteMultipleBlocks = (editorState, dispatcher) => {
         let tempBlockDepth = tempBlockData.has(blockDataKeys.indentLevel) ? tempBlockData.get(blockDataKeys.indentLevel) : 0;
         if (tempBlockDepth <= curBlockDepth) break;
 
-        let newTempBlockData = new Map(tempBlockData);
+        let newTempBlockData = new GeekeMap(tempBlockData);
         newTempBlockData.set(blockDataKeys.indentLevel, tempBlockDepth - depthDelta);
         newContentState = updateBlockData(newContentState, newTempBlockData);
         tempBlock = newContentState.getBlockAfter(tempBlock.getKey());
@@ -974,7 +1013,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
     newContentState = Modifier.setBlockType(newContentState, selectionState, 'unstyled');
 
     // Update block data: remove numberListOrder from block data
-    let focusBlockData = new Map(curBlock.getData());
+    let focusBlockData = new GeekeMap(curBlock.getData());
     let dataChanged = false;
     if (focusBlockData.has(blockDataKeys.numberListOrder)) {
       focusBlockData.delete(blockDataKeys.numberListOrder);
@@ -1011,7 +1050,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   }
 
   // Copy only necessary block data
-  let newMap = new Map();
+  let newMap = new GeekeMap();
   blockData.forEach((value, key) => {
     if (config[key].indexOf(blockDataPreserveConstant.all) > -1 ||
         config[key].indexOf(curBlockType) > -1) {
@@ -1065,6 +1104,18 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
     let focusBlockData = focusBlock.getData();
     let baseNumberListOrder = focusBlockData.has(blockDataKeys.numberListOrder) ? focusBlockData.get(blockDataKeys.numberListOrder) : 1;
     newContentState = trimNumberListWithSameDepth(newContentState, selectionState.getFocusKey(), indentLevel, baseNumberListOrder);
+  }
+
+  // If current block is heading, remove the block type and set it to default
+  if (curBlockType === constBlockType.heading) {
+    let nextBlock = newContentState.getBlockAfter(selectionState.getFocusKey());
+    let nextBlockKey = nextBlock.getKey();
+    newContentState = Modifier.setBlockType(newContentState, new SelectionState({
+      focusKey: nextBlockKey,
+      focusOffset: 0,
+      anchorKey: nextBlockKey,
+      anchorOffset: 0,
+    }), constBlockType.default);
   }
 
   // Push copy block data action into editorState & update selection state

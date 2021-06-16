@@ -13,6 +13,7 @@ import {
   blockDataKeys, constBlockType,
 } from '../constant';
 import {
+  GeekeMap,
   getFirstBlockKey,
   updateBlockData,
 } from '../utils/Misc';
@@ -75,7 +76,7 @@ export const trimNumberListWithSameDepth = (contentState, blockKey, indentLevel,
   // Set numberListOrder of current block to startOrder
   curBlockData = curBlock.getData();
   curBlockKey = curBlock.getKey();
-  let newBlockData = new Map(curBlockData);
+  let newBlockData = new GeekeMap(curBlockData);
   newBlockData.set(blockDataKeys.numberListOrder, startOrder);
   newContentState = updateBlockData(newContentState, curBlockKey, newBlockData);
 
@@ -100,7 +101,7 @@ export const trimNumberListWithSameDepth = (contentState, blockKey, indentLevel,
     if (curBlockType !== constBlockType.numberList) break;
 
     // Trim this block
-    let newBlockData = new Map(curBlockData);
+    let newBlockData = new GeekeMap(curBlockData);
     newBlockData.set(blockDataKeys.numberListOrder, curNumberListOrder);
     curNumberListOrder += 1;
 
@@ -112,8 +113,8 @@ export const trimNumberListWithSameDepth = (contentState, blockKey, indentLevel,
 };
 
 export const trimNumberListInWholePage = contentState => {
-  let numberListOrderMap = new Map([[0, 0]]);
-  let parentKeyMap = new Map([[-1, null], [0, null]]);
+  let numberListOrderMap = new GeekeMap([[0, 0]]);
+  let parentKeyMap = new GeekeMap([[-1, null], [0, null]]);
   let curDepth = 0;
   let newContentState = contentState
   let firstBlockKey = getFirstBlockKey(newContentState);
@@ -142,7 +143,7 @@ export const trimNumberListInWholePage = contentState => {
 
     // Check whether to update parent block
     if (blockParentKey !== parentKeyMap.get(curDepth - 1)) {
-      let newBlockData = new Map(blockData);
+      let newBlockData = new GeekeMap(blockData);
       newBlockData.set(blockDataKeys.parentKey, parentKeyMap.get(curDepth - 1));
       newContentState = updateBlockData(newContentState, curBlock.getKey(), newBlockData);
       blockData = newContentState.getBlockForKey(curBlock.getKey()).getData();
@@ -161,7 +162,7 @@ export const trimNumberListInWholePage = contentState => {
 
       // Check numberListOrder of this block. If it is not correct,
       if (numberListOrder !== numberListOrderMap.get(curDepth)) {
-        let newBlockData = new Map(blockData);
+        let newBlockData = new GeekeMap(blockData);
         newBlockData.set(blockDataKeys.numberListOrder, numberListOrderMap.get(curDepth));
         newContentState = updateBlockData(newContentState, curBlock.getKey(), newBlockData);
       }
@@ -171,7 +172,7 @@ export const trimNumberListInWholePage = contentState => {
     } else {
       // If improper number list data exists in a block, remove it!
       if (blockData.has(blockDataKeys.numberListOrder)) {
-        let newBlockData = new Map(blockData);
+        let newBlockData = new GeekeMap(blockData);
         newBlockData.delete(blockDataKeys.numberListOrder);
         newContentState = updateBlockData(newContentState, curBlock.getKey(), newBlockData);
       }

@@ -32,6 +32,7 @@ const BlockDargButton = props => {
   const blockKey = props.blockKey;
   const pageUuid = props.pageUuid;
   const readOnly = props.readOnly;
+  const topOffset = props.topOffset; // Unit: rem
   const paddingLeft = props.paddingLeft;
   const handleBlockDargStart = props.handleBlockDargStart;
 
@@ -39,6 +40,12 @@ const BlockDargButton = props => {
   const editorMiscPages = useSelector(state => state.editorMisc.pages);
   const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
   const className = 'geeke-draggableWrapper' + (readOnly ? '' : ' geeke-draggableCursor') + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible');
+
+  // Top offset
+  let style = null;
+  if (topOffset) {
+    style = {top: `${topOffset}rem`};
+  }
 
   return (
     <div
@@ -49,7 +56,7 @@ const BlockDargButton = props => {
 
       onDragStart={handleBlockDargStart}
     >
-      <div className='geeke-draggableWrapperInner'>
+      <div className='geeke-draggableWrapperInner' style={style}>
         <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
       </div>
     </div>

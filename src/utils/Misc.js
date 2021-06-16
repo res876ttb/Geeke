@@ -43,3 +43,9 @@ export const updateBlockData = (contentState, blockKey, blockData, selectionStat
     }), blockData);
   }
 }
+
+export class GeekeMap extends Map {
+  toObject() {
+    return Object.fromEntries(this);
+  }
+};

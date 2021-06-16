@@ -295,6 +295,13 @@ code {
 }
 
 
+/* Heading */
+.geeke-headingEditor {
+  /* margin-left: var(--indentWidth); */
+  font-weight: bold;
+}
+
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);

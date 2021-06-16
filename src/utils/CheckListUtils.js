@@ -11,6 +11,10 @@ import {
   EditorState,
   SelectionState,
 } from "draft-js";
+import {
+  GeekeMap,
+  updateBlockData,
+} from "./Misc";
 
 /*************************************************
  * CONST
@@ -18,7 +22,6 @@ import {
 import {
   blockDataKeys
 } from "../constant";
-import { updateBlockData } from "./Misc";
 
 /*************************************************
  * FUNCTIONS
@@ -41,7 +44,7 @@ export const toggleCheckList = (editorState, blockKey) => {
   let checked = curBlockData.get(blockDataKeys.checkListCheck);
 
   // Set new check data
-  let newBlockData = new Map(curBlockData);
+  let newBlockData = new GeekeMap(curBlockData);
   newBlockData.set(blockDataKeys.checkListCheck, checked ? false : true);
 
   // Merge new block data

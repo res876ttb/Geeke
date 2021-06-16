@@ -27,6 +27,7 @@ export const blockDataKeys = {
   checkListCheck: 'checkListCheck',
   toggleListToggle: 'toggleListToggle',
   parentKey: 'parentKey',
+  headingType: 'headingType',
 };
 
 export const constBlockType = {
@@ -36,4 +37,14 @@ export const constBlockType = {
   checkList: 'check-list',
   toggleList: 'toggle-list',
   quote: 'quote',
+  heading: 'heading',
+};
+
+export const headingType = {
+  h1: 1,
+  h2: 2,
+  h3: 3,
+  h4: 4,
+  h5: 5,
+  h6: 6,
 };

@@ -11,6 +11,7 @@ import {
   unsetMouseOverBlockKey,
 } from '../states/editorMisc';
 import {
+  GeekeMap,
   getFirstBlockKey,
   getLastBlockKey,
   updateBlockData,
@@ -198,7 +199,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     const thisKey = selectedBlocks[i];
     const thisBlock = blockMap.get(thisKey);
     const blockData = thisBlock.getData();
-    let newBlockData = new Map(blockData);
+    let newBlockData = new GeekeMap(blockData);
     let curIndentLevel = 0;
     if (blockData.has(blockDataKeys.indentLevel)) {
       curIndentLevel = blockData.get(blockDataKeys.indentLevel);
