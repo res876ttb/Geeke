@@ -139,7 +139,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   let insertionMode = insertBeforeFirstBlock ? 'before' : 'after';
 
   // Check whether the block position is changed
-  if (targetBlockKey !== previousBlockKey) {
+  if (targetBlockKey !== previousBlockKey || insertBeforeFirstBlock) {
     // If the position is changed, move selected block iteratively
     for (let i = 0; i < selectedBlocks.length; i++) {
       const blockKeyToBeMoved = selectedBlocks[i];
@@ -163,7 +163,6 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
       selectionBefore: selectionState,
       selectionAfter: newSelectionState.set('hasFocus', true),
     });
-    newEditorState = EditorState.push(editorState, newContentState, 'drag-and-drop-blocks');
   }
 
   // Modify block data (just like indentLevel)
