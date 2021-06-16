@@ -541,6 +541,11 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
       if (focusBlockType !== constBlockType.toggleList) newType = constBlockType.toggleList;
       break;
 
+    // Quote
+    case '"':
+      if (focusBlockType !== constBlockType.quote) newType = constBlockType.quote;
+      break;
+
     // Other cases
     default:
       // Numbered list

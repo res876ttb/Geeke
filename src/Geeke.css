@@ -275,6 +275,27 @@ code {
 }
 
 
+/* Quote */
+.geeke-quoteBar {
+  height: 0px;
+  position: absolute;
+  left: calc(var(--editorLeftPadding));
+  top: 0rem;
+}
+
+.geeke-quoteBarInner {
+  height: calc(var(--lineHeight) + var(--editorTopPadding) * 2);
+  width: 0.25rem;
+  background: gray;
+  position: relative;
+}
+
+.geeke-quoteEditor {
+  margin-left: var(--indentWidth);
+  font-style: italic;
+}
+
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);

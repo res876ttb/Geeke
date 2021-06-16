@@ -35,4 +35,5 @@ export const constBlockType = {
   numberList: 'number-list',
   checkList: 'check-list',
   toggleList: 'toggle-list',
+  quote: 'quote',
 };
