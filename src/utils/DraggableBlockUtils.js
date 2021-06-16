@@ -13,6 +13,7 @@ import {
 import {
   getFirstBlockKey,
   getLastBlockKey,
+  updateBlockData,
 } from '../utils/Misc';
 import { trimNumberListInWholePage } from './NumberListUtils';
 
@@ -33,7 +34,6 @@ import {
   EditorState,
   SelectionState,
   AtomicBlockUtils,
-  Modifier,
 } from 'draft-js';
 
 /*************************************************
@@ -210,12 +210,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     prevIndentLevel = curIndentLevel;
 
     newBlockData.set(blockDataKeys.indentLevel, curIndentLevel);
-    newContentState = Modifier.mergeBlockData(newContentState, new SelectionState({
-      anchorKey: thisKey,
-      anchorOffset: 0,
-      focusKey: thisKey,
-      focusOffset: 0,
-    }), newBlockData);
+    newContentState = updateBlockData(newContentState, thisKey, newBlockData);
   }
 
   // Trim the whole page and push state to undo stack

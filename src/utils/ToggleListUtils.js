@@ -9,8 +9,7 @@
  *************************************************/
 import {
   EditorState,
-  Modifier,
-  SelectionState
+  SelectionState,
 } from "draft-js";
 
 /*************************************************
@@ -19,6 +18,7 @@ import {
 import {
   blockDataKeys
 } from "../constant";
+import { updateBlockData } from "./Misc";
 
 /*************************************************
  * FUNCTIONS
@@ -45,7 +45,7 @@ export const toggleToggleList = (editorState, blockKey, setNewSelectionState=tru
   newBlockData.set(blockDataKeys.toggleListToggle, toggle ? false : true);
 
   // Merge new block data
-  newContentState = Modifier.mergeBlockData(newContentState, newSelectionState, newBlockData);
+  newContentState = updateBlockData(newContentState, null, newBlockData, newSelectionState);
 
   // Push state
   newEditorState = EditorState.push(newEditorState, newContentState, 'toggle-toggle-list');

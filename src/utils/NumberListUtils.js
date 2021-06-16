@@ -10,10 +10,6 @@
  * IMPORT
  *************************************************/
 import {
-  Modifier,
-  SelectionState,
-} from 'draft-js';
-import {
   blockDataKeys, constBlockType,
 } from '../constant';
 import {
@@ -81,16 +77,7 @@ export const trimNumberListWithSameDepth = (contentState, blockKey, indentLevel,
   curBlockKey = curBlock.getKey();
   let newBlockData = new Map(curBlockData);
   newBlockData.set(blockDataKeys.numberListOrder, startOrder);
-  newContentState = Modifier.mergeBlockData(
-    newContentState,
-    new SelectionState({
-      focusKey: curBlockKey,
-      focusOffset: 0,
-      anchorKey: curBlockKey,
-      anchorOffset: 0,
-    }),
-    newBlockData
-  );
+  newContentState = updateBlockData(newContentState, curBlockKey, newBlockData);
 
   // Update curBlock and curBlockData to the latest value
   curBlock = newContentState.getBlockForKey(curBlockKey);
@@ -118,16 +105,7 @@ export const trimNumberListWithSameDepth = (contentState, blockKey, indentLevel,
     curNumberListOrder += 1;
 
     // Merge new block data into editorState
-    newContentState = Modifier.mergeBlockData(
-      newContentState,
-      new SelectionState({
-        focusKey: curBlockKey,
-        focusOffset: 0,
-        anchorKey: curBlockKey,
-        anchorOffset: 0,
-      }),
-      newBlockData
-    );
+    newContentState = updateBlockData(newContentState, curBlockKey, newBlockData);
   }
 
   return newContentState;

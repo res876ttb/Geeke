@@ -142,9 +142,6 @@ const mapKeyToEditorCommand_backspace = (e, config, editorState) => {
 
   // Check whether this block and the previous block are not number list blocks
   let needTrimNumberList = !(prevBlock && curBlock.getType() !== constBlockType.numberList && prevBlock.getType() !== constBlockType.numberList);
-  // if (prevBlock && curBlock.getType() !== constBlockType.numberList && prevBlock.getType() !== constBlockType.numberList) {
-  //   return defaultBackspaceFunciton();
-  // }
 
   // Make sure that prevBlock is a numberListBlock
   if (prevBlock && prevBlock.getType() !== constBlockType.numberList) prevBlock = null;
@@ -644,8 +641,7 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
       dataChanged = true;
     }
     if (dataChanged) {
-      newContentState = updateBlockData(newContentState, focusKey, focusBlockData, newSelectionState);
-      console.log(newContentState.getBlockForKey(focusKey).getData().get(blockDataKeys.checkListCheck));
+      newContentState = updateBlockData(newContentState, null, focusBlockData, newSelectionState);
     }
 
     // Trim the next list
@@ -954,7 +950,10 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
 
   // If selection is not collapsed... return false!
   // TODO: handle this kind of case
-  if (!selectionState.isCollapsed()) return false;
+  if (!selectionState.isCollapsed()) {
+    console.error('Unhandled condition: selectionState is not collapsed when enter is pressed!');
+    return true;
+  }
 
   // If shift is pressed, then insert soft new line
   if (hasShift) {
@@ -968,6 +967,48 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   const curBlockType = curBlock.getType();
   const blockData = curBlock.getData();
   const indentLevel = blockData.has(blockDataKeys.indentLevel) ? blockData.get(blockDataKeys.indentLevel) : 0;
+
+  // Check whether the current block is not a default block and the content is empty.
+  // If both conditions are true, then convert this block into a default block and remove the corresponding block data.
+  if (curBlockType !== constBlockType.default && curBlock.getLength() === 0) {
+    newContentState = Modifier.setBlockType(newContentState, selectionState, 'unstyled');
+
+    // Update block data: remove numberListOrder from block data
+    let focusBlockData = new Map(curBlock.getData());
+    let dataChanged = false;
+    if (focusBlockData.has(blockDataKeys.numberListOrder)) {
+      focusBlockData.delete(blockDataKeys.numberListOrder);
+      dataChanged = true;
+    }
+    if (focusBlockData.has(blockDataKeys.toggleListToggle)) {
+      focusBlockData.delete(blockDataKeys.toggleListToggle);
+      dataChanged = true;
+    }
+    if (focusBlockData.has(blockDataKeys.checkListCheck)) {
+      console.log(focusBlockData.get(blockDataKeys.checkListCheck));
+      focusBlockData.delete(blockDataKeys.checkListCheck);
+      console.log(focusBlockData.get(blockDataKeys.checkListCheck));
+      dataChanged = true;
+    }
+    if (dataChanged) {
+      newContentState = updateBlockData(newContentState, null, focusBlockData, selectionState);
+    }
+
+    // Trim the next list
+    let nextBlock = newContentState.getBlockAfter(curBlock.getKey());
+    if (nextBlock) {
+      let prevBlock = newContentState.getBlockBefore(curBlock.getKey());
+      if (!(prevBlock && curBlock.getType() !== constBlockType.numberList && prevBlock.getType() !== constBlockType.numberList)) {
+        newContentState = trimNumberListWithSameDepth(newContentState, nextBlock.getKey(), indentLevel);
+      }
+    }
+
+    // Push to undo stack
+    newEditorState = EditorState.push(editorState, newContentState, 'split-block');
+    dispatcher.setEditorState(newEditorState);
+
+    return true;
+  }
 
   // Copy only necessary block data
   let newMap = new Map();
