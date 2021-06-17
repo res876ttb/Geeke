@@ -18,6 +18,7 @@ import {
   onMouseLeave as _onMouseLeave,
 } from '../utils/DraggableBlockUtils';
 import { isShowBlock } from '../utils/NumberListUtils';
+import { getFirstBlockKey } from '../utils/Misc';
 
 /*************************************************
  * Import Components
@@ -57,6 +58,7 @@ const HeadingBlock = props => {
   }
 
   // Variables
+  const isFirstBlock = blockKey === getFirstBlockKey(contentState);
   let indentLevel = 0;
 
   // Functions
@@ -76,38 +78,38 @@ const HeadingBlock = props => {
   switch (blockData.get(blockDataKeys.headingType)) {
     case headingType.h1:
       style = 'h1';
-      paddingTop = 2 + editorTopPadding;
-      topOffset = 3;
+      paddingTop = (isFirstBlock ? 0 : 2) + editorTopPadding;
+      topOffset = (isFirstBlock ? 0.7 : 3);
       break;
 
     case headingType.h2:
       style = 'h2';
-      paddingTop = 1.7 + editorTopPadding;
-      topOffset = 2.3;
+      paddingTop = (isFirstBlock ? 0 : 1.7) + editorTopPadding;
+      topOffset = (isFirstBlock ? 0.5 : 2.3);
       break;
 
     case headingType.h3:
       style = 'h3';
-      paddingTop = 1.5 + editorTopPadding;
-      topOffset = 1.9;
+      paddingTop = (isFirstBlock ? 0 : 1.5) + editorTopPadding;
+      topOffset = (isFirstBlock ? 0.4 : 1.9);
       break;
 
     case headingType.h4:
       style = 'h4';
-      paddingTop = 1.3 + editorTopPadding;
-      topOffset = 1.5;
+      paddingTop = (isFirstBlock ? 0 : 1.3) + editorTopPadding;
+      topOffset = (isFirstBlock ? 0.2 : 1.5);
       break;
 
     case headingType.h5:
       style = 'h5';
-      paddingTop = 1.2 + editorTopPadding;
-      topOffset = 1.2;
+      paddingTop = (isFirstBlock ? 0 : 1.2) + editorTopPadding;
+      topOffset = (isFirstBlock ? 0 : 1.2);
       break;
 
     case headingType.h6:
       style = 'h6';
-      paddingTop = 1.2 + editorTopPadding;
-      topOffset = 1.1;
+      paddingTop = (isFirstBlock ? 0 : 1.2) + editorTopPadding;
+      topOffset = (isFirstBlock ? -0.1 : 1.1);
       break;
 
     default:
