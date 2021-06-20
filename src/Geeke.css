@@ -302,6 +302,16 @@ code {
 }
 
 
+/* CodeEditor */
+.geeke-codeEditor {
+  min-height: 1rem;
+}
+/* Correct Ace editor style */
+.ace_hidden-cursors .ace_cursor {
+  opacity: 0 !important;
+}
+
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);

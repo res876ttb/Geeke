@@ -28,6 +28,7 @@ export const blockDataKeys = {
   toggleListToggle: 'toggleListToggle',
   parentKey: 'parentKey',
   headingType: 'headingType',
+  codeContent: 'codeContent',
 };
 
 export const constBlockType = {
@@ -38,6 +39,7 @@ export const constBlockType = {
   toggleList: 'toggle-list',
   quote: 'quote',
   heading: 'heading',
+  code: 'code',
 };
 
 export const headingType = {
@@ -47,4 +49,16 @@ export const headingType = {
   h4: 4,
   h5: 5,
   h6: 6,
+};
+
+export const constAceEditorAction = {
+  left: 0,
+  up: 1,
+  down: 2,
+  right: 3,
+};
+
+export const constMoveDirection = {
+  up: 0,
+  down: 1,
 };
