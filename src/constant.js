@@ -31,6 +31,7 @@ export const blockDataKeys = {
   codeContent: 'codeContent',
   codeLanguage: 'codeLanguage',
   codeWrapping: 'codeWrapping',
+  codeTheme: 'codeTheme',
 };
 
 export const constBlockType = {
@@ -212,44 +213,85 @@ export const languageList = [
 
 export const codeBlockThemeList = [
   'ambiance',
-  'merbivore',
   'chaos',
-  'merbivore_soft',
   'chrome',
-  'mono_industrial',
-  'clouds',
-  'monokai',
   'clouds_midnight',
-  'nord_dark',
+  'clouds',
   'cobalt',
-  'pastel_on_dark',
   'crimson_editor',
-  'solarized_dark',
   'dawn',
-  'solarized_light',
   'dracula',
-  'sqlserver',
   'dreamweaver',
-  'terminal',
   'eclipse',
-  'textmate',
   'github',
-  'tomorrow',
   'gob',
-  'tomorrow_night',
   'gruvbox',
-  'tomorrow_night_blue',
   'idle_fingers',
-  'tomorrow_night_bright',
   'iplastic',
-  'tomorrow_night_eighties',
   'katzenmilch',
-  'twilight',
   'kr_theme',
-  'vibrant_ink',
   'kuroir',
+  'merbivore_soft',
+  'merbivore',
+  'mono_industrial',
+  'monokai',
+  'nord_dark',
+  'pastel_on_dark',
+  'solarized_dark',
+  'solarized_light',
+  'sqlserver',
+  'terminal',
+  'textmate',
+  'tomorrow_night_blue',
+  'tomorrow_night_bright',
+  'tomorrow_night_eighties',
+  'tomorrow_night',
+  'tomorrow',
+  'twilight',
+  'vibrant_ink',
   'xcode',
 ];
+
+export const codeBlockThemeMap = new Map([
+  ['Ambiance', 'ambiance'],
+  ['Chaos', 'chaos'],
+  ['Chrome', 'chrome'],
+  ['Clouds Midnight', 'clouds_midnight'],
+  ['Clouds', 'clouds'],
+  ['Cobalt', 'cobalt'],
+  ['Crimson Editor', 'crimson_editor'],
+  ['Dawn', 'dawn'],
+  ['Dracula', 'dracula'],
+  ['Dreamweaver', 'dreamweaver'],
+  ['Eclipse', 'eclipse'],
+  ['GitHub', 'github'],
+  ['Gob', 'gob'],
+  ['Gruvbox', 'gruvbox'],
+  ['Idle Fingers', 'idle_fingers'],
+  ['Iplastic', 'iplastic'],
+  ['Katzen-Milch', 'katzenmilch'],
+  ['KR Theme', 'kr_theme'],
+  ['Kuroir', 'kuroir'],
+  ['Merbivore Soft', 'merbivore_soft'],
+  ['Merbivore', 'merbivore'],
+  ['Mono Industrial', 'mono_industrial'],
+  ['Monokai', 'monokai'],
+  ['Nord Dark', 'nord_dark'],
+  ['Pastel on Dark', 'pastel_on_dark'],
+  ['Solarized Dark', 'solarized_dark'],
+  ['Solarized Light', 'solarized_light'],
+  ['SQL Server', 'sqlserver'],
+  ['Temrinal', 'terminal'],
+  ['Textmate', 'textmate'],
+  ['Tomorrow Night Blue', 'tomorrow_night_blue'],
+  ['Tomorrow Night Bright', 'tomorrow_night_bright'],
+  ['Tomorrow Night Eighties', 'tomorrow_night_eighties'],
+  ['Tomorrow Night', 'tomorrow_night'],
+  ['Tomorrow', 'tomorrow'],
+  ['Twilight', 'twilight'],
+  ['Vibrant Ink', 'vibrant_ink'],
+  ['XCode', 'xcode'],
+]);
 
 export const languageOptions = languageList.map(v => {
   return {
@@ -262,3 +304,15 @@ export const languageReverseMap = new Map(languageList.map(v => {
   let lv = v.toLowerCase();
   return [languageMap[lv], v];
 }));
+
+export const codeBlockThemeReverseMap = new Map(Array.from(codeBlockThemeMap.keys()).map(k => {
+  let v = codeBlockThemeMap.get(k);
+  return [v, k];
+}));
+
+export const themeOptions = codeBlockThemeList.map(v => {
+  return {
+    value: v,
+    label: codeBlockThemeReverseMap.get(v),
+  };
+});

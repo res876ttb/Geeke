@@ -382,7 +382,7 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   padding: 1rem 1rem 0.6rem 1rem;
 }
 
-.geeke-codeEditor-languageListWrapper {
+.geeke-codeEditor-languageListWrapper, .geeke-codeEditor-themeListWrapper {
   height: 300px;
   width: 12rem;
   overflow-y: hidden;

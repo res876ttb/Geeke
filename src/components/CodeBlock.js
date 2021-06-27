@@ -150,6 +150,7 @@ import BlockDargButton from './BlcokDragButton';
  *************************************************/
 import {
   blockDataKeys,
+  codeBlockThemeReverseMap,
   constAceEditorAction,
   constMoveDirection,
   editorLeftPadding,
@@ -157,6 +158,7 @@ import {
   languageOptions,
   languageReverseMap,
   remToPx,
+  themeOptions,
 } from '../constant';
 import { EditorState } from 'draft-js';
 import { pmsc } from '../states/editorMisc';
@@ -194,7 +196,8 @@ const CodeBlock = props => {
   const codeContent = blockData.has(blockDataKeys.codeContent) ? blockData.get(blockDataKeys.codeContent) : '';
   let indentLevel = 0;
   let codeLanguage = 'plain_text';
-  let codeWrapping = false;
+  let codeWrapping = false; // TODO: make the default value to user-specieifed.
+  let codeTheme = 'github'; // TODO: make the default value to user-specieifed.
 
   // Functions
   const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
@@ -240,6 +243,11 @@ const CodeBlock = props => {
     codeWrapping = blockData.get(blockDataKeys.codeWrapping);
   }
 
+  // Get code theme
+  if (blockData.has(blockDataKeys.codeTheme)) {
+    codeTheme = blockData.get(blockDataKeys.codeTheme);
+  }
+
   // Calculate paddingLeft depends on indent level
   const paddingLeft = remToPx(indentWidth * indentLevel);
 
@@ -256,6 +264,15 @@ const CodeBlock = props => {
   const updateCodeLanguage = language => {
     let newBlockData = new GeekeMap(blockData);
     newBlockData.set(blockDataKeys.codeLanguage, language);
+    let newContentState = updateBlockData(contentState, blockKey, newBlockData);
+    let newEditorState = EditorState.push(getEditorState(), newContentState, 'change-block-data');
+    setEditorState(newEditorState);
+  }
+
+  // Function to update code theme
+  const updateCodeTheme = theme => {
+    let newBlockData = new GeekeMap(blockData);
+    newBlockData.set(blockDataKeys.codeTheme, theme);
     let newContentState = updateBlockData(contentState, blockKey, newBlockData);
     let newEditorState = EditorState.push(getEditorState(), newContentState, 'change-block-data');
     setEditorState(newEditorState);
@@ -291,7 +308,7 @@ const CodeBlock = props => {
     className: 'geeke-codeEditor',
     mode: codeLanguage,
     wrapEnabled: codeWrapping,
-    theme: 'github',
+    theme: codeTheme,
     fontSize: '1rem',
     onFocus: onFocus,
     onBlur: onBlur,
@@ -336,7 +353,9 @@ const CodeBlock = props => {
         setEditingMenu={setEditingMenu}
         focusAceEditor={focusAceEditor}
         codeLanguage={codeLanguage}
+        codeTheme={codeTheme}
         updateCodeLanguage={updateCodeLanguage}
+        updateCodeTheme={updateCodeTheme}
         codeContent={codeContent}
       />
 
@@ -357,25 +376,30 @@ const CodeBlockMenuButtons = props => {
   const blockKey = props.blockKey;
   const setEditingMenu = props.setEditingMenu;
   const updateCodeLanguage = props.updateCodeLanguage;
+  const updateCodeTheme = props.updateCodeTheme;
   const focusAceEditor = props.focusAceEditor;
   const codeLanguage = props.codeLanguage;
+  const codeTheme = props.codeTheme;
   const codeContent = props.codeContent;
   const languageName = languageReverseMap.has(codeLanguage) ? languageReverseMap.get(codeLanguage) : 'PlainText';
+  const themeName = codeBlockThemeReverseMap.has(codeTheme) ? codeBlockThemeReverseMap.get(codeTheme) : 'GitHub';
 
   // Reducers
   const [languageAnchorEl, setLanguageAnchorEl] = useState(null);
-  const open = Boolean(languageAnchorEl);
+  const [themeAnchorEl, setThemeAnchorEl] = useState(null);
+  const languageMenuOpen = Boolean(languageAnchorEl);
+  const themeMenuOpen = Boolean(themeAnchorEl);
   const editorMiscPages = useSelector(state => state.editorMisc.pages);
   const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
 
-  // handleClickMenu
-  const handleClickMenu = e => {
+  // handleClickLanguageMenu
+  const handleClickLanguageMenu = e => {
     setLanguageAnchorEl(e.currentTarget);
     setEditingMenu(true);
   };
 
-  // handleCloseMenu
-  const handleCloseMenu = () => {
+  // handleCloseLanguageMenu
+  const handleCloseLanguageMenu = () => {
     setLanguageAnchorEl(null);
     setEditingMenu(false);
     setTimeout(() => {
@@ -383,15 +407,37 @@ const CodeBlockMenuButtons = props => {
     }, 1);
   };
 
-  // onChange
-  const onChange = v => {
+  // handleChangeCodeLanguage
+  const handleChangeCodeLanguage = v => {
     if (!v) return;
-    handleCloseMenu();
+    handleCloseLanguageMenu();
     updateCodeLanguage(v.value);
   };
 
+  // handleClickThemeMenu
+  const handleClickThemeMenu = e => {
+    setThemeAnchorEl(e.currentTarget);
+    setEditingMenu(true);
+  };
+
+  // handleCloseThemeMenu
+  const handleCloseThemeMenu = e => {
+    setThemeAnchorEl(null);
+    setEditingMenu(false);
+    setTimeout(() => {
+      focusAceEditor();
+    }, 1);
+  };
+
+  // handleChangeCodeTheme
+  const handleChangeCodeTheme = v => {
+    if (!v) return;
+    handleCloseThemeMenu();
+    updateCodeTheme(v.value);
+  }
+
   // Styles...
-  const languageStyle = {
+  const codeBlockMenuStyles = {
     menu: (provided, state) => ({
       ...provided,
       boxShadow: 'unset',
@@ -423,9 +469,15 @@ const CodeBlockMenuButtons = props => {
       <div className={'geeke-codeEditor-buttonWrapper' + (mouseOverBlockKey === blockKey ? ' geeke-codeEditor-button-active' : '')}>
         <Button
           className='geeke-codeEditor-button' variant="outlined" size="small"
-          onClick={handleClickMenu}
+          onClick={handleClickLanguageMenu}
         >
           {languageName} ▾
+        </Button>
+        <Button
+          className='geeke-codeEditor-button' variant="outlined" size="small"
+          onClick={handleClickThemeMenu}
+        >
+          {themeName} ▾
         </Button>
 
         <CopyToClipboard text={codeContent}>
@@ -435,9 +487,9 @@ const CodeBlockMenuButtons = props => {
 
       {/* Code Language */}
       <Popover
-        open={open}
+        open={languageMenuOpen}
         anchorEl={languageAnchorEl}
-        onClose={handleCloseMenu}
+        onClose={handleCloseLanguageMenu}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'right',
@@ -453,14 +505,39 @@ const CodeBlockMenuButtons = props => {
             autoFocus={true}
             menuIsOpen={true}
             maxMenuHeight={255}
-            styles={languageStyle}
+            styles={codeBlockMenuStyles}
             placeholder='Language'
-            onChange={onChange}
+            onChange={handleChangeCodeLanguage}
           />
         </div>
       </Popover>
 
       {/* Code Themes */}
+      <Popover
+        open={themeMenuOpen}
+        anchorEl={themeAnchorEl}
+        onClose={handleCloseThemeMenu}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <div className='geeke-codeEditor-themeListWrapper'>
+          <Select
+            options={themeOptions}
+            autoFocus={true}
+            menuIsOpen={true}
+            maxMenuHeight={255}
+            styles={codeBlockMenuStyles}
+            placeholder='Theme'
+            onChange={handleChangeCodeTheme}
+          />
+        </div>
+      </Popover>
     </div>
   )
 }
