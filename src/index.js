@@ -12,6 +12,8 @@ import {Provider} from 'react-redux';
 import {createStore, combineReducers} from 'redux';
 import reportWebVitals from './reportWebVitals';
 import { enableMapSet } from 'immer';
+import { createMuiTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
 
 /*************************************************
  * Redux Reducers
@@ -34,15 +36,32 @@ enableMapSet();
  *************************************************/
 if (window.event) alert('IE not supported!')
 else {
+  const MuiTheme = createMuiTheme({
+    palette: {
+      primary: {
+        light: '#4791db',
+        main: '#1976d2',
+        dark: '#115293',
+      },
+      secondary: {
+        light: '#e33371',
+        main: '#dc004e',
+        dark: '#9a0036',
+      },
+    },
+  });
+
   const store = createStore(combineReducers({
     editorMisc
   }));
 
   ReactDOM.render(
     <Provider store={store}>
-      <React.StrictMode>
-        <Geeke />
-      </React.StrictMode>
+      <ThemeProvider theme={MuiTheme}>
+        <React.StrictMode>
+          <Geeke />
+        </React.StrictMode>
+      </ThemeProvider>
     </Provider>,
     document.getElementById('root')
   );

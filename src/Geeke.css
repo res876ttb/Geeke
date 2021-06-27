@@ -80,17 +80,16 @@ code {
   position: absolute;
   transition-duration: 0.3s;
   left: 1.6rem;
-  top: 0.2rem;
+  top: 0.25rem;
 }
 
 .geeke-draggableWrapperInner {
-  height: 1.6rem;
-  width: 1.2rem;
-  line-height: 1.9rem;
+  height: 1.5rem;
+  width: 1rem;
   text-align: center;
   transition-duration: 0.15s;
   position: relative;
-  border-radius: 20%;
+  border-radius: 0.2rem;
 }
 
 .geeke-draggableWrapperInner:hover {
@@ -192,7 +191,7 @@ code {
   height: 0px;
   position: absolute;
   left: var(--editorLeftPadding);
-  top: 0.25rem;
+  top: 0.3rem;
 }
 
 .geeke-numberedListMarkInner {
@@ -212,14 +211,14 @@ code {
   height: 0px;
   position: absolute;
   left: var(--editorLeftPadding);
-  top: 0.25rem;
+  top: -0.15rem;
 }
 
 .geeke-checkListMarkInner {
   text-align: right;
   position: relative;
   min-width: var(--indentWidth);
-  right: 0.3rem;
+  right: 0.4rem;
 }
 
 .geeke-checkListEditor {
@@ -239,12 +238,14 @@ code {
   text-align: right;
   position: relative;
   min-width: var(--indentWidth);
-  right: 0.45rem;
+  right: -0.05rem;
+  top: 0.05rem;
 }
 
 .geeke-toggleListImg {
-  width: calc(var(--fontSize) * 0.7);
-  height: calc(var(--fontSize) * 0.7);
+  width: calc(var(--fontSize) * 1.5);
+  height: calc(var(--fontSize) * 1.5);
+  transform-origin: center;
   transition: transform 0.1s;
   cursor: pointer;
 }

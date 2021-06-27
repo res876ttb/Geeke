@@ -8,6 +8,7 @@
  *************************************************/
 import React from 'react';
 import { useSelector } from 'react-redux';
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 
 /*************************************************
  * Utils & States
@@ -57,7 +58,7 @@ const BlockDargButton = props => {
       onDragStart={handleBlockDargStart}
     >
       <div className='geeke-draggableWrapperInner' style={style}>
-        <img draggable="false" src='./drag.svg' alt='handleBlockDrag'></img>
+        <DragIndicatorIcon style={{position: 'relative', right: '0.25rem'}} />
       </div>
     </div>
   )

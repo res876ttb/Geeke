@@ -9,6 +9,7 @@
 import React from 'react';
 import { EditorBlock } from 'draft-js';
 import { useDispatch } from 'react-redux';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 /*************************************************
  * Utils & States
@@ -90,7 +91,9 @@ const ToggleListBlock = props => {
       />
       <div className='geeke-toggleListMark noselect' contentEditable={false} style={{paddingLeft: `${paddingLeft}px`}}>
         <div className='geeke-toggleListMarkInner' onClick={() => handleToggleToggleList(blockKey)}>
-          <img className={'geeke-toggleListImg' + (toggleListToggle ? ' geeke-toggleListImgOpen' : '')} src='./arrow.svg' alt='toggle-list' ></img>
+          <div className={'geeke-toggleListImg' + (toggleListToggle ? ' geeke-toggleListImgOpen' : '')}>
+            <ChevronRightIcon />
+          </div>
         </div>
       </div>
       <div className='geeke-toggleListEditor'>

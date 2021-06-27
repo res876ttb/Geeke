@@ -9,6 +9,7 @@
 import React from 'react';
 import { EditorBlock } from 'draft-js';
 import { useDispatch } from 'react-redux';
+import Checkbox from '@material-ui/core/Checkbox';
 
 /*************************************************
  * Utils & States
@@ -90,7 +91,7 @@ const CheckListBlock = props => {
       />
       <div className='geeke-checkListMark noselect' contentEditable={false} style={{paddingLeft: `${paddingLeft}px`}}>
         <div className='geeke-checkListMarkInner'>
-          <input className='form-check-input' type='checkbox' checked={checkListCheck} onClick={() => handleToggleCheckList(blockKey)} onChange={() => {}} />
+          <Checkbox checked={checkListCheck} onClick={() => handleToggleCheckList(blockKey)} color="primary" size='small' />
         </div>
       </div>
       <div className='geeke-checkListEditor'>
