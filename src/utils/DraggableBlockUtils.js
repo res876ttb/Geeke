@@ -106,7 +106,7 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   let newEditorState = editorState;
   let newContentState = contentState;
 
-  // Check whether drop above the editor. TODO: check whether first block or last block...
+  // Check whether drop above the editor
   const editorId = `geeke-editor-${pageUuid}`;
   const editorRect = document.getElementById(editorId).getBoundingClientRect();
   const editorTopFromPageTop = editorRect.top;
@@ -357,7 +357,7 @@ export const createDragMaskParam = (mouseX, mouseY, pageUuid, editorState, selec
   // Constants
   const contentState = editorState.getCurrentContent();
 
-  // Check whether drop above the editor. TODO: check whether first block or last block...
+  // Check whether drop above the editor
   const editorId = `geeke-editor-${pageUuid}`;
   const editorRect = document.getElementById(editorId).getBoundingClientRect();
   const editorTopFromPageTop = editorRect.top;

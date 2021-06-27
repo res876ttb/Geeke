@@ -75,7 +75,8 @@ const HeadingBlock = props => {
   let style = 'h1';
   let paddingTop = 2 + editorTopPadding; // Unit: rem
   let topOffset = 3;                     // Unit: rem
-  switch (blockData.get(blockDataKeys.headingType)) {
+  let blockHeadingType = blockData.get(blockDataKeys.headingType);
+  switch (blockHeadingType) {
     case headingType.h1:
       style = 'h1';
       paddingTop = (isFirstBlock ? 0 : 2) + editorTopPadding;
@@ -134,7 +135,7 @@ const HeadingBlock = props => {
         paddingLeft={paddingLeft}
         topOffset={topOffset}
       />
-      <div className={'geeke-headingEditor ' + style}>
+      <div className={'geeke-headingEditor ' + style} headingtype={blockHeadingType}>
         <EditorBlock {...props} />
       </div>
     </div>

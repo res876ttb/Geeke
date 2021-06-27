@@ -67,6 +67,12 @@ code {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
+/* Remove outline from Bootstrap button */
+.btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 
 /* Basic Block */
 .geeke-draggableWrapper {
@@ -80,6 +86,7 @@ code {
 .geeke-draggableWrapperInner {
   height: 1.6rem;
   width: 1.2rem;
+  line-height: 1.9rem;
   text-align: center;
   transition-duration: 0.15s;
   position: relative;
@@ -212,7 +219,7 @@ code {
   text-align: right;
   position: relative;
   min-width: var(--indentWidth);
-  right: 0.4rem;
+  right: 0.3rem;
 }
 
 .geeke-checkListEditor {
@@ -296,9 +303,31 @@ code {
 
 
 /* Heading */
-.geeke-headingEditor {
-  /* margin-left: var(--indentWidth); */
-  font-weight: bold;
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  margin-top: 0;
+  margin-bottom: .5rem;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-block-start: 0rem !important;
+  margin-block-end: 0rem !important;
+}
+.h1 {
+  font-size: 2.5rem;
+}
+.h2 {
+  font-size: 2rem;
+}
+.h3 {
+  font-size: 1.75rem;
+}
+.h4 {
+  font-size: 1.5rem;
+}
+.h5 {
+  font-size: 1.25rem;
+}
+.h6 {
+  font-size: 1rem;
 }
 
 
@@ -306,9 +335,56 @@ code {
 .geeke-codeEditor {
   min-height: 1rem;
 }
+
 /* Correct Ace editor style */
 .ace_hidden-cursors .ace_cursor {
   opacity: 0 !important;
+}
+
+/* Hide gutter shadow when code editor is inactive */
+div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
+  background-color: rgba(1, 1, 1, 0) !important;
+}
+
+/* Make ace gutter will not block dropdown menu... */
+.ace_gutter {
+  z-index: 0;
+}
+
+/* Button style in code editor... */
+.geeke-codeEditor-dropdownWrapper {
+  position: relative;
+  height: 0px;
+}
+
+.geeke-codeEditor-buttonWrapper {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.geeke-codeEditor-button {
+  position: absolute;
+  top: -1.8rem;
+  height: 1.2rem;
+  font-size: 0.8rem;
+  line-height: 0.8rem;
+  text-transform: none !important;
+}
+
+.geeke-codeEditor-button-active {
+  background-color: unset;
+  color: gray;
+  opacity: 1;
+}
+
+.geeke-codeEditor-languageTextfieldWrapper {
+  padding: 1rem 1rem 0.6rem 1rem;
+}
+
+.geeke-codeEditor-languageListWrapper {
+  height: 300px;
+  width: 12rem;
+  overflow-y: hidden;
 }
 
 
