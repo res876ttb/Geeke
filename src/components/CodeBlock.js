@@ -12,6 +12,8 @@ import {
   Button,
   Popover,
 } from '@material-ui/core';
+import CheckIcon from '@material-ui/icons/Check';
+import CloseIcon from '@material-ui/icons/Close';
 import Select from 'react-select';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 
@@ -278,6 +280,15 @@ const CodeBlock = props => {
     setEditorState(newEditorState);
   }
 
+  // Function to update code wrapping status
+  const updateCodeWrapping = wrapping => {
+    let newBlockData = new GeekeMap(blockData);
+    newBlockData.set(blockDataKeys.codeWrapping, wrapping);
+    let newContentState = updateBlockData(contentState, blockKey, newBlockData);
+    let newEditorState = EditorState.push(getEditorState(), newContentState, 'change-block-data');
+    setEditorState(newEditorState);
+  }
+
   // Compose aceEditor command
   const aceEditorCommands = [
     {
@@ -354,9 +365,11 @@ const CodeBlock = props => {
         focusAceEditor={focusAceEditor}
         codeLanguage={codeLanguage}
         codeTheme={codeTheme}
+        codeContent={codeContent}
+        codeWrapping={codeWrapping}
         updateCodeLanguage={updateCodeLanguage}
         updateCodeTheme={updateCodeTheme}
-        codeContent={codeContent}
+        updateCodeWrapping={updateCodeWrapping}
       />
 
       <div
@@ -377,10 +390,12 @@ const CodeBlockMenuButtons = props => {
   const setEditingMenu = props.setEditingMenu;
   const updateCodeLanguage = props.updateCodeLanguage;
   const updateCodeTheme = props.updateCodeTheme;
+  const updateCodeWrapping = props.updateCodeWrapping;
   const focusAceEditor = props.focusAceEditor;
   const codeLanguage = props.codeLanguage;
   const codeTheme = props.codeTheme;
   const codeContent = props.codeContent;
+  const codeWrapping = props.codeWrapping;
   const languageName = languageReverseMap.has(codeLanguage) ? languageReverseMap.get(codeLanguage) : 'PlainText';
   const themeName = codeBlockThemeReverseMap.has(codeTheme) ? codeBlockThemeReverseMap.get(codeTheme) : 'GitHub';
 
@@ -434,7 +449,10 @@ const CodeBlockMenuButtons = props => {
     if (!v) return;
     handleCloseThemeMenu();
     updateCodeTheme(v.value);
-  }
+  };
+
+  // handleToggleCodeWrapping
+  const handleToggleCodeWrapping = () => updateCodeWrapping(!codeWrapping);
 
   // Styles...
   const codeBlockMenuStyles = {
@@ -464,21 +482,26 @@ const CodeBlockMenuButtons = props => {
     }),
   };
 
+  // Wrapping icon
+  const wrappingIcon = codeWrapping ? <CheckIcon fontSize='inherit' /> : <CloseIcon fontSize='inherit' />;
+
   return (
     <div className='geeke-codeEditor-dropdownWrapper' contentEditable={false}>
       <div className={'geeke-codeEditor-buttonWrapper' + (mouseOverBlockKey === blockKey ? ' geeke-codeEditor-button-active' : '')}>
         <Button
           className='geeke-codeEditor-button' variant="outlined" size="small"
           onClick={handleClickLanguageMenu}
-        >
-          {languageName} ▾
-        </Button>
+        >{languageName} ▾</Button>
+
         <Button
           className='geeke-codeEditor-button' variant="outlined" size="small"
           onClick={handleClickThemeMenu}
-        >
-          {themeName} ▾
-        </Button>
+        >{themeName} ▾</Button>
+
+        <Button
+          className='geeke-codeEditor-button' variant="outlined" size="small"
+          onClick={handleToggleCodeWrapping}
+        >{wrappingIcon} Wrapping</Button>
 
         <CopyToClipboard text={codeContent}>
           <Button className='geeke-codeEditor-button' variant="outlined" size="small">Copy</Button>
