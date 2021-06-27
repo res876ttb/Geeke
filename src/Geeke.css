@@ -368,6 +368,7 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   height: 1.2rem;
   font-size: 0.8rem;
   line-height: 0.8rem;
+  margin-right: 0.5rem !important;
   text-transform: none !important;
 }
 

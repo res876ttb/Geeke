@@ -13,6 +13,7 @@ import {
   Popover,
 } from '@material-ui/core';
 import Select from 'react-select';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 import AceEditor from "react-ace";
 import "ace-builds/webpack-resolver";
@@ -193,6 +194,7 @@ const CodeBlock = props => {
   const codeContent = blockData.has(blockDataKeys.codeContent) ? blockData.get(blockDataKeys.codeContent) : '';
   let indentLevel = 0;
   let codeLanguage = 'plain_text';
+  let codeWrapping = false;
 
   // Functions
   const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
@@ -231,6 +233,11 @@ const CodeBlock = props => {
   // Get code language
   if (blockData.has(blockDataKeys.codeLanguage)) {
     codeLanguage = blockData.get(blockDataKeys.codeLanguage);
+  }
+
+  // Get wrapping status
+  if (blockData.has(blockDataKeys.codeWrapping)) {
+    codeWrapping = blockData.get(blockDataKeys.codeWrapping);
   }
 
   // Calculate paddingLeft depends on indent level
@@ -283,6 +290,7 @@ const CodeBlock = props => {
     ref: aceEditor,
     className: 'geeke-codeEditor',
     mode: codeLanguage,
+    wrapEnabled: codeWrapping,
     theme: 'github',
     fontSize: '1rem',
     onFocus: onFocus,
@@ -322,13 +330,14 @@ const CodeBlock = props => {
         topOffset={-0.1} // TODO: Need to be tuned...
       />
 
-      <CodeBlockLanguageButton
+      <CodeBlockMenuButtons
         pageUuid={pageUuid}
         blockKey={blockKey}
         setEditingMenu={setEditingMenu}
         focusAceEditor={focusAceEditor}
         codeLanguage={codeLanguage}
         updateCodeLanguage={updateCodeLanguage}
+        codeContent={codeContent}
       />
 
       <div
@@ -342,7 +351,7 @@ const CodeBlock = props => {
   )
 }
 
-const CodeBlockLanguageButton = props => {
+const CodeBlockMenuButtons = props => {
   // Props
   const pageUuid = props.pageUuid;
   const blockKey = props.blockKey;
@@ -350,23 +359,24 @@ const CodeBlockLanguageButton = props => {
   const updateCodeLanguage = props.updateCodeLanguage;
   const focusAceEditor = props.focusAceEditor;
   const codeLanguage = props.codeLanguage;
+  const codeContent = props.codeContent;
   const languageName = languageReverseMap.has(codeLanguage) ? languageReverseMap.get(codeLanguage) : 'PlainText';
 
   // Reducers
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const [languageAnchorEl, setLanguageAnchorEl] = useState(null);
+  const open = Boolean(languageAnchorEl);
   const editorMiscPages = useSelector(state => state.editorMisc.pages);
   const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
 
   // handleClickMenu
   const handleClickMenu = e => {
-    setAnchorEl(e.currentTarget);
+    setLanguageAnchorEl(e.currentTarget);
     setEditingMenu(true);
   };
 
   // handleCloseMenu
   const handleCloseMenu = () => {
-    setAnchorEl(null);
+    setLanguageAnchorEl(null);
     setEditingMenu(false);
     setTimeout(() => {
       focusAceEditor();
@@ -417,10 +427,16 @@ const CodeBlockLanguageButton = props => {
         >
           {languageName} ▾
         </Button>
+
+        <CopyToClipboard text={codeContent}>
+          <Button className='geeke-codeEditor-button' variant="outlined" size="small">Copy</Button>
+        </CopyToClipboard>
       </div>
+
+      {/* Code Language */}
       <Popover
         open={open}
-        anchorEl={anchorEl}
+        anchorEl={languageAnchorEl}
         onClose={handleCloseMenu}
         anchorOrigin={{
           vertical: 'top',
@@ -443,6 +459,8 @@ const CodeBlockLanguageButton = props => {
           />
         </div>
       </Popover>
+
+      {/* Code Themes */}
     </div>
   )
 }
