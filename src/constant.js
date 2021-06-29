@@ -59,6 +59,7 @@ export const constAceEditorAction = {
   up: 1,
   down: 2,
   right: 3,
+  backspace: 4,
 };
 
 export const constMoveDirection = {

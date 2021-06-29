@@ -756,18 +756,22 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
     // Update block data: remove numberListOrder from block data
     let focusBlockData = new GeekeMap(focusBlock.getData());
     let dataChanged = false;
-    if (focusBlockData.has(blockDataKeys.numberListOrder)) {
-      focusBlockData.delete(blockDataKeys.numberListOrder);
-      dataChanged = true;
+    const removeBlockData = blockDataKey => {
+      if (focusBlockData.has(blockDataKey)) {
+        focusBlockData.delete(blockDataKey);
+        dataChanged = true;
+      }
     }
-    if (focusBlockData.has(blockDataKeys.toggleListToggle)) {
-      focusBlockData.delete(blockDataKeys.toggleListToggle);
-      dataChanged = true;
-    }
-    if (focusBlockData.has(blockDataKeys.checkListCheck)) {
-      focusBlockData.delete(blockDataKeys.checkListCheck);
-      dataChanged = true;
-    }
+
+    removeBlockData(blockDataKeys.numberListOrder);
+    removeBlockData(blockDataKeys.toggleListToggle);
+    removeBlockData(blockDataKeys.checkListCheck);
+    removeBlockData(blockDataKeys.headingType);
+    removeBlockData(blockDataKeys.codeContent);
+    removeBlockData(blockDataKeys.codeLanguage);
+    removeBlockData(blockDataKeys.codeWrapping);
+    removeBlockData(blockDataKeys.codeTheme);
+
     if (dataChanged) {
       newContentState = updateBlockData(newContentState, null, focusBlockData, newSelectionState);
     }
@@ -1515,6 +1519,25 @@ const handleAceEditor_right = (editor, dispatcher, blockKey) => {
   dispatcher.moveCursor([keyCommandConst.moveToNextBlock, blockKey]);
 };
 
+const handleAceEditor_backspace = (editor, dispatcher, blockKey) => {
+  if (!dispatcher.moveCursor) {
+    console.error(dispatcherNotFoundConst.moveCursor);
+    return false;
+  }
+
+  let editorContent = editor.getValue();
+  if (editorContent !== '') return false;
+
+  dispatcher.onBlur();
+  dispatcher.moveCursor([[keyCommandConst.multiCommands, keyCommandConst.handleBackspace, null, false], blockKey]);
+  setTimeout(() => {
+    dispatcher.handleFocusEditor();
+    setTimeout(() => {
+      dispatcher.updateSelectionState(blockKey);
+    });
+  }, 1);
+};
+
 export const handleAceEditor = (editor, action, dispatcher, blockKey) => {
   switch(action) {
     case constAceEditorAction.up:
@@ -1528,6 +1551,9 @@ export const handleAceEditor = (editor, action, dispatcher, blockKey) => {
 
     case constAceEditorAction.right:
       return handleAceEditor_right(editor, dispatcher, blockKey);
+
+    case constAceEditorAction.backspace:
+      return handleAceEditor_backspace(editor, dispatcher, blockKey);
 
     default:
       console.error(`Unknown action in handleAceEditor: ${action}`);

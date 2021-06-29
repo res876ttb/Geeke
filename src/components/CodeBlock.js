@@ -184,6 +184,8 @@ const CodeBlock = props => {
   const setEditorState = props.blockProps.setEditorState;
   const getEditorState = props.blockProps.getEditorState;
   const setEditingMenu = props.blockProps.setEditingMenu;
+  const handleFocusEditor = props.blockProps.handleFocusEditor;
+  const updateSelectionState = props.blockProps.updateSelectionState;
 
   // Reducers
   const dispatch = useDispatch();
@@ -204,10 +206,13 @@ const CodeBlock = props => {
   // Functions
   const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
   const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
-  const onFocus = e => setEditingCode(true);
-  const onBlur = e => setEditingCode(false);
   const focusAceEditor = () => aceEditor.current.editor.focus();
   const blurAceEditor = () => aceEditor.current.editor.blur();
+  const onBlur = e => setEditingCode(false);
+  const onFocus = e => {
+    setEditingCode(true);
+    updateSelectionState();
+  };
 
   // If current block is focused, then automatically focus it.
   if (getFocusBlockKey() === blockKey) {
@@ -253,41 +258,20 @@ const CodeBlock = props => {
   // Calculate paddingLeft depends on indent level
   const paddingLeft = remToPx(indentWidth * indentLevel);
 
-  // Function to update content
-  const updateCodeContent = newValue => {
+  // Function to update blockData of block data
+  const updateCodeBlockData = (blockDataKey, changeType, newValue) => {
     let newBlockData = new GeekeMap(blockData);
-    newBlockData.set(blockDataKeys.codeContent, newValue);
+    newBlockData.set(blockDataKey, newValue);
     let newContentState = updateBlockData(contentState, blockKey, newBlockData);
-    let newEditorState = EditorState.push(getEditorState(), newContentState, 'insert-characters');
+    let newEditorState = EditorState.push(getEditorState(), newContentState, changeType);
     setEditorState(newEditorState);
   };
 
-  // Function to update language
-  const updateCodeLanguage = language => {
-    let newBlockData = new GeekeMap(blockData);
-    newBlockData.set(blockDataKeys.codeLanguage, language);
-    let newContentState = updateBlockData(contentState, blockKey, newBlockData);
-    let newEditorState = EditorState.push(getEditorState(), newContentState, 'change-block-data');
-    setEditorState(newEditorState);
-  }
-
-  // Function to update code theme
-  const updateCodeTheme = theme => {
-    let newBlockData = new GeekeMap(blockData);
-    newBlockData.set(blockDataKeys.codeTheme, theme);
-    let newContentState = updateBlockData(contentState, blockKey, newBlockData);
-    let newEditorState = EditorState.push(getEditorState(), newContentState, 'change-block-data');
-    setEditorState(newEditorState);
-  }
-
-  // Function to update code wrapping status
-  const updateCodeWrapping = wrapping => {
-    let newBlockData = new GeekeMap(blockData);
-    newBlockData.set(blockDataKeys.codeWrapping, wrapping);
-    let newContentState = updateBlockData(contentState, blockKey, newBlockData);
-    let newEditorState = EditorState.push(getEditorState(), newContentState, 'change-block-data');
-    setEditorState(newEditorState);
-  }
+  // Function to update content, language, theme, and wrapping status
+  const updateCodeContent = newValue => updateCodeBlockData(blockDataKeys.codeContent, 'insert-characters', newValue);
+  const updateCodeLanguage = language => updateCodeBlockData(blockDataKeys.codeLanguage, 'change-block-data', language);
+  const updateCodeTheme = theme => updateCodeBlockData(blockDataKeys.codeTheme, 'change-block-data', theme);
+  const updateCodeWrapping = wrapping => updateCodeBlockData(blockDataKeys.codeWrapping, 'change-block-data', wrapping);
 
   // Compose aceEditor command
   const aceEditorCommands = [
@@ -310,6 +294,11 @@ const CodeBlock = props => {
       name: 'moveCursorRight',
       bindKey: {win: 'right', mac: 'right'},
       exec: editor => handleAceEditor(editor, constAceEditorAction.right, {moveCursor}, blockKey)
+    },
+    {
+      name: 'removeBlockType',
+      bindKey: {win: 'backspace', mac: 'backspace'},
+      exec: editor => handleAceEditor(editor, constAceEditorAction.backspace, {moveCursor, onBlur, handleFocusEditor, updateSelectionState}, blockKey),
     },
   ];
 

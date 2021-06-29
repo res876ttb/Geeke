@@ -6,7 +6,7 @@
 /*************************************************
  * IMPORT LIBRARIES
  *************************************************/
-import { Modifier, SelectionState } from 'draft-js';
+import { EditorState, Modifier, SelectionState } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
 
 /*************************************************
@@ -48,4 +48,13 @@ export class GeekeMap extends Map {
   toObject() {
     return Object.fromEntries(this);
   }
+};
+
+export const setSelectionStateByKey = (editorState, blockKey, offset=0) => {
+  return EditorState.forceSelection(editorState, new SelectionState({
+    focusKey: blockKey,
+    focusOffset: offset,
+    anchorKey: blockKey,
+    anchorOffset: offset,
+  }));
 };

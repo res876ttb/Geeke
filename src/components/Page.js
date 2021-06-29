@@ -66,6 +66,7 @@ import {
   constBlockType,
 } from '../constant';
 import HeadingBlock from './HeadingBlock';
+import { setSelectionStateByKey } from '../utils/Misc';
 
 /*************************************************
  * Main components
@@ -221,7 +222,19 @@ const Page = props => {
       case constBlockType.code:
         return {
           component: CodeBlock,
-          props: {...defaultBlockProps, setEditingCode, getFocusBlockKey, setFocusBlockKey, setMoveCursorArgs, getMoveDirection, setEditorState, getEditorState, setEditingMenu},
+          props: {
+            ...defaultBlockProps,
+            setEditingCode,
+            getFocusBlockKey,
+            setFocusBlockKey,
+            setMoveCursorArgs,
+            getMoveDirection,
+            setEditorState,
+            getEditorState,
+            setEditingMenu,
+            handleFocusEditor,
+            updateSelectionState: blockKey => setEditorState(setSelectionStateByKey(getEditorState(), blockKey)),
+          },
         };
 
       default:
