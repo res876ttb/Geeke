@@ -674,7 +674,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
     return 'handled';
   }
 
-  // Before conver the block into another type, insert a space first for a better undo
+  // Before convert the block into another type, insert a space first for a better undo
   let newContentState = contentState;
   let newEditorState = editorState;
   newContentState = Modifier.insertText(contentState, selectionState, ' ');
@@ -729,6 +729,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   newEditorState = EditorState.push(newEditorState, newContentState, 'change-block-type');
   newEditorState = EditorState.forceSelection(newEditorState, newSelectionState);
   dispatcher.setEditorState(newEditorState);
+
   return 'handled';
 };
 

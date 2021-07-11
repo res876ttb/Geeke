@@ -183,6 +183,7 @@ const CodeBlock = props => {
   const blockData = props.block.getData();
   const blockKey = props.block.key;
   const contentState = props.contentState;
+  const selectionState = props.selection;
   const handleBlockDargStart = props.blockProps.handleBlockDargStart;
   const pageUuid = props.blockProps.pageUuid;
   const readOnly = props.blockProps.readOnly;
@@ -209,6 +210,12 @@ const CodeBlock = props => {
     setTimeout(() => aceEditor.current.editor.focus(), 1);
   };
   useEffect(() => setSpecialFocusFunc(dispatch, pageUuid, blockKey, focusCodeBlock), []); // eslint-disable-line
+
+  // Focus code block if it is created by converting from other type of block
+  useEffect(() => {
+    if (selectionState.getFocusKey() !== blockKey) return;
+    setTimeout(() => aceEditor.current.editor.focus(), 1);
+  }, []); // eslint-disable-line
 
   // Variables
   const codeContent = blockData.has(blockDataKeys.codeContent) ? blockData.get(blockDataKeys.codeContent) : '';
