@@ -142,6 +142,7 @@ import {
 } from '../utils/DraggableBlockUtils';
 import {
   GeekeMap,
+  getBackgroundColorWithClass,
   updateBlockData,
 } from '../utils/Misc';
 
@@ -196,6 +197,7 @@ const CodeBlock = props => {
   const dispatch = useDispatch();
   const aceEditor = useRef(null);
   const [editorKeyCommand, setEditorKeyCommand] = useState(null);
+  const [backgroundColor, setBackgroundColor] = useState('rgba(0,0,0,0)');
 
   // Register focus function
   const focusCodeBlock = moveDirection => {
@@ -224,6 +226,7 @@ const CodeBlock = props => {
   let codeWrapping = false; // TODO: make the default value to user-specieifed.
   let codeTheme = 'github'; // TODO: make the default value to user-specieifed.
   let showLineNumber = true;
+  let codeWrapperBorder = '0px';
 
   // Functions
   const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
@@ -261,6 +264,11 @@ const CodeBlock = props => {
     showLineNumber = blockData.get(blockDataKeys.codeLineNumber);
   }
 
+  // Set border width
+  if (backgroundColor === 'rgb(255, 255, 255)') {
+    // codeWrapperBorder = '#e8e8e8 solid 2px';
+  }
+
   // Calculate paddingLeft depends on indent level
   const paddingLeft = remToPx(indentWidth * indentLevel);
 
@@ -290,6 +298,21 @@ const CodeBlock = props => {
     handleKeyCommand(editorState, editorKeyCommand, keyCommandDispatcher, blockKey, {blurAceEditor, handleFocusEditor});
   }, [editorKeyCommand, editorState]); // eslint-disable-line
 
+  // Set codeblock background color
+  useEffect(() => {
+    let processedCodeTheme = codeTheme.replace('_', '-');
+    let targetClass = showLineNumber ? `.ace-${processedCodeTheme} .ace_gutter` : `.ace-${processedCodeTheme}`;
+    let newBackgroundColor = getBackgroundColorWithClass(targetClass);
+    if (newBackgroundColor) {
+      setBackgroundColor(newBackgroundColor);
+    }
+  }, [codeTheme, showLineNumber]);
+
+  // Check whether to show this block
+  if (!isShowBlock(contentState, blockKey)) {
+    return null;
+  }
+
   // Compose aceEditor command
   const aceEditorCommands = [
     {
@@ -318,11 +341,6 @@ const CodeBlock = props => {
       exec: editor => handleAceEditor(editor, constAceEditorAction.backspace, {moveCursor, onBlur, handleFocusEditor, updateSelectionState}),
     },
   ];
-
-  // Check whether to show this block
-  if (!isShowBlock(contentState, blockKey)) {
-    return null;
-  }
 
   // Compose aceEditor Props
   const aceEditorProps = {
@@ -386,6 +404,8 @@ const CodeBlock = props => {
       />
 
       <div
+        className='geeke-codeEditorWrapper'
+        style={{backgroundColor: backgroundColor, border: codeWrapperBorder}}
         onClick={focusAceEditor} // Need to force focus on mouse click because in some situation, click on the last line cannot focus the AceEditor...
         contentEditable={false}  // Make this block not contenteditable to prevent from modify some DOM by accident...
       >

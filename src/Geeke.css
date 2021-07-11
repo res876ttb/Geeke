@@ -337,6 +337,11 @@ code {
   min-height: 1rem;
 }
 
+.geeke-codeEditorWrapper {
+  padding: 0.3rem 1rem;
+  border-radius: 0.3rem;
+}
+
 /* Correct Ace editor style */
 .ace_hidden-cursors .ace_cursor {
   opacity: 0 !important;

@@ -58,3 +58,25 @@ export const setSelectionStateByKey = (editorState, blockKey, offset=0) => {
     anchorOffset: offset,
   }));
 };
+
+export const getBackgroundColorWithClass = className => {
+  let targetStyle = null;
+  let styleSheets = document.styleSheets;
+
+  // Find background color first.
+  for (let i in styleSheets) {
+    let cssRules = styleSheets[i]['cssRules'];
+    for (let j in cssRules) {
+      if (cssRules[j].selectorText === className) {
+        targetStyle = cssRules[j].style;
+        break;
+      }
+    }
+  }
+
+  if (!targetStyle || !targetStyle.backgroundColor) {
+    // Unable to find background color. QQ
+    return null;
+  }
+  return targetStyle.backgroundColor;
+};
