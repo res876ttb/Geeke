@@ -131,6 +131,13 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     targetBlockKey = getBlockKeyFromBlockElement(blockElement);
   }
 
+  if (!targetBlockKey) {
+    console.warn('targetBlockKey is null...');
+    // If drop position is not good, then we cannot get target block key... QQ
+    // Ex. If drop on editor button, then it would not work
+    return editorState;
+  }
+
   // Check whether the drop position is the selected blocks
   if (selectedBlocks.indexOf(targetBlockKey) !== -1) return editorState;
 
@@ -144,6 +151,10 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
     for (let i = 0; i < selectedBlocks.length; i++) {
       const blockKeyToBeMoved = selectedBlocks[i];
       const blockLengthToBeMoved = blockMap.get(blockKeyToBeMoved).getLength();
+      if (!previousKey) {
+        console.error(`Unknown condition! previousKey is null!`);
+        break;
+      }
       newContentState = moveAtomicBlock(
         newContentState,
         contentState.getBlockForKey(blockKeyToBeMoved),
@@ -234,7 +245,7 @@ export const onMouseLeave = (e, dispatch, pageUuid) => {
   setMouseOverBlockKey(dispatch, pageUuid, null);
 };
 
-export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorState, handleDropCallback=handleDrop_normalBlock) => {
+export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorState, blockKey, handleDropCallback=handleDrop_normalBlock) => {
   if (readOnly) {
     return;
   }
@@ -245,6 +256,7 @@ export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorSt
   // Constants
   const selectionState = editorState.getSelection();
   const contentState = editorState.getCurrentContent();
+  const hasFocus = selectionState.getHasFocus();
 
   // Find target DOM element and get the block key of the dragged block
   const target = getBlockElementFromAnyDomEle(e.target);
@@ -256,8 +268,8 @@ export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorSt
   const targetHeight = targetRect.height;
 
   // Find all selected blocks
-  const endBlockKey = selectionState.getEndKey();
-  let curBlock = contentState.getBlockForKey(selectionState.getStartKey());
+  const endBlockKey = hasFocus ? selectionState.getEndKey() : blockKey;
+  let curBlock = contentState.getBlockForKey(hasFocus ? selectionState.getStartKey() : blockKey);
   let selectedBlocks = [];
   while (curBlock.getKey() !== endBlockKey) {
     selectedBlocks.push(curBlock.getKey());

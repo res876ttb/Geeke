@@ -63,7 +63,7 @@ const BlockDargButton = props => {
       draggable='true'
       style={{paddingLeft: `${paddingLeft}px`}}
 
-      onDragStart={e => onDragStart(e, readOnly, dargShadowId, setDragShadowPos, editorState)}
+      onDragStart={e => onDragStart(e, readOnly, dargShadowId, setDragShadowPos, editorState, blockKey)}
     >
       <div className='geeke-draggableWrapperInner' style={style}>
         <DragIndicatorIcon style={{position: 'relative', right: '0.25rem'}} />
