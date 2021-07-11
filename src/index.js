@@ -12,13 +12,14 @@ import {Provider} from 'react-redux';
 import {createStore, combineReducers} from 'redux';
 import reportWebVitals from './reportWebVitals';
 import { enableMapSet } from 'immer';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 
 /*************************************************
  * Redux Reducers
  *************************************************/
 import {editorMisc} from './states/editorMisc';
+import {editor} from './states/editor';
 
 /*************************************************
  * Components
@@ -36,7 +37,7 @@ enableMapSet();
  *************************************************/
 if (window.event) alert('IE not supported!')
 else {
-  const MuiTheme = createMuiTheme({
+  const MuiTheme = createTheme({
     palette: {
       primary: {
         light: '#4791db',
@@ -52,7 +53,8 @@ else {
   });
 
   const store = createStore(combineReducers({
-    editorMisc
+    editor,
+    editorMisc,
   }));
 
   ReactDOM.render(

@@ -6,16 +6,19 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Button,
-  Popover,
-} from '@material-ui/core';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { EditorState } from 'draft-js';
+import Select from 'react-select';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
-import Select from 'react-select';
-import {CopyToClipboard} from 'react-copy-to-clipboard';
+import Snackbar from '@material-ui/core/Snackbar';
+import {
+  Button,
+  ButtonGroup,
+  Popover,
+} from '@material-ui/core';
 
 import AceEditor from "react-ace";
 import "ace-builds/webpack-resolver";
@@ -131,6 +134,8 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 /*************************************************
  * Utils & States
  *************************************************/
+import { isShowBlock } from '../utils/NumberListUtils';
+import { handleAceEditor, handleKeyCommand } from '../utils/KeyboardUtils';
 import {
   onMouseOver as _onMouseOver,
   onMouseLeave as _onMouseLeave,
@@ -139,8 +144,14 @@ import {
   GeekeMap,
   updateBlockData,
 } from '../utils/Misc';
-import { isShowBlock } from '../utils/NumberListUtils';
-import { handleAceEditor } from '../utils/KeyboardUtils';
+
+import { setEditorState } from '../states/editor';
+import {
+  pmsc,
+  setEditingCode,
+  setEditingMenu,
+  setSpecialFocusFunc,
+} from '../states/editorMisc';
 
 /*************************************************
  * Import Components
@@ -162,8 +173,7 @@ import {
   remToPx,
   themeOptions,
 } from '../constant';
-import { EditorState } from 'draft-js';
-import { pmsc } from '../states/editorMisc';
+import { Alert } from '@material-ui/lab';
 
 /*************************************************
  * Main components
@@ -173,28 +183,32 @@ const CodeBlock = props => {
   const blockData = props.block.getData();
   const blockKey = props.block.key;
   const contentState = props.contentState;
-  const getFocusBlockKey = props.blockProps.getFocusBlockKey;
   const handleBlockDargStart = props.blockProps.handleBlockDargStart;
-  const moveCursor = props.blockProps.setMoveCursorArgs;
   const pageUuid = props.blockProps.pageUuid;
   const readOnly = props.blockProps.readOnly;
-  const setEditingCode = props.blockProps.setEditingCode;
-  const setFocusBlockKey = props.blockProps.setFocusBlockKey;
-  const getMoveDirection = props.blockProps.getMoveDirection;
-  const setEditorState = props.blockProps.setEditorState;
-  const getEditorState = props.blockProps.getEditorState;
-  const setEditingMenu = props.blockProps.setEditingMenu;
   const handleFocusEditor = props.blockProps.handleFocusEditor;
   const updateSelectionState = props.blockProps.updateSelectionState;
+  const keyCommandDispatcher = props.blockProps.keyCommandDispatcher;
+  const editorState = useSelector(state => state.editor.cachedPages.get(pageUuid).get('content'));
 
   // Reducers
   const dispatch = useDispatch();
   const aceEditor = useRef(null);
+  const [editorKeyCommand, setEditorKeyCommand] = useState(null);
 
-  // Check whether to show this block
-  if (!isShowBlock(contentState, blockKey)) {
-    return null;
-  }
+  // Register focus function
+  const focusCodeBlock = moveDirection => {
+    if (moveDirection === constMoveDirection.up) {
+      aceEditor.current.editor.navigateFileEnd();
+    } else if (moveDirection === constMoveDirection.down) {
+      aceEditor.current.editor.navigateFileStart();
+    } else {
+      console.error(`Unknown move direction: ${moveDirection}`);
+    }
+    // Use timeout to prevent dispatch runs in dispatch because onFocus dispatch something
+    setTimeout(() => aceEditor.current.editor.focus(), 1);
+  };
+  useEffect(() => setSpecialFocusFunc(dispatch, pageUuid, blockKey, focusCodeBlock), []); // eslint-disable-line
 
   // Variables
   const codeContent = blockData.has(blockDataKeys.codeContent) ? blockData.get(blockDataKeys.codeContent) : '';
@@ -208,32 +222,11 @@ const CodeBlock = props => {
   const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
   const focusAceEditor = () => aceEditor.current.editor.focus();
   const blurAceEditor = () => aceEditor.current.editor.blur();
-  const onBlur = e => setEditingCode(false);
+  const onBlur = e => setEditingCode(dispatch, pageUuid, false);
   const onFocus = e => {
-    setEditingCode(true);
+    setEditingCode(dispatch, pageUuid, true);
     updateSelectionState();
   };
-
-  // If current block is focused, then automatically focus it.
-  if (getFocusBlockKey() === blockKey) {
-    setTimeout(() => { // Use timeout to delay focus operation and prevent from updating content when block is being rendered
-      const moveDirection = getMoveDirection();
-      if (moveDirection === constMoveDirection.up) {
-        aceEditor.current.editor.navigateFileEnd();
-      } else if (moveDirection === constMoveDirection.down) {
-        aceEditor.current.editor.navigateFileStart();
-      } else {
-        console.error(`Unknown move direction: ${moveDirection}`);
-      }
-      focusAceEditor();       // Focus on editor
-      setFocusBlockKey(null); // Unset it
-    }, 1);
-  } else if (getFocusBlockKey() === `${blockKey}blur`) {
-    setTimeout(() => {
-      blurAceEditor();
-      setFocusBlockKey(null);
-    }, 1);
-  }
 
   // Calculate indent level
   if (blockData.has(blockDataKeys.indentLevel)) {
@@ -263,8 +256,8 @@ const CodeBlock = props => {
     let newBlockData = new GeekeMap(blockData);
     newBlockData.set(blockDataKey, newValue);
     let newContentState = updateBlockData(contentState, blockKey, newBlockData);
-    let newEditorState = EditorState.push(getEditorState(), newContentState, changeType);
-    setEditorState(newEditorState);
+    let newEditorState = EditorState.push(editorState, newContentState, changeType);
+    setEditorState(dispatch, pageUuid, newEditorState);
   };
 
   // Function to update content, language, theme, and wrapping status
@@ -273,34 +266,49 @@ const CodeBlock = props => {
   const updateCodeTheme = theme => updateCodeBlockData(blockDataKeys.codeTheme, 'change-block-data', theme);
   const updateCodeWrapping = wrapping => updateCodeBlockData(blockDataKeys.codeWrapping, 'change-block-data', wrapping);
 
+  // Handle moveCursor
+  // Because moveCursor cannot be updated to Ace Editor when editorState is updated (i.e. using useCallback),
+  // we have to use useEffect to get the latest editorState when editorKeyCommand is updated.
+  const moveCursor = editorKeyCommand => setEditorKeyCommand(editorKeyCommand);
+  useEffect(() => {
+    if (!editorKeyCommand) return;
+    setEditorKeyCommand(null);
+    handleKeyCommand(editorState, editorKeyCommand, keyCommandDispatcher, blockKey, {blurAceEditor, handleFocusEditor});
+  }, [editorKeyCommand, editorState]); // eslint-disable-line
+
   // Compose aceEditor command
   const aceEditorCommands = [
     {
       name: 'moveCursorUp',
       bindKey: {win: 'up', mac: 'up'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.up, {moveCursor}, blockKey)
+      exec: editor => handleAceEditor(editor, constAceEditorAction.up, {moveCursor})
     },
     {
       name: 'moveCursorDown',
       bindKey: {win: 'down', mac: 'down'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.down, {moveCursor}, blockKey)
+      exec: editor => handleAceEditor(editor, constAceEditorAction.down, {moveCursor})
     },
     {
       name: 'moveCursorLeft',
       bindKey: {win: 'left', mac: 'left'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.left, {moveCursor}, blockKey)
+      exec: editor => handleAceEditor(editor, constAceEditorAction.left, {moveCursor})
     },
     {
       name: 'moveCursorRight',
       bindKey: {win: 'right', mac: 'right'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.right, {moveCursor}, blockKey)
+      exec: editor => handleAceEditor(editor, constAceEditorAction.right, {moveCursor})
     },
     {
       name: 'removeBlockType',
       bindKey: {win: 'backspace', mac: 'backspace'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.backspace, {moveCursor, onBlur, handleFocusEditor, updateSelectionState}, blockKey),
+      exec: editor => handleAceEditor(editor, constAceEditorAction.backspace, {moveCursor, onBlur, handleFocusEditor, updateSelectionState}),
     },
   ];
+
+  // Check whether to show this block
+  if (!isShowBlock(contentState, blockKey)) {
+    return null;
+  }
 
   // Compose aceEditor Props
   const aceEditorProps = {
@@ -350,7 +358,6 @@ const CodeBlock = props => {
       <CodeBlockMenuButtons
         pageUuid={pageUuid}
         blockKey={blockKey}
-        setEditingMenu={setEditingMenu}
         focusAceEditor={focusAceEditor}
         codeLanguage={codeLanguage}
         codeTheme={codeTheme}
@@ -376,7 +383,6 @@ const CodeBlockMenuButtons = props => {
   // Props
   const pageUuid = props.pageUuid;
   const blockKey = props.blockKey;
-  const setEditingMenu = props.setEditingMenu;
   const updateCodeLanguage = props.updateCodeLanguage;
   const updateCodeTheme = props.updateCodeTheme;
   const updateCodeWrapping = props.updateCodeWrapping;
@@ -389,8 +395,10 @@ const CodeBlockMenuButtons = props => {
   const themeName = codeBlockThemeReverseMap.has(codeTheme) ? codeBlockThemeReverseMap.get(codeTheme) : 'GitHub';
 
   // Reducers
+  const dispatch = useDispatch();
   const [languageAnchorEl, setLanguageAnchorEl] = useState(null);
   const [themeAnchorEl, setThemeAnchorEl] = useState(null);
+  const [showCopyMessage, setShowCopyMessage] = useState(false);
   const languageMenuOpen = Boolean(languageAnchorEl);
   const themeMenuOpen = Boolean(themeAnchorEl);
   const editorMiscPages = useSelector(state => state.editorMisc.pages);
@@ -399,13 +407,13 @@ const CodeBlockMenuButtons = props => {
   // handleClickLanguageMenu
   const handleClickLanguageMenu = e => {
     setLanguageAnchorEl(e.currentTarget);
-    setEditingMenu(true);
+    setEditingMenu(dispatch, pageUuid, true);
   };
 
   // handleCloseLanguageMenu
   const handleCloseLanguageMenu = () => {
     setLanguageAnchorEl(null);
-    setEditingMenu(false);
+    setEditingMenu(dispatch, pageUuid, false);
     setTimeout(() => {
       focusAceEditor();
     }, 1);
@@ -421,13 +429,13 @@ const CodeBlockMenuButtons = props => {
   // handleClickThemeMenu
   const handleClickThemeMenu = e => {
     setThemeAnchorEl(e.currentTarget);
-    setEditingMenu(true);
+    setEditingMenu(dispatch, pageUuid, true);
   };
 
   // handleCloseThemeMenu
   const handleCloseThemeMenu = e => {
     setThemeAnchorEl(null);
-    setEditingMenu(false);
+    setEditingMenu(dispatch, pageUuid, false);
     setTimeout(() => {
       focusAceEditor();
     }, 1);
@@ -438,6 +446,17 @@ const CodeBlockMenuButtons = props => {
     if (!v) return;
     handleCloseThemeMenu();
     updateCodeTheme(v.value);
+  };
+
+  // handleShowCopyMessage
+  const handleShowCopyMessage = () => {
+    setShowCopyMessage(true);
+    setTimeout(() => {
+      focusAceEditor();
+    }, 1);
+  };
+  const handleCloseCopyMessage = () => {
+    setShowCopyMessage(false);
   };
 
   // handleToggleCodeWrapping
@@ -477,24 +496,29 @@ const CodeBlockMenuButtons = props => {
   return (
     <div className='geeke-codeEditor-dropdownWrapper' contentEditable={false}>
       <div className={'geeke-codeEditor-buttonWrapper' + (mouseOverBlockKey === blockKey ? ' geeke-codeEditor-button-active' : '')}>
-        <Button
-          className='geeke-codeEditor-button' variant="outlined" size="small"
-          onClick={handleClickLanguageMenu}
-        >{languageName} ▾</Button>
+        <ButtonGroup className='geeke-codeEditor-buttonGroup' variant="outlined" size="small">
+          <Button
+            className='geeke-codeEditor-button'
+            onClick={handleClickLanguageMenu}
+          >{languageName} ▾</Button>
 
-        <Button
-          className='geeke-codeEditor-button' variant="outlined" size="small"
-          onClick={handleClickThemeMenu}
-        >{themeName} ▾</Button>
+          <Button
+            className='geeke-codeEditor-button'
+            onClick={handleClickThemeMenu}
+          >{themeName} ▾</Button>
 
-        <Button
-          className='geeke-codeEditor-button' variant="outlined" size="small"
-          onClick={handleToggleCodeWrapping}
-        >{wrappingIcon} Wrapping</Button>
+          <Button
+            className='geeke-codeEditor-button'
+            onClick={handleToggleCodeWrapping}
+          >{wrappingIcon} Wrapping</Button>
 
-        <CopyToClipboard text={codeContent}>
-          <Button className='geeke-codeEditor-button' variant="outlined" size="small">Copy</Button>
-        </CopyToClipboard>
+          <CopyToClipboard text={codeContent}>
+            <Button
+              style={{textTransform: 'none'}} // I don't know why className not work when using button group...
+              onClick={handleShowCopyMessage}
+            >Copy</Button>
+          </CopyToClipboard>
+        </ButtonGroup>
       </div>
 
       {/* Code Language */}
@@ -550,6 +574,16 @@ const CodeBlockMenuButtons = props => {
           />
         </div>
       </Popover>
+
+      {/* Copy Message */}
+      <Snackbar
+        open={showCopyMessage} autoHideDuration={5000} onClose={handleCloseCopyMessage}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseCopyMessage} severity='success'>
+          Copied!
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

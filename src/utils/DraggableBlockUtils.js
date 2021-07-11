@@ -6,9 +6,9 @@
 /*************************************************
  * IMPORT
  *************************************************/
+import { trimNumberListInWholePage } from './NumberListUtils';
 import {
   setMouseOverBlockKey,
-  unsetMouseOverBlockKey,
 } from '../states/editorMisc';
 import {
   GeekeMap,
@@ -16,7 +16,6 @@ import {
   getLastBlockKey,
   updateBlockData,
 } from '../utils/Misc';
-import { trimNumberListInWholePage } from './NumberListUtils';
 
 /*************************************************
  * CONST
@@ -194,7 +193,6 @@ const handleDrop_normalBlock = (e, pageUuid, editorState, selectedBlocks) => {
   }
 
   // Update indent level for each block
-  newContentState = newEditorState.getCurrentContent();
   for (let i = 0; i < selectedBlocks.length; i++) {
     const thisKey = selectedBlocks[i];
     const thisBlock = blockMap.get(thisKey);
@@ -233,13 +231,16 @@ export const onMouseOver = (e, dispatch, pageUuid, blockKey) => {
 
 export const onMouseLeave = (e, dispatch, pageUuid) => {
   e.stopPropagation();
-  unsetMouseOverBlockKey(dispatch, pageUuid);
+  setMouseOverBlockKey(dispatch, pageUuid, null);
 };
 
 export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorState, handleDropCallback=handleDrop_normalBlock) => {
   if (readOnly) {
     return;
   }
+
+  e.preventDefault();
+  e.stopPropagation();
 
   // Constants
   const selectionState = editorState.getSelection();
@@ -330,9 +331,10 @@ export const onDragStart = (e, readOnly, renderEleId, setDragShadowPos, editorSt
   }, selectedBlocks]);
 };
 
-export const onDragEnd = (e, setReadOnly, renderEleId, setDragShadowPos) => {
+export const onDragEnd = (e, setDraggingBlock, renderEleId, setDragShadowPos) => {
   e.stopPropagation();
-  setReadOnly(false);
+
+  setDraggingBlock(false);
 
   // Remove event listener
   document.onmousemove = null;

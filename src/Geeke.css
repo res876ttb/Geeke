@@ -363,13 +363,15 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   transition: opacity 0.15s;
 }
 
-.geeke-codeEditor-button {
+.geeke-codeEditor-buttonGroup {
   position: absolute;
-  top: -1.8rem;
+  top: -1.5rem;
   height: 1.2rem;
   font-size: 0.8rem;
   line-height: 0.8rem;
-  margin-right: 0.5rem !important;
+}
+
+.geeke-codeEditor-button {
   text-transform: none !important;
 }
 

@@ -7,7 +7,7 @@
  * React Components
  *************************************************/
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 
 /*************************************************
@@ -22,8 +22,10 @@ import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
  * Constant
  *************************************************/
 import {
-  pmsc
+  pmsc,
+  setDragShadowPos as _setDragShadowPos,
 } from '../states/editorMisc';
+import { onDragStart } from '../utils/DraggableBlockUtils';
 
 /*************************************************
  * Main components
@@ -35,12 +37,18 @@ const BlockDargButton = props => {
   const readOnly = props.readOnly;
   const topOffset = props.topOffset; // Unit: rem
   const paddingLeft = props.paddingLeft;
-  const handleBlockDargStart = props.handleBlockDargStart;
+  const dargShadowId = `geeke-dragShadow-${pageUuid}`;
 
   // Reducers
-  const editorMiscPages = useSelector(state => state.editorMisc.pages);
-  const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
+  const dispatch = useDispatch();
+  const editorMiscPage = useSelector(state => state.editorMisc.pages.get(pageUuid));
+  const editorPage = useSelector(state => state.editor.cachedPages.get(pageUuid));
+  const mouseOverBlockKey = editorMiscPage.get(pmsc.hover);
+  const editorState = editorPage.get('content');
   const className = 'geeke-draggableWrapper' + (readOnly ? '' : ' geeke-draggableCursor') + (mouseOverBlockKey === blockKey ? '' : ' geeke-invisible');
+
+  // Functions
+  const setDragShadowPos = (newShadowPos) => _setDragShadowPos(dispatch, pageUuid, newShadowPos);
 
   // Top offset
   let style = null;
@@ -55,7 +63,7 @@ const BlockDargButton = props => {
       draggable='true'
       style={{paddingLeft: `${paddingLeft}px`}}
 
-      onDragStart={handleBlockDargStart}
+      onDragStart={e => onDragStart(e, readOnly, dargShadowId, setDragShadowPos, editorState)}
     >
       <div className='geeke-draggableWrapperInner' style={style}>
         <DragIndicatorIcon style={{position: 'relative', right: '0.25rem'}} />

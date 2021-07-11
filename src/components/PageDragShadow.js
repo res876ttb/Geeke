@@ -7,6 +7,7 @@
  * React Components
  *************************************************/
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import throttle from 'lodash/throttle';
 
 /*************************************************
@@ -16,6 +17,11 @@ import {
   onDragEnd as _onDragEnd,
   createDragMaskParam,
 } from '../utils/DraggableBlockUtils';
+import {
+  setDragShadowPos as _setDragShadowPos,
+  setDraggingBlock as _setDraggingBlock,
+  pmsc,
+} from '../states/editorMisc';
 
 /*************************************************
  * Import Components
@@ -33,20 +39,19 @@ const PageDragShadow = props => {
   // Props
   const pageUuid = props.pageUuid;
   const elementId = props.elementId;
-  const dragShadowPos = props.dragShadowPos;
-  const setDragShadowPos = props.setDragShadowPos;
-  const setReadOnly = props.setReadOnly;
   const updateEditor = props.updateEditor;
   const editorState = props.editorState;
   const focusEditor = props.focusEditor;
 
-  // Constants
-  const enable = dragShadowPos && dragShadowPos.length >= 2 && dragShadowPos[2];
-  const initShadowPos = [window.innerWidth * 2, window.innerHeight * 2];
-
   // States & Reducers
+  const initShadowPos = [window.innerWidth * 2, window.innerHeight * 2];
+  const dispatch = useDispatch();
   const [mousePosition, setMousePosition] = useState(initShadowPos);
   const [dragMaskParam, setDragMaskParam] = useState(null);
+  const dragShadowPos = useSelector(state => state.editorMisc.pages.get(pageUuid).get(pmsc.dragShadowPos));
+
+  // Constants
+  const enable = dragShadowPos && dragShadowPos.length >= 2 && dragShadowPos[2];
 
   // Functions
   const createDragMask = throttle((x, y) => {
@@ -64,12 +69,14 @@ const PageDragShadow = props => {
   const onDragEnd = e => {
     // Get drop handler, which is the fourth element in dragShadowPos, and by default is handleDrop_normalBlock
     const handleDrop = dragShadowPos && dragShadowPos.length >= 3 && dragShadowPos[3] ? dragShadowPos[3] : null;
+    const setDraggingBlock = dragging => _setDraggingBlock(dispatch, pageUuid, dragging);
+    const setDragShadowPos = newPos => _setDragShadowPos(dispatch, pageUuid, newPos);
 
     // If drop handler exists, update editor
     if (handleDrop) updateEditor(handleDrop(e, pageUuid, editorState));
 
     // Remove mouse position handler
-    _onDragEnd(e, setReadOnly, elementId, setDragShadowPos);
+    _onDragEnd(e, setDraggingBlock, elementId, setDragShadowPos);
 
     // Automatically focus editor
     focusEditor();

@@ -17,7 +17,7 @@ import {
 } from "draft-js";
 
 import {
-  unsetMouseOverBlockKey,
+  setMouseOverBlockKey,
 } from '../states/editorMisc';
 import {
   trimNumberListInWholePage,
@@ -282,7 +282,7 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
 };
 
 export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid) => {
-  unsetMouseOverBlockKey(dispatch, pageUuid);
+  setMouseOverBlockKey(dispatch, pageUuid, null);
 
   switch (e.keyCode) {
     case 9: // Tab
@@ -1028,19 +1028,6 @@ const handleKeyCommand_deleteMultipleBlocks = (editorState, dispatcher) => {
 };
 
 const handleKeyCommand_moveUpToSpecialBlock = (editorState, dispatcher) => {
-  if (!dispatcher.setEditorState) {
-    console.error(dispatcherNotFoundConst.setEditorState);
-    return 'not-handled';
-  }
-  if (!dispatcher.setFocusBlockKey) {
-    console.error(dispatcherNotFoundConst.setFocusBlockKey);
-    return 'not-handled';
-  }
-  if (!dispatcher.setMoveDirection) {
-    console.error(dispatcherNotFoundConst.setMoveDirection);
-    return 'not-handled';
-  }
-
   const contentState = editorState.getCurrentContent();
   const selectionState = editorState.getSelection();
 
@@ -1062,29 +1049,13 @@ const handleKeyCommand_moveUpToSpecialBlock = (editorState, dispatcher) => {
   }));
   dispatcher.setEditorState(newEditorState);
 
-  // Set move direction first
-  dispatcher.setMoveDirection(constMoveDirection.up);
-
-  // Set focusBlockKey to previousBlockKey
-  dispatcher.setFocusBlockKey(previousBlockKey);
+  // Focus the special block
+  dispatcher.focusSpecialBlock(previousBlockKey, constMoveDirection.up);
 
   return 'handled';
 }
 
 const handleKeyCommand_moveDownToSpecialBlock = (editorState, dispatcher) => {
-  if (!dispatcher.setEditorState) {
-    console.error(dispatcherNotFoundConst.setEditorState);
-    return 'not-handled';
-  }
-  if (!dispatcher.setFocusBlockKey) {
-    console.error(dispatcherNotFoundConst.setFocusBlockKey);
-    return 'not-handled';
-  }
-  if (!dispatcher.setMoveDirection) {
-    console.error(dispatcherNotFoundConst.setMoveDirection);
-    return 'not-handled';
-  }
-
   const contentState = editorState.getCurrentContent();
   const selectionState = editorState.getSelection();
 
@@ -1106,28 +1077,14 @@ const handleKeyCommand_moveDownToSpecialBlock = (editorState, dispatcher) => {
   }));
   dispatcher.setEditorState(newEditorState);
 
-  // Set move direction first
-  dispatcher.setMoveDirection(constMoveDirection.down);
-
-  // Set focusBlockKey to nextBlockKey
-  dispatcher.setFocusBlockKey(nextBlockKey);
+  // Focus the special block
+  dispatcher.focusSpecialBlock(nextBlockKey, constMoveDirection.down);
 
   return 'handled';
 }
 
-const handleKeyCommand_moveToPreviousBlock = (editorState, dispatcher, blockKey) => {
-  if (!dispatcher.setEditorState) {
-    console.error(dispatcherNotFoundConst.setEditorState);
-    return 'not-handled';
-  }
-  if (!dispatcher.handleFocusEditor) {
-    console.error(dispatcherNotFoundConst.handleFocusEditor);
-    return 'not-handled';
-  }
-  if (!dispatcher.setFocusBlockKey) {
-    console.error(dispatcherNotFoundConst.setFocusBlockKey);
-    return 'not-handled';
-  }
+const handleKeyCommand_moveToPreviousBlock = (editorState, dispatcher, blockKey, restArgs=null) => {
+  if (restArgs === null) return 'not-handled';
 
   const selectionState = editorState.getSelection();
   const focusBlockKey = blockKey ? blockKey : selectionState.getFocusKey();
@@ -1136,7 +1093,8 @@ const handleKeyCommand_moveToPreviousBlock = (editorState, dispatcher, blockKey)
   // If current block is code block, then blur it first
   const focusBlock = newContentState.getBlockForKey(focusBlockKey);
   if (focusBlock.getType() === constBlockType.code) {
-    dispatcher.setFocusBlockKey(`${focusBlockKey}blur`);
+    restArgs.blurAceEditor();
+    restArgs.handleFocusEditor();
   }
 
   // Check whether previous block is a special block
@@ -1149,7 +1107,7 @@ const handleKeyCommand_moveToPreviousBlock = (editorState, dispatcher, blockKey)
       focusOffset: 0,
       anchorKey: focusBlockKey,
       anchorOffset: 0,
-    })), dispatcher);
+    })), dispatcher, restArgs);
   }
 
   // The previous block is NOT a special block. Then, se the cursor position to the end of the previous block.
@@ -1163,25 +1121,14 @@ const handleKeyCommand_moveToPreviousBlock = (editorState, dispatcher, blockKey)
   });
   const newEditorState = EditorState.forceSelection(editorState, newSelectionState);
 
+  // Render the new selection
   dispatcher.setEditorState(newEditorState);
 
-  // Wait for special block blurring
-  setTimeout(() => dispatcher.handleFocusEditor(), 1);
+  return 'handled';
 };
 
-const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey) => {
-  if (!dispatcher.setEditorState) {
-    console.error(dispatcherNotFoundConst.setEditorState);
-    return 'not-handled';
-  }
-  if (!dispatcher.handleFocusEditor) {
-    console.error(dispatcherNotFoundConst.handleFocusEditor);
-    return 'not-handled';
-  }
-  if (!dispatcher.setFocusBlockKey) {
-    console.error(dispatcherNotFoundConst.setFocusBlockKey);
-    return 'not-handled';
-  }
+const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey, restArgs=null) => {
+  if (restArgs === null) return 'not-handled';
 
   const selectionState = editorState.getSelection();
   const focusBlockKey = blockKey ? blockKey : selectionState.getFocusKey();
@@ -1190,7 +1137,8 @@ const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey) => 
   // If current block is code block, then blur it first
   const focusBlock = newContentState.getBlockForKey(focusBlockKey);
   if (focusBlock.getType() === constBlockType.code) {
-    dispatcher.setFocusBlockKey(`${focusBlockKey}blur`);
+    restArgs.blurAceEditor();
+    restArgs.handleFocusEditor();
   }
 
   // Check whether next block is a special block
@@ -1203,7 +1151,7 @@ const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey) => 
       focusOffset: 0,
       anchorKey: focusBlockKey,
       anchorOffset: 0,
-    })), dispatcher);
+    })), dispatcher, restArgs);
   }
 
   // The previous block is NOT a special block. Then, se the cursor position to the end of the previous block.
@@ -1216,13 +1164,13 @@ const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey) => 
   });
   const newEditorState = EditorState.forceSelection(editorState, newSelectionState);
 
+  // Render the new selection
   dispatcher.setEditorState(newEditorState);
 
-  // Wait for special block blurring
-  setTimeout(() => dispatcher.handleFocusEditor(), 1);
+  return 'handled';
 };
 
-export const handleKeyCommand = (editorState, command, dispatcher, blockKey) => {
+export const handleKeyCommand = (editorState, command, dispatcher, blockKey, restArgs=null) => {
   switch (command) {
     case keyCommandConst.moreIndent:
       return handleKeyCommand_moreIndent(editorState, dispatcher);
@@ -1240,10 +1188,10 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey) => 
       return handleKeyCommand_deleteMultipleBlocks(editorState, dispatcher);
 
     case keyCommandConst.moveToNextBlock:
-      return handleKeyCommand_moveToNextBlock(editorState, dispatcher, blockKey);
+      return handleKeyCommand_moveToNextBlock(editorState, dispatcher, blockKey, restArgs);
 
     case keyCommandConst.moveToPreviousBlock:
-      return handleKeyCommand_moveToPreviousBlock(editorState, dispatcher, blockKey);
+      return handleKeyCommand_moveToPreviousBlock(editorState, dispatcher, blockKey, restArgs);
 
     case keyCommandConst.moveUpToCodeBlock:
       return handleKeyCommand_moveUpToSpecialBlock(editorState, dispatcher);
@@ -1430,7 +1378,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
 /// End handleReturn
 
 /// Start handleAceEditor
-const handleAceEditor_up = (editor, dispatcher, blockKey) => {
+const handleAceEditor_up = (editor, dispatcher) => {
   if (!dispatcher.moveCursor) {
     console.error(dispatcherNotFoundConst.moveCursor);
     return null;
@@ -1444,14 +1392,14 @@ const handleAceEditor_up = (editor, dispatcher, blockKey) => {
   const selectionLead = selection.getSelectionLead();
   if (selectionAnchor.row !== selectionLead.row || selectionAnchor.column !== selectionLead.column) return false;
 
-  // // Check whether current cursor position at the first line. If not, apply the default action.
-  if (cursor.row !== 0) return false;
+  // Check whether current cursor position at the first line. If not, apply the default action.
+  if (cursor.row !== 0 || cursor.column !== 0) return false;
 
   // Current cursor is at the first line of the ace editor. However, up arrow key is pressed now because user want to move to the previous block.
-  dispatcher.moveCursor([keyCommandConst.moveToPreviousBlock, blockKey]);
+  dispatcher.moveCursor(keyCommandConst.moveToPreviousBlock);
 };
 
-const handleAceEditor_down = (editor, dispatcher, blockKey) => {
+const handleAceEditor_down = (editor, dispatcher) => {
   if (!dispatcher.moveCursor) {
     console.error(dispatcherNotFoundConst.moveCursor);
     return null;
@@ -1461,6 +1409,7 @@ const handleAceEditor_down = (editor, dispatcher, blockKey) => {
   const cursor = selection.getCursor();
   const editSession = editor.getSession();
   const lastLine = editSession.getLength() - 1;
+  const lastLineLastPosition = editSession.getLine(lastLine).length;
 
   // Check whether range start is equal to range end. If not, apply the default action.
   const selectionAnchor = selection.getSelectionAnchor();
@@ -1468,13 +1417,13 @@ const handleAceEditor_down = (editor, dispatcher, blockKey) => {
   if (selectionAnchor.row !== selectionLead.row || selectionAnchor.column !== selectionLead.column) return false;
 
   // Check whether current cursor position at the last line. If not, apply the default action.
-  if (cursor.row !== lastLine) return false;
+  if (cursor.row !== lastLine || cursor.column !== lastLineLastPosition) return false;
 
   // Current cursor is at the last line of the ace editor. However, down arrow key is pressed now because user want to move to the next block.
-  dispatcher.moveCursor([keyCommandConst.moveToNextBlock, blockKey]);
+  dispatcher.moveCursor(keyCommandConst.moveToNextBlock);
 };
 
-const handleAceEditor_left = (editor, dispatcher, blockKey) => {
+const handleAceEditor_left = (editor, dispatcher) => {
   if (!dispatcher.moveCursor) {
     console.error(dispatcherNotFoundConst.moveCursor);
     return null;
@@ -1492,10 +1441,10 @@ const handleAceEditor_left = (editor, dispatcher, blockKey) => {
   if (cursor.row !== 0 || cursor.column !== 0) return false;
 
   // Current cursor is at the beginning of the first line of the ace editor. However, left arrow key is pressed now because user want to move to the previous block.
-  dispatcher.moveCursor([keyCommandConst.moveToPreviousBlock, blockKey]);
+  dispatcher.moveCursor(keyCommandConst.moveToPreviousBlock);
 };
 
-const handleAceEditor_right = (editor, dispatcher, blockKey) => {
+const handleAceEditor_right = (editor, dispatcher) => {
   if (!dispatcher.moveCursor) {
     console.error(dispatcherNotFoundConst.moveCursor);
     return null;
@@ -1516,44 +1465,43 @@ const handleAceEditor_right = (editor, dispatcher, blockKey) => {
   if (cursor.row !== lastLine || cursor.column !== lastLineLastPosition) return false;
 
   // Current cursor is at the end of the last line of the ace editor. However, right arrow key is pressed now because user want to move to the next block.
-  dispatcher.moveCursor([keyCommandConst.moveToNextBlock, blockKey]);
+  dispatcher.moveCursor(keyCommandConst.moveToNextBlock);
 };
 
-const handleAceEditor_backspace = (editor, dispatcher, blockKey) => {
+const handleAceEditor_backspace = (editor, dispatcher) => {
   if (!dispatcher.moveCursor) {
     console.error(dispatcherNotFoundConst.moveCursor);
     return false;
   }
 
+  // Check whether the code block is empty. If not, perform normal backspace operation
   let editorContent = editor.getValue();
   if (editorContent !== '') return false;
 
+  // 1. Blur ace editor to make editingCode to false
+  // 2. Focus editor
+  // 3. Remove block style and block data
   dispatcher.onBlur();
-  dispatcher.moveCursor([[keyCommandConst.multiCommands, keyCommandConst.handleBackspace, null, false], blockKey]);
-  setTimeout(() => {
-    dispatcher.handleFocusEditor();
-    setTimeout(() => {
-      dispatcher.updateSelectionState(blockKey);
-    });
-  }, 1);
+  dispatcher.handleFocusEditor();
+  dispatcher.moveCursor([keyCommandConst.multiCommands, keyCommandConst.handleBackspace, null, false]);
 };
 
-export const handleAceEditor = (editor, action, dispatcher, blockKey) => {
+export const handleAceEditor = (editor, action, dispatcher) => {
   switch(action) {
     case constAceEditorAction.up:
-      return handleAceEditor_up(editor, dispatcher, blockKey);
+      return handleAceEditor_up(editor, dispatcher);
 
     case constAceEditorAction.down:
-      return handleAceEditor_down(editor, dispatcher, blockKey);
+      return handleAceEditor_down(editor, dispatcher);
 
     case constAceEditorAction.left:
-      return handleAceEditor_left(editor, dispatcher, blockKey);
+      return handleAceEditor_left(editor, dispatcher);
 
     case constAceEditorAction.right:
-      return handleAceEditor_right(editor, dispatcher, blockKey);
+      return handleAceEditor_right(editor, dispatcher);
 
     case constAceEditorAction.backspace:
-      return handleAceEditor_backspace(editor, dispatcher, blockKey);
+      return handleAceEditor_backspace(editor, dispatcher);
 
     default:
       console.error(`Unknown action in handleAceEditor: ${action}`);
