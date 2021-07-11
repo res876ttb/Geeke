@@ -32,6 +32,7 @@ export const blockDataKeys = {
   codeLanguage: 'codeLanguage',
   codeWrapping: 'codeWrapping',
   codeTheme: 'codeTheme',
+  codeLineNumber: 'codeLineNumber',
 };
 
 export const constBlockType = {

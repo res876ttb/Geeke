@@ -772,6 +772,7 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
     removeBlockData(blockDataKeys.codeLanguage);
     removeBlockData(blockDataKeys.codeWrapping);
     removeBlockData(blockDataKeys.codeTheme);
+    removeBlockData(blockDataKeys.codeLineNumber);
 
     if (dataChanged) {
       newContentState = updateBlockData(newContentState, null, focusBlockData, newSelectionState);

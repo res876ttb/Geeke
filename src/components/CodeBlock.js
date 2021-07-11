@@ -11,9 +11,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { EditorState } from 'draft-js';
 import Select from 'react-select';
-import CheckIcon from '@material-ui/icons/Check';
-import CloseIcon from '@material-ui/icons/Close';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Snackbar from '@material-ui/core/Snackbar';
+import Switch from '@material-ui/core/Switch';
 import {
   Button,
   ButtonGroup,
@@ -223,6 +223,7 @@ const CodeBlock = props => {
   let codeLanguage = 'plain_text';
   let codeWrapping = false; // TODO: make the default value to user-specieifed.
   let codeTheme = 'github'; // TODO: make the default value to user-specieifed.
+  let showLineNumber = true;
 
   // Functions
   const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
@@ -255,6 +256,11 @@ const CodeBlock = props => {
     codeTheme = blockData.get(blockDataKeys.codeTheme);
   }
 
+  // Get show line number
+  if (blockData.has(blockDataKeys.codeLineNumber)) {
+    showLineNumber = blockData.get(blockDataKeys.codeLineNumber);
+  }
+
   // Calculate paddingLeft depends on indent level
   const paddingLeft = remToPx(indentWidth * indentLevel);
 
@@ -272,6 +278,7 @@ const CodeBlock = props => {
   const updateCodeLanguage = language => updateCodeBlockData(blockDataKeys.codeLanguage, 'change-block-data', language);
   const updateCodeTheme = theme => updateCodeBlockData(blockDataKeys.codeTheme, 'change-block-data', theme);
   const updateCodeWrapping = wrapping => updateCodeBlockData(blockDataKeys.codeWrapping, 'change-block-data', wrapping);
+  const updateShowLineNumber = showLineNumber => updateCodeBlockData(blockDataKeys.codeLineNumber, 'change-block-data', showLineNumber);
 
   // Handle moveCursor
   // Because moveCursor cannot be updated to Ace Editor when editorState is updated (i.e. using useCallback),
@@ -336,6 +343,7 @@ const CodeBlock = props => {
     name: `${blockKey}-aceEditor`,
     value: codeContent,
     onChange: updateCodeContent,
+    showGutter: showLineNumber,
     setOptions: {
       enableBasicAutocompletion: true,
       enableLiveAutocompletion: true,
@@ -370,9 +378,11 @@ const CodeBlock = props => {
         codeTheme={codeTheme}
         codeContent={codeContent}
         codeWrapping={codeWrapping}
+        showLineNumber={showLineNumber}
         updateCodeLanguage={updateCodeLanguage}
         updateCodeTheme={updateCodeTheme}
         updateCodeWrapping={updateCodeWrapping}
+        updateShowLineNumber={updateShowLineNumber}
       />
 
       <div
@@ -393,11 +403,13 @@ const CodeBlockMenuButtons = props => {
   const updateCodeLanguage = props.updateCodeLanguage;
   const updateCodeTheme = props.updateCodeTheme;
   const updateCodeWrapping = props.updateCodeWrapping;
+  const updateShowLineNumber = props.updateShowLineNumber;
   const focusAceEditor = props.focusAceEditor;
   const codeLanguage = props.codeLanguage;
   const codeTheme = props.codeTheme;
   const codeContent = props.codeContent;
   const codeWrapping = props.codeWrapping;
+  const showLineNumber = props.showLineNumber;
   const languageName = languageReverseMap.has(codeLanguage) ? languageReverseMap.get(codeLanguage) : 'PlainText';
   const themeName = codeBlockThemeReverseMap.has(codeTheme) ? codeBlockThemeReverseMap.get(codeTheme) : 'GitHub';
 
@@ -405,9 +417,11 @@ const CodeBlockMenuButtons = props => {
   const dispatch = useDispatch();
   const [languageAnchorEl, setLanguageAnchorEl] = useState(null);
   const [themeAnchorEl, setThemeAnchorEl] = useState(null);
+  const [settingAnchorEl, setSettingAnchorEl] = useState(null);
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const languageMenuOpen = Boolean(languageAnchorEl);
   const themeMenuOpen = Boolean(themeAnchorEl);
+  const settingmenuOpen = Boolean(settingAnchorEl);
   const editorMiscPages = useSelector(state => state.editorMisc.pages);
   const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
 
@@ -462,12 +476,32 @@ const CodeBlockMenuButtons = props => {
       focusAceEditor();
     }, 1);
   };
+
+  // handleCloseCopyMessage
   const handleCloseCopyMessage = () => {
     setShowCopyMessage(false);
   };
 
+  // handleOpenSettingMenu
+  const handleOpenSettingMenu = e => {
+    setSettingAnchorEl(e.currentTarget);
+    setEditingMenu(dispatch, pageUuid, true);
+  };
+
+  // handleCloseSettingMenu
+  const handleCloseSettingMenu = () => {
+    setSettingAnchorEl(null);
+    setEditingMenu(dispatch, pageUuid, false);
+    setTimeout(() => {
+      focusAceEditor();
+    }, 1);
+  };
+
   // handleToggleCodeWrapping
   const handleToggleCodeWrapping = () => updateCodeWrapping(!codeWrapping);
+
+  // handleToggleShowLineNumber
+  const handleToggleShowLineNumber = () => updateShowLineNumber(!showLineNumber);
 
   // Styles...
   const codeBlockMenuStyles = {
@@ -497,9 +531,6 @@ const CodeBlockMenuButtons = props => {
     }),
   };
 
-  // Wrapping icon
-  const wrappingIcon = codeWrapping ? <CheckIcon fontSize='inherit' /> : <CloseIcon fontSize='inherit' />;
-
   return (
     <div className='geeke-codeEditor-dropdownWrapper' contentEditable={false}>
       <div className={'geeke-codeEditor-buttonWrapper' + (mouseOverBlockKey === blockKey ? ' geeke-codeEditor-button-active' : '')}>
@@ -514,17 +545,18 @@ const CodeBlockMenuButtons = props => {
             onClick={handleClickThemeMenu}
           >{themeName} ▾</Button>
 
-          <Button
-            className='geeke-codeEditor-button'
-            onClick={handleToggleCodeWrapping}
-          >{wrappingIcon} Wrapping</Button>
-
           <CopyToClipboard text={codeContent}>
             <Button
               style={{textTransform: 'none'}} // I don't know why className not work when using button group...
               onClick={handleShowCopyMessage}
             >Copy</Button>
           </CopyToClipboard>
+
+          <Button
+            onClick={handleOpenSettingMenu}
+          >
+            <MoreHorizIcon />
+          </Button>
         </ButtonGroup>
       </div>
 
@@ -579,6 +611,50 @@ const CodeBlockMenuButtons = props => {
             placeholder='Theme'
             onChange={handleChangeCodeTheme}
           />
+        </div>
+      </Popover>
+
+      {/* Setting Menu */}
+      <Popover
+        open={settingmenuOpen}
+        anchorEl={settingAnchorEl}
+        onClose={handleCloseSettingMenu}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <div className='geeke-codeblockSettingMenu noselect'>
+          <table>
+            <tbody>
+              <tr>
+                <td>Wrapping</td>
+                <td>
+                  <Switch
+                    size="small"
+                    checked={codeWrapping}
+                    onChange={handleToggleCodeWrapping}
+                    color='primary'
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Line Number</td>
+                <td>
+                  <Switch
+                    size="small"
+                    checked={showLineNumber}
+                    onChange={handleToggleShowLineNumber}
+                    color='primary'
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </Popover>
 
