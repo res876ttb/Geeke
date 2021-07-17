@@ -233,7 +233,10 @@ const CodeBlock = props => {
   const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
   const focusAceEditor = () => aceEditor.current.editor.focus();
   const blurAceEditor = () => aceEditor.current.editor.blur();
-  const onBlur = e => setEditingCode(dispatch, pageUuid, false);
+  const onBlur = e => {
+    aceEditor.current.editor.clearSelection();
+    setEditingCode(dispatch, pageUuid, false);
+  };
   const onFocus = e => {
     setEditingCode(dispatch, pageUuid, true);
     updateSelectionState();
