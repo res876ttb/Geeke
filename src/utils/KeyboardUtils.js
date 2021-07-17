@@ -62,6 +62,8 @@ const keyCommandConst = {
   moveUpToCodeBlock: 9,
   moveToPreviousBlock: 10,
   moveToNextBlock: 11,
+  selectPreviousSpecialBlock: 12,
+  selectNextSpecialBlock: 13,
 };
 
 /**
@@ -98,9 +100,9 @@ const blockDataPreserveConfig = {
   [blockDataKeys.headingType]: [blockDataPreserveConstant.none],
 };
 
-const specialBlockList = [
+const specialBlockSet = new Set([
   constBlockType.code,
-];
+]);
 
 /*************************************************
  * FUNCTIONS
@@ -228,6 +230,7 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
   const focusBlockKey = selectionState.getFocusKey();
   const focusBlock = contentState.getBlockForKey(focusBlockKey);
   const focusOffset = selectionState.getFocusOffset();
+  const hasShift = e.shiftKey;
 
   const checkMoveUp = (leftKey=false) => {
     // Check whether current position is at first
@@ -238,7 +241,7 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
     if (!previousBlock) return defaultArrowKeyFunction();
 
     // Check whether the previous block is a code block
-    if (previousBlock.getType() === constBlockType.code) {
+    if (previousBlock.getType() === constBlockType.code && !hasShift) {
       // This is exactly the block that you can move up!
       return keyCommandConst.moveUpToCodeBlock;
     }
@@ -255,7 +258,7 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
     if (!nextBlock) return defaultArrowKeyFunction();
 
     // Check whether the next block is a code block
-    if (nextBlock.getType() === constBlockType.code) {
+    if (nextBlock.getType() === constBlockType.code && !hasShift) {
       return keyCommandConst.moveDownToCodeBlock;
     }
 
@@ -537,8 +540,8 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   const focusBlock = contentState.getBlockForKey(focusKey);
   const focusBlockType = focusBlock.getType();
   const blockText = focusBlock.getText();
-  const firstSpaceIndex__ = blockText.indexOf(' ');
-  const firstSpaceIndex = firstSpaceIndex__ > -1 ? firstSpaceIndex__ : focusBlock.getLength();
+  const __firstSpaceIndex = blockText.indexOf(' ');
+  const firstSpaceIndex = __firstSpaceIndex > -1 ? __firstSpaceIndex : focusBlock.getLength();
 
   // handleConvertToNumberList
   const handleConvertToNumberList = () => {
@@ -720,9 +723,29 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
 
   // Set heading type if the new type is heading
   if (newType === constBlockType.heading) {
+    let focusBlock = newContentState.getBlockForKey(focusKey);
     let focusBlockData = new GeekeMap(focusBlock.getData());
     focusBlockData.set(blockDataKeys.headingType, newHeadingType);
     newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
+  }
+
+  // If newType is code, then put the content to block data
+  if (newType === constBlockType.code) {
+    // Put content to block data
+    let focusBlock = newContentState.getBlockForKey(focusKey);
+    let focusBlockData = new GeekeMap(focusBlock.getData());
+    let focusBlockContent = focusBlock.getText();
+    focusBlockData.set(blockDataKeys.codeContent, focusBlockContent);
+    newContentState = updateBlockData(newContentState, focusKey, focusBlockData);
+
+    // Remove block text
+    let selectionToRemoveText = new SelectionState({
+      focusKey: focusKey,
+      focusOffset: focusBlockContent.length,
+      anchorKey: focusKey,
+      anchorOffset: 0
+    });
+    newContentState = Modifier.removeRange(newContentState, selectionToRemoveText, 'forward');
   }
 
   // Update editorState
@@ -733,7 +756,7 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
   return 'handled';
 };
 
-export const handleKeyCommand_backspace = (editorState, command, dispatcher) => {
+export const handleKeyCommand_backspace = (editorState, command, dispatcher, returnResult=false) => {
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
     return 'not-handled';
@@ -764,6 +787,7 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
       }
     }
 
+    // TODO: automation...
     removeBlockData(blockDataKeys.numberListOrder);
     removeBlockData(blockDataKeys.toggleListToggle);
     removeBlockData(blockDataKeys.checkListCheck);
@@ -850,6 +874,8 @@ export const handleKeyCommand_backspace = (editorState, command, dispatcher) => 
       }
     }
   }
+
+  if (returnResult) return newContentState;
 
   // Apply update to editorState
   newEditorState = EditorState.push(editorState, newContentState, 'change-block-type');
@@ -969,7 +995,7 @@ const handleKeyCommand_delete = (editorState, command, dispatcher) => {
   return 'handled';
 };
 
-const handleKeyCommand_deleteMultipleBlocks = (editorState, dispatcher) => {
+const handleKeyCommand_deleteMultipleBlocks = (editorState, command, dispatcher) => {
   if (!dispatcher.setEditorState) {
     console.error(dispatcherNotFoundConst.setEditorState);
     return 'not-handled';
@@ -981,6 +1007,12 @@ const handleKeyCommand_deleteMultipleBlocks = (editorState, dispatcher) => {
   let startOffset = selectionState.getStartOffset();
   let endBlockKey = selectionState.getEndKey();
   let nextToEndBlock = newContentState.getBlockAfter(endBlockKey);
+
+  // Sanity check whether startOffset is valid. If not, set it to the length of the startBlock
+  let startBlock = newContentState.getBlockForKey(startBlockKey);
+  if (startBlock.getLength() < startOffset) {
+    startOffset = startBlock.getLength();
+  }
 
   // If this is not the end of the editor...
   if (nextToEndBlock) {
@@ -1007,6 +1039,13 @@ const handleKeyCommand_deleteMultipleBlocks = (editorState, dispatcher) => {
         tempBlock = newContentState.getBlockAfter(tempBlock.getKey());
       }
     }
+  }
+
+  // If the focus block is a special block, set the block type to basic block and remove all the related block data
+  const focusBlockType = newContentState.getBlockForKey(selectionState.getFocusKey()).getType();
+  if (specialBlockSet.has(focusBlockType)) {
+    let newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
+    newContentState = handleKeyCommand_backspace(newEditorState, command, dispatcher, true);
   }
 
   // Remove the block
@@ -1102,7 +1141,7 @@ const handleKeyCommand_moveToPreviousBlock = (editorState, dispatcher, blockKey,
   // Check whether previous block is a special block
   const previousBlock = newContentState.getBlockBefore(focusBlockKey);
   if (!previousBlock) return 'not-handled'; // If this is the first block, then no need to handle this event.
-  if (specialBlockList.indexOf(previousBlock.getType()) !== -1) {
+  if (specialBlockSet.has(previousBlock.getType())) {
     // The previous block is a special block
     return handleKeyCommand_moveUpToSpecialBlock(EditorState.forceSelection(editorState, new SelectionState({
       focusKey: focusBlockKey,
@@ -1146,7 +1185,7 @@ const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey, res
   // Check whether next block is a special block
   const nextBlock = newContentState.getBlockAfter(focusBlockKey);
   if (!nextBlock) return 'not-handled'; // If this is the first block, then no need to handle this event.
-  if (specialBlockList.indexOf(nextBlock.getType()) !== -1) {
+  if (specialBlockSet.has(nextBlock.getType())) {
     // The next block is a special block
     return handleKeyCommand_moveDownToSpecialBlock(EditorState.forceSelection(editorState, new SelectionState({
       focusKey: focusBlockKey,
@@ -1187,7 +1226,7 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
       return handleKeyCommand_checkBlockTypeConversion(editorState, command, dispatcher);
 
     case keyCommandConst.deleteMultipleBlocks:
-      return handleKeyCommand_deleteMultipleBlocks(editorState, dispatcher);
+      return handleKeyCommand_deleteMultipleBlocks(editorState, command, dispatcher);
 
     case keyCommandConst.moveToNextBlock:
       return handleKeyCommand_moveToNextBlock(editorState, dispatcher, blockKey, restArgs);

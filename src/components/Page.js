@@ -17,6 +17,7 @@ import {
   Editor,
   convertToRaw,
 } from 'draft-js';
+import throttle from 'lodash/throttle';
 
 /*************************************************
  * Utils & States
@@ -55,8 +56,8 @@ import {
   pmsc,
   setFocusBlockKey,
   setMoveDirection,
+  setSelectedBlocks,
 } from '../states/editorMisc';
-// import Dispatcher from '../utils/Dispatcher';
 
 /*************************************************
  * Main components
@@ -71,6 +72,7 @@ const Page = props => {
   const readOnly = useSelector(state => state.editor.cachedPages.get(uuid).get('readOnly'));
   const editingCode = useSelector(state => state.editorMisc.pages.get(uuid).get(pmsc.editingCode));
   const editingMenu = useSelector(state => state.editorMisc.pages.get(uuid).get(pmsc.editingMenu));
+  const selectedBlocks = useSelector(state => state.editorMisc.pages.get(uuid).get(pmsc.selectedBlocks));
   const editor = useRef(null);
 
   // Constants
@@ -79,8 +81,19 @@ const Page = props => {
     ...defaultKeyboardHandlingConfig,
   };
 
+  // Find selected blocks
+  const findSelectedBlocks = throttle(editorState => {
+    // This function may consume lots of CPU resource, so use throttle to reduce CPU usage. (10Hz)
+    setSelectedBlocks(dispatch, uuid, editorState);
+  }, 100, {'trailing': false});
+
+  const isSelectedBlock = blockKey => {
+    return selectedBlocks.has(blockKey);
+  };
+
   // onChange
   const updateEditor = editorState => {
+    findSelectedBlocks(editorState);
     if (!readOnly) setEditorState(dispatch, uuid, editorState);
   };
   const updateEditorButIgnoreReadOnly = editorState => setEditorState(dispatch, uuid, editorState);
@@ -173,8 +186,10 @@ const Page = props => {
           component: CodeBlock,
           props: {
             ...defaultBlockProps,
-            keyCommandDispatcher,
+            editorState,
+            isSelectedBlock,
             handleFocusEditor,
+            keyCommandDispatcher,
             updateSelectionState: blockKey => updateEditor(setSelectionStateByKey(editorState, blockKey)),
           },
         };
@@ -209,7 +224,6 @@ const Page = props => {
         pageUuid={uuid}
         elementId={dargShadowId}
         editorState={editorState}
-        // dragShadowPos={dragShadowPos}
         updateEditor={updateEditorButIgnoreReadOnly}
         focusEditor={handleFocusEditor}
       />

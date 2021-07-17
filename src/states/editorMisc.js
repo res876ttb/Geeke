@@ -22,6 +22,7 @@ export const pmsc = { // Page Misc State Constants
   focusBlockKey: 6,
   specialFocusFunc: 7,
   moveDirection: 8,
+  selectedBlocks: 9,
 };
 
 const initPageMiscState = [
@@ -33,6 +34,7 @@ const initPageMiscState = [
   [pmsc.focusBlockKey, null], // Used for special block like code block, table, and etc.
   [pmsc.specialFocusFunc, new Map()], // Key: blockKey, Value: focus func
   [pmsc.moveDirection, null],
+  [pmsc.selectedBlocks, new Set()],
 ];
 
 const initEditorMiscState = {
@@ -64,6 +66,35 @@ export const setSpecialFocusFunc = (dispatch, pageUuid, blockKey, focusFunc) => 
 export const focusSpecialBlock = (dispatch, pageUuid, blockKey, moveDirection) => {
   dispatch({type, callback: state => {
     state.pages.get(pageUuid).get(pmsc.specialFocusFunc).get(blockKey)(moveDirection);
+    return state;
+  }});
+};
+
+export const setSelectedBlocks = (dispatch, pageUuid, editorState) => {
+  dispatch({type, callback: state => {
+    const selectionState = editorState.getSelection();
+
+    let page = state.pages.get(pageUuid);
+    let selectedBlocks = new Set();
+
+    if (selectionState.isCollapsed()) {
+      page.set(pmsc.selectedBlocks, selectedBlocks);
+      return state;
+    }
+
+    const isBackward = selectionState.getIsBackward();
+    const startBlockKey = isBackward ? selectionState.getFocusKey() : selectionState.getAnchorKey();
+    const endBlockKey = isBackward ? selectionState.getAnchorKey() : selectionState.getFocusKey();
+    const contentState = editorState.getCurrentContent();
+
+    let curBlock = contentState.getBlockForKey(startBlockKey);
+    while (true) {
+      selectedBlocks.add(curBlock.getKey());
+      if (curBlock.getKey() === endBlockKey) break;
+      curBlock = contentState.getBlockAfter(curBlock.getKey());
+    }
+
+    page.set(pmsc.selectedBlocks, selectedBlocks);
     return state;
   }});
 };

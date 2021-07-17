@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { EditorState } from 'draft-js';
+import { EditorBlock, EditorState } from 'draft-js';
 import Select from 'react-select';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -191,7 +191,7 @@ const CodeBlock = props => {
   const handleFocusEditor = props.blockProps.handleFocusEditor;
   const updateSelectionState = props.blockProps.updateSelectionState;
   const keyCommandDispatcher = props.blockProps.keyCommandDispatcher;
-  const editorState = useSelector(state => state.editor.cachedPages.get(pageUuid).get('content'));
+  const editorState = props.blockProps.editorState;
 
   // Reducers
   const dispatch = useDispatch();
@@ -403,18 +403,43 @@ const CodeBlock = props => {
         updateShowLineNumber={updateShowLineNumber}
       />
 
-      <div
-        className='geeke-codeEditorWrapper'
-        style={{backgroundColor: backgroundColor, border: codeWrapperBorder}}
-        onClick={focusAceEditor} // Need to force focus on mouse click because in some situation, click on the last line cannot focus the AceEditor...
-        contentEditable={false}  // Make this block not contenteditable to prevent from modify some DOM by accident...
-      >
-        <AceEditor {...aceEditorProps} />
+      <div className='geeke-codeBlockEditor'>
+        <EditorBlock {...props} />
       </div>
+      <CodeBlockSelection blockKey={blockKey} pageUuid={pageUuid}>
+        <div
+          className='geeke-codeEditorWrapper'
+          style={{backgroundColor: backgroundColor, border: codeWrapperBorder}}
+          onClick={focusAceEditor} // Need to force focus on mouse click because in some situation, click on the last line cannot focus the AceEditor...
+          contentEditable={false}  // Make this block not contenteditable to prevent from modify some DOM by accident...
+        >
+          <AceEditor {...aceEditorProps} />
+        </div>
+      </CodeBlockSelection>
 
     </div>
   )
 }
+
+const CodeBlockSelection = props => {
+  // Props
+  const blockKey = props.blockKey;
+  const pageUuid = props.pageUuid;
+  const children = props.children;
+
+  // Reducers
+  const selectedBlocks = useSelector(state => state.editorMisc.pages.get(pageUuid).get(pmsc.selectedBlocks));
+
+  // Constants
+  const isSelected = selectedBlocks.has(blockKey);
+  const className = 'geeke-codeBlockSelectionMask' + (isSelected ? ' geeke-codeBlockSelected' : '');
+
+  return (
+    <div className={className}>
+      {children}
+    </div>
+  );
+};
 
 const CodeBlockMenuButtons = props => {
   // Props

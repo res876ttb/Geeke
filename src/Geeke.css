@@ -10,6 +10,9 @@
   --editorTopPadding: 0.3rem;
   --dragButtonHoverColor: rgba(124, 124, 124, 0.5);
   --dragMaskHeight: 0.25rem;
+
+  --specialBlockSelectionWidth: 0.3rem;
+  --selectionColor: rgba(42, 165, 245, 0.5);
 }
 
 
@@ -337,9 +340,16 @@ code {
   min-height: 1rem;
 }
 
+.geeke-codeBlockEditor {
+  /* height: 1px; */
+  overflow: hidden;
+  position: absolute;
+}
+
 .geeke-codeEditorWrapper {
   padding: 0.3rem 1rem;
   border-radius: 0.3rem;
+  transition: background-color 0.3s;
 }
 
 /* Correct Ace editor style */
@@ -400,6 +410,21 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   padding: 0.6rem 0.8rem;
   font-size: 1rem;
   /* line-height: 2rem; */
+}
+
+.geeke-codeBlockSelectionMask {
+  border-radius: 0.4rem;
+  top: calc(-1 * var(--specialBlockSelectionWidth));
+  bottom: calc(-1 * var(--specialBlockSelectionWidth));
+  left: calc(-1 * var(--specialBlockSelectionWidth));
+  right: calc(-1 * var(--specialBlockSelectionWidth));
+  position: relative;
+  background-color: rgba(0, 0, 0, 0);
+  border: rgba(0, 0, 0, 0) solid var(--specialBlockSelectionWidth);
+}
+
+.geeke-codeBlockSelected {
+  background-color: var(--selectionColor);
 }
 
 
