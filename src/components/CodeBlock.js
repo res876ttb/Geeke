@@ -376,7 +376,7 @@ const CodeBlock = props => {
   return (
     <div
       className='geeke-blockWrapper'
-      style={{paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`, margin: '1.6rem 0rem'}}
+      style={{paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`, margin: '1rem 0rem 0rem'}}
       geeke='true'
 
       onMouseOver={onMouseOver}

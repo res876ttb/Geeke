@@ -9,6 +9,7 @@
  * React Components
  *************************************************/
 import React, { useRef } from 'react';
+import throttle from 'lodash/throttle';
 import {
   useDispatch,
   useSelector,
@@ -17,7 +18,6 @@ import {
   Editor,
   convertToRaw,
 } from 'draft-js';
-import throttle from 'lodash/throttle';
 
 /*************************************************
  * Utils & States
@@ -58,6 +58,7 @@ import {
   setMoveDirection,
   setSelectedBlocks,
 } from '../states/editorMisc';
+import { Button } from '@material-ui/core';
 
 /*************************************************
  * Main components
@@ -202,6 +203,19 @@ const Page = props => {
     }
   };
 
+  // styleMap
+  const styleMap = {
+    'STRIKETHROUGH': {
+      textDecoration: 'line-through',
+    },
+    'CODE': {
+      backgroundColor: 'rgba(55, 55, 55, 0.2)',
+      borderRadius: '0.2rem',
+      fontFamily: 'monospace',
+      padding: '0rem 0.2rem',
+    },
+  };
+
   return (
     <div>
       <PageTitle uuid={uuid} />
@@ -216,6 +230,7 @@ const Page = props => {
           blockRendererFn={blockDecorator}
           spellCheck={true}
           readOnly={readOnly || editingCode || editingMenu}
+          customStyleMap={styleMap}
           // placeholder={'Write something here...'}
         />
       </div>
@@ -232,9 +247,9 @@ const Page = props => {
       <div className='geeke-pageBottom'></div>
 
       {/* For debug only */}
-      <button onClick={e => {
-        copyTextToClipboard(JSON.stringify(convertToRaw(editorState.getCurrentContent())));
-      }}>Copy content</button>
+      <Button variant='outlined' onClick={e => {copyTextToClipboard(JSON.stringify(convertToRaw(editorState.getCurrentContent())))}}>
+        Copy content
+      </Button>
     </div>
   )
 }

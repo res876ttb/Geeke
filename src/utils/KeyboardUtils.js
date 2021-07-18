@@ -64,6 +64,8 @@ const keyCommandConst = {
   moveToNextBlock: 11,
   selectPreviousSpecialBlock: 12,
   selectNextSpecialBlock: 13,
+  toggleInlineStrikeThrough: 14,
+  toggleInlineCode: 15,
 };
 
 /**
@@ -284,6 +286,22 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
   }
 };
 
+const mapKeyToEditorCommand_s = (e, config) => {
+  if (((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) && e.shiftKey) {
+    return keyCommandConst.toggleInlineStrikeThrough;
+  }
+
+  return null;
+};
+
+const mapKeyToEditorCommand_e = (e, config) => {
+  if ((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) {
+    return keyCommandConst.toggleInlineCode;
+  }
+
+  return null;
+};
+
 export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid) => {
   setMouseOverBlockKey(dispatch, pageUuid, null);
 
@@ -305,6 +323,12 @@ export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid
     case 39: // Right
     case 40: // Down
       return mapKeyToEditorCommand_arrowKey(e, editorState);
+
+    case 83: // S
+      return mapKeyToEditorCommand_s(e, config);
+
+    case 69: // E
+      return mapKeyToEditorCommand_e(e, config);
 
     default:
       return getDefaultKeyBinding(e);
@@ -575,7 +599,13 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
 
   // Check whether current caret position is before the first space. If not, this is not the type conversion case, and insert a space back
   const insertSpaceToCurrentSelection = () => {
-    let newContentState = Modifier.insertText(contentState, selectionState, ' ');
+    // Get entity by key and offset
+    let focusInlineStyle = focusBlock.getInlineStyleAt(caretPosition - 1);
+    let focusEntity = focusBlock.getEntityAt(caretPosition - 1);
+    console.log(focusInlineStyle);
+
+    // Insert space with the same inline style to the entity
+    let newContentState = Modifier.insertText(contentState, selectionState, ' ', focusInlineStyle, focusEntity);
     let newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
     dispatcher.setEditorState(newEditorState);
   };
@@ -1211,6 +1241,37 @@ const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey, res
   return 'handled';
 };
 
+const handleKeyCommand_toggleInlineStrikeThrough = (editorState, dispatcher) => {
+  const styleCode = 'STRIKETHROUGH';
+  let newContentState = handleKeyCommand_toggleInlineStyle(editorState, styleCode);
+  let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
+  dispatcher.setEditorState(newEditorState);
+};
+
+const handleKeyCommand_toggleInlineCode = (editorState, dispatcher) => {
+  const styleCode = 'CODE';
+  let newContentState = handleKeyCommand_toggleInlineStyle(editorState, styleCode);
+  let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
+  dispatcher.setEditorState(newEditorState);
+};
+
+const handleKeyCommand_toggleInlineStyle = (editorState, styleCode) => {
+  const selectionState = editorState.getSelection();
+  let newContentState = editorState.getCurrentContent();
+  const anchorBlock = newContentState.getBlockForKey(selectionState.getAnchorKey());
+  const anchorInlineStyle = anchorBlock.getInlineStyleAt(selectionState.getAnchorOffset());
+  const focusBlock = newContentState.getBlockForKey(selectionState.getFocusKey());
+  const focusInlineStyle = focusBlock.getInlineStyleAt(selectionState.getFocusOffset());
+
+  if (anchorInlineStyle.has(styleCode) || focusInlineStyle.has(styleCode)) {
+    newContentState = Modifier.removeInlineStyle(newContentState, selectionState, styleCode);
+  } else {
+    newContentState = Modifier.applyInlineStyle(newContentState, selectionState, styleCode);
+  }
+
+  return newContentState;
+}
+
 export const handleKeyCommand = (editorState, command, dispatcher, blockKey, restArgs=null) => {
   switch (command) {
     case keyCommandConst.moreIndent:
@@ -1239,6 +1300,12 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
 
     case keyCommandConst.moveDownToCodeBlock:
       return handleKeyCommand_moveDownToSpecialBlock(editorState, dispatcher);
+
+    case keyCommandConst.toggleInlineStrikeThrough:
+      return handleKeyCommand_toggleInlineStrikeThrough(editorState, dispatcher);
+
+    case keyCommandConst.toggleInlineCode:
+      return handleKeyCommand_toggleInlineCode(editorState, dispatcher);
 
     default:
       if (typeof(command) === typeof([]) && command.length > 0 && command[0] === keyCommandConst.multiCommands) {
