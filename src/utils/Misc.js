@@ -80,3 +80,20 @@ export const getBackgroundColorWithClass = className => {
   }
   return targetStyle.backgroundColor;
 };
+
+// Reference: https://javascript.plainenglish.io/how-to-find-the-caret-inside-a-contenteditable-element-955a5ad9bf81
+export const getCaretRange = () => {
+  const isSupported = typeof window.getSelection !== "undefined";
+  if (isSupported) {
+    const selection = window.getSelection();
+    if (selection.rangeCount !== 0) {
+      const range = selection.getRangeAt(0).cloneRange();
+      range.collapse(true);
+      const rect = range.getClientRects()[0];
+      if (rect) {
+        return range;
+      }
+    }
+  }
+  return null;
+}

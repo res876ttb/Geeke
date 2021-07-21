@@ -23,6 +23,7 @@ export const pmsc = { // Page Misc State Constants
   specialFocusFunc: 7,
   moveDirection: 8,
   selectedBlocks: 9,
+  popupMenuRange: 10,
 };
 
 const initPageMiscState = [
@@ -35,6 +36,7 @@ const initPageMiscState = [
   [pmsc.specialFocusFunc, new Map()], // Key: blockKey, Value: focus func
   [pmsc.moveDirection, null],
   [pmsc.selectedBlocks, new Set()],
+  [pmsc.popupMenuRange, null],
 ];
 
 const initEditorMiscState = {
@@ -99,13 +101,14 @@ export const setSelectedBlocks = (dispatch, pageUuid, editorState) => {
   }});
 };
 
-export const setMouseOverBlockKey = (dispatch, pageUuid, blockKey) => setPageValue(dispatch, pageUuid, pmsc.hover, blockKey);
-export const setDragShadowPos = (dispatch, pageUuid, dragShadowPos) => setPageValue(dispatch, pageUuid, pmsc.dragShadowPos, dragShadowPos);
-export const setEditingCode = (dispatch, pageUuid, editingCode) => setPageValue(dispatch, pageUuid, pmsc.editingCode, editingCode);
-export const setEditingMenu = (dispatch, pageUuid, editingMenu) => setPageValue(dispatch, pageUuid, pmsc.editingMenu, editingMenu);
-export const setDraggingBlock = (dispatch, pageUuid, dragging) => setPageValue(dispatch, pageUuid, pmsc.draggingBlock, dragging);
-export const setFocusBlockKey = (dispatch, pageUuid, focusBlockKey) => setPageValue(dispatch, pageUuid, pmsc.focusBlockKey, focusBlockKey);
-export const setMoveDirection = (dispatch, pageUuid, moveDirection) => setPageValue(dispatch, pageUuid, pmsc.moveDirection, moveDirection);
+export const setPopupMenuRange    = (dispatch, pageUuid, menuRange)     => setPageValue(dispatch, pageUuid, pmsc.popupMenuRange,  menuRange);
+export const setMouseOverBlockKey = (dispatch, pageUuid, blockKey)      => setPageValue(dispatch, pageUuid, pmsc.hover,           blockKey);
+export const setDragShadowPos     = (dispatch, pageUuid, dragShadowPos) => setPageValue(dispatch, pageUuid, pmsc.dragShadowPos,   dragShadowPos);
+export const setEditingCode       = (dispatch, pageUuid, editingCode)   => setPageValue(dispatch, pageUuid, pmsc.editingCode,     editingCode);
+export const setEditingMenu       = (dispatch, pageUuid, editingMenu)   => setPageValue(dispatch, pageUuid, pmsc.editingMenu,     editingMenu);
+export const setDraggingBlock     = (dispatch, pageUuid, dragging)      => setPageValue(dispatch, pageUuid, pmsc.draggingBlock,   dragging);
+export const setFocusBlockKey     = (dispatch, pageUuid, focusBlockKey) => setPageValue(dispatch, pageUuid, pmsc.focusBlockKey,   focusBlockKey);
+export const setMoveDirection     = (dispatch, pageUuid, moveDirection) => setPageValue(dispatch, pageUuid, pmsc.moveDirection,   moveDirection);
 
 const setPageValue = (dispatch, pageUuid, pmscKey, value) => {
   dispatch({type, callback: state => {

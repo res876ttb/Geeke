@@ -10,6 +10,7 @@
  *************************************************/
 import React, { useRef } from 'react';
 import throttle from 'lodash/throttle';
+import debounce from 'lodash/debounce';
 import {
   useDispatch,
   useSelector,
@@ -48,7 +49,7 @@ import ToggleListBlock from './ToggleListBlock';
 /*************************************************
  * Constants
  *************************************************/
-import { setSelectionStateByKey } from '../utils/Misc';
+import { getCaretRange, setSelectionStateByKey } from '../utils/Misc';
 import { setEditorState, setSelectionState } from '../states/editor';
 import { constBlockType } from '../constant';
 import {
@@ -56,9 +57,11 @@ import {
   pmsc,
   setFocusBlockKey,
   setMoveDirection,
+  setPopupMenuRange,
   setSelectedBlocks,
 } from '../states/editorMisc';
 import { Button } from '@material-ui/core';
+import PopupMenu from './PopupMenu';
 
 /*************************************************
  * Main components
@@ -92,9 +95,20 @@ const Page = props => {
     return selectedBlocks.has(blockKey);
   };
 
+  // Show popup menu
+  const checkSelectionState = debounce(() => {
+    setPopupMenuRange(dispatch, uuid, getCaretRange());
+  }, 100);
+
   // onChange
   const updateEditor = editorState => {
+    const selectionState = editorState.getSelection();
     findSelectedBlocks(editorState);
+    if (selectionState.isCollapsed()) {
+      setPopupMenuRange(dispatch, uuid, null);
+    } else {
+      checkSelectionState(editorState);
+    }
     if (!readOnly) setEditorState(dispatch, uuid, editorState);
   };
   const updateEditorButIgnoreReadOnly = editorState => setEditorState(dispatch, uuid, editorState);
@@ -218,6 +232,7 @@ const Page = props => {
 
   return (
     <div>
+      <div style={{height: '100px', color: 'white'}}>debugOnly</div>
       <PageTitle uuid={uuid} />
       <div id={`geeke-editor-${uuid}`}>
         <Editor
@@ -233,6 +248,7 @@ const Page = props => {
           customStyleMap={styleMap}
           // placeholder={'Write something here...'}
         />
+        <PopupMenu pageUuid={uuid} handleFocusEditor={handleFocusEditor} />
       </div>
 
       <PageDragShadow

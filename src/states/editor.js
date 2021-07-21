@@ -6,6 +6,7 @@
 /*************************************************
  * IMPORT
  *************************************************/
+import { EditorState, Modifier } from 'draft-js';
 import produce from 'immer';
 import { GeekeMap } from '../utils/Misc';
 
@@ -130,6 +131,37 @@ export const setEditorState = (dispatch, pageUuid, editorState) => {
 
 export const setSelectionState = (dispatch, pageUuid, selectionState) => {
   dispatch({type, callback: state => {
+    return state;
+  }});
+};
+
+export const toggleBold = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'BOLD');
+export const toggleItalic = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'ITALIC');
+export const toggleStrikethrough = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'STRIKETHROUGH');
+export const toggleUnderline = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'UNDERLINE');
+
+const toggleStyle = (dispatch, pageUuid, styleCode) => {
+  dispatch({type, callback: state => {
+    let page = state.cachedPages.get(pageUuid);
+    let editorState = page.get('content');
+
+    let newContentState = editorState.getCurrentContent();
+    const selectionState = editorState.getSelection();
+    const anchorBlock = newContentState.getBlockForKey(selectionState.getAnchorKey());
+    const anchorInlineStyle = anchorBlock.getInlineStyleAt(selectionState.getAnchorOffset());
+    const focusBlock = newContentState.getBlockForKey(selectionState.getFocusKey());
+    const focusInlineStyle = focusBlock.getInlineStyleAt(selectionState.getFocusOffset());
+
+    if (anchorInlineStyle.has(styleCode) || focusInlineStyle.has(styleCode)) {
+      newContentState = Modifier.removeInlineStyle(newContentState, selectionState, styleCode);
+    } else {
+      newContentState = Modifier.applyInlineStyle(newContentState, selectionState, styleCode);
+    }
+
+    let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
+    newEditorState = EditorState.forceSelection(newEditorState, selectionState);
+    page.set('content', newEditorState);
+
     return state;
   }});
 };
