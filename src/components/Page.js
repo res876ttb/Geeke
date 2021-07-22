@@ -50,8 +50,11 @@ import ToggleListBlock from './ToggleListBlock';
  * Constants
  *************************************************/
 import { getCaretRange, setSelectionStateByKey } from '../utils/Misc';
-import { setEditorState, setSelectionState } from '../states/editor';
-import { constBlockType } from '../constant';
+import { setEditorState } from '../states/editor';
+import {
+  constBlockType,
+  styleMap,
+} from '../constant';
 import {
   focusSpecialBlock,
   pmsc,
@@ -102,6 +105,7 @@ const Page = props => {
 
   // onChange
   const updateEditor = editorState => {
+    // Check selection range. If not collapsed, show popup menu
     const selectionState = editorState.getSelection();
     findSelectedBlocks(editorState);
     if (selectionState.isCollapsed()) {
@@ -109,6 +113,8 @@ const Page = props => {
     } else {
       checkSelectionState(editorState);
     }
+
+    // If not readonly, update editorState
     if (!readOnly) setEditorState(dispatch, uuid, editorState);
   };
   const updateEditorButIgnoreReadOnly = editorState => setEditorState(dispatch, uuid, editorState);
@@ -139,7 +145,6 @@ const Page = props => {
   // handleKeyCommand
   const keyCommandDispatcher = {
     setEditorState: updateEditor,
-    setSelectionState: selectionState => setSelectionState(dispatch, uuid, selectionState),
     setFocusBlockKey: focusBlockKey => setFocusBlockKey(dispatch, uuid, focusBlockKey),
     setMoveDirection: moveDirection => setMoveDirection(dispatch, uuid, moveDirection),
     focusSpecialBlock: (blockKey, moveDirection) => focusSpecialBlock(dispatch, uuid, blockKey, moveDirection),
@@ -215,19 +220,6 @@ const Page = props => {
           props: defaultBlockProps,
         };
     }
-  };
-
-  // styleMap
-  const styleMap = {
-    'STRIKETHROUGH': {
-      textDecoration: 'line-through',
-    },
-    'CODE': {
-      backgroundColor: 'rgba(55, 55, 55, 0.2)',
-      borderRadius: '0.2rem',
-      fontFamily: 'monospace',
-      padding: '0rem 0.2rem',
-    },
   };
 
   return (

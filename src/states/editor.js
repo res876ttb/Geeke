@@ -13,6 +13,9 @@ import { GeekeMap } from '../utils/Misc';
 /*************************************************
  * CONST
  *************************************************/
+import { colorList } from '../constant';
+
+// The reducer is `editor`
 const type = 'editor';
 
 // Permission
@@ -129,8 +132,14 @@ export const setEditorState = (dispatch, pageUuid, editorState) => {
   }});
 };
 
-export const setSelectionState = (dispatch, pageUuid, selectionState) => {
+export const showEditorSelection = (dispatch, pageUuid) => {
   dispatch({type, callback: state => {
+    let page = state.cachedPages.get(pageUuid);
+    const editorState = page.get('content');
+    const selectionState = editorState.getSelection();
+    const newEditorState = EditorState.forceSelection(editorState, selectionState);
+    page.set('content', newEditorState);
+
     return state;
   }});
 };
@@ -156,6 +165,62 @@ const toggleStyle = (dispatch, pageUuid, styleCode) => {
       newContentState = Modifier.removeInlineStyle(newContentState, selectionState, styleCode);
     } else {
       newContentState = Modifier.applyInlineStyle(newContentState, selectionState, styleCode);
+    }
+
+    let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
+    newEditorState = EditorState.forceSelection(newEditorState, selectionState);
+    page.set('content', newEditorState);
+
+    return state;
+  }});
+};
+
+export const setTextColor = (dispatch, pageUuid, color) => {
+  dispatch({type, callback: state => {
+    let page = state.cachedPages.get(pageUuid);
+    let editorState = page.get('content');
+
+    let newContentState = editorState.getCurrentContent();
+    const selectionState = editorState.getSelection();
+
+    // Clear test color
+    for (let i in colorList) {
+      let textColorStyle = `TEXT${colorList[i]}`;
+      newContentState = Modifier.removeInlineStyle(newContentState, selectionState, textColorStyle);
+    }
+
+    // Set text color style
+    const upperColor = color.toUpperCase();
+    if (colorList.indexOf(upperColor) !== -1) {
+      newContentState = Modifier.applyInlineStyle(newContentState, selectionState, `TEXT${upperColor}`);
+    }
+
+    let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
+    newEditorState = EditorState.forceSelection(newEditorState, selectionState);
+    page.set('content', newEditorState);
+
+    return state;
+  }});
+};
+
+export const setBackgroundColor = (dispatch, pageUuid, color) => {
+  dispatch({type, callback: state => {
+    let page = state.cachedPages.get(pageUuid);
+    let editorState = page.get('content');
+
+    let newContentState = editorState.getCurrentContent();
+    const selectionState = editorState.getSelection();
+
+    // Clear test color
+    for (let i in colorList) {
+      let textColorStyle = `BG${colorList[i]}`;
+      newContentState = Modifier.removeInlineStyle(newContentState, selectionState, textColorStyle);
+    }
+
+    // Set text color style
+    const upperColor = color.toUpperCase();
+    if (colorList.indexOf(upperColor) !== -1) {
+      newContentState = Modifier.applyInlineStyle(newContentState, selectionState, `BG${upperColor}`);
     }
 
     let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');

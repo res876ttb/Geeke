@@ -55,6 +55,42 @@ export const headingType = {
   h6: 'h6',
 };
 
+export const styleMap = {
+  'STRIKETHROUGH': {
+    textDecoration: 'line-through',
+  },
+  'CODE': {
+    backgroundColor: 'rgba(55, 55, 55, 0.2)',
+    borderRadius: '0.2rem',
+    fontFamily: 'monospace',
+    padding: '0rem 0.2rem',
+  },
+
+  // Text Color
+  'TEXTRED':    {color: '#f44336'},
+  'TEXTORANGE': {color: '#ff9800'},
+  'TEXTYELLOW': {color: '#fdd835'},
+  'TEXTGREEN':  {color: '#4caf50'},
+  'TEXTBLUE':   {color: '#2196f3'},
+  'TEXTPURPLE': {color: '#9c27b0'},
+  'TEXTPINK':   {color: '#f06292'},
+  'TEXTBROWN':  {color: '#795548'},
+  'TEXTGRAY':   {color: '#9e9e9e'},
+
+  // Background Color
+  'BGRED':    {backgroundColor: '#f4433680'},
+  'BGORANGE': {backgroundColor: '#ff980080'},
+  'BGYELLOW': {backgroundColor: '#fdd83580'},
+  'BGGREEN':  {backgroundColor: '#4caf5080'},
+  'BGBLUE':   {backgroundColor: '#2196f380'},
+  'BGPURPLE': {backgroundColor: '#9c27b080'},
+  'BGPINK':   {backgroundColor: '#f0629280'},
+  'BGBROWN':  {backgroundColor: '#79554880'},
+  'BGGRAY':   {backgroundColor: '#9e9e9e80'},
+};
+
+export const colorList = ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE', 'PINK', 'BROWN', 'GRAY'];
+
 export const constAceEditorAction = {
   left: 0,
   up: 1,

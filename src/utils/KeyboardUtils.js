@@ -602,7 +602,6 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
     // Get entity by key and offset
     let focusInlineStyle = focusBlock.getInlineStyleAt(caretPosition - 1);
     let focusEntity = focusBlock.getEntityAt(caretPosition - 1);
-    console.log(focusInlineStyle);
 
     // Insert space with the same inline style to the entity
     let newContentState = Modifier.insertText(contentState, selectionState, ' ', focusInlineStyle, focusEntity);

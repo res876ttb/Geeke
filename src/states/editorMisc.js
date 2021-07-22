@@ -11,6 +11,7 @@ import produce from 'immer';
 /*************************************************
  * CONST
  *************************************************/
+// The reducer is `editorMisc`
 const type = 'editorMisc';
 
 export const pmsc = { // Page Misc State Constants
