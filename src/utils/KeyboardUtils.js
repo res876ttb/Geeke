@@ -1241,35 +1241,14 @@ const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey, res
 };
 
 const handleKeyCommand_toggleInlineStrikeThrough = (editorState, dispatcher) => {
-  const styleCode = 'STRIKETHROUGH';
-  let newContentState = handleKeyCommand_toggleInlineStyle(editorState, styleCode);
-  let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
-  dispatcher.setEditorState(newEditorState);
+  dispatcher.toggleInlineStyle('STRIKETHROUGH');
+  return 'handled';
 };
 
 const handleKeyCommand_toggleInlineCode = (editorState, dispatcher) => {
-  const styleCode = 'CODE';
-  let newContentState = handleKeyCommand_toggleInlineStyle(editorState, styleCode);
-  let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
-  dispatcher.setEditorState(newEditorState);
+  dispatcher.toggleInlineStyle('CODE');
+  return 'handled';
 };
-
-const handleKeyCommand_toggleInlineStyle = (editorState, styleCode) => {
-  const selectionState = editorState.getSelection();
-  let newContentState = editorState.getCurrentContent();
-  const anchorBlock = newContentState.getBlockForKey(selectionState.getAnchorKey());
-  const anchorInlineStyle = anchorBlock.getInlineStyleAt(selectionState.getAnchorOffset());
-  const focusBlock = newContentState.getBlockForKey(selectionState.getFocusKey());
-  const focusInlineStyle = focusBlock.getInlineStyleAt(selectionState.getFocusOffset());
-
-  if (anchorInlineStyle.has(styleCode) || focusInlineStyle.has(styleCode)) {
-    newContentState = Modifier.removeInlineStyle(newContentState, selectionState, styleCode);
-  } else {
-    newContentState = Modifier.applyInlineStyle(newContentState, selectionState, styleCode);
-  }
-
-  return newContentState;
-}
 
 export const handleKeyCommand = (editorState, command, dispatcher, blockKey, restArgs=null) => {
   switch (command) {

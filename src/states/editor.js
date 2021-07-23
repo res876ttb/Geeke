@@ -148,8 +148,9 @@ export const toggleBold = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid
 export const toggleItalic = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'ITALIC');
 export const toggleStrikethrough = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'STRIKETHROUGH');
 export const toggleUnderline = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'UNDERLINE');
+export const toggleCode = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'CODE');
 
-const toggleStyle = (dispatch, pageUuid, styleCode) => {
+export const toggleStyle = (dispatch, pageUuid, styleCode) => {
   dispatch({type, callback: state => {
     let page = state.cachedPages.get(pageUuid);
     let editorState = page.get('content');

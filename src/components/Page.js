@@ -50,7 +50,10 @@ import ToggleListBlock from './ToggleListBlock';
  * Constants
  *************************************************/
 import { getCaretRange, setSelectionStateByKey } from '../utils/Misc';
-import { setEditorState } from '../states/editor';
+import {
+  setEditorState,
+  toggleStyle,
+} from '../states/editor';
 import {
   constBlockType,
   styleMap,
@@ -149,6 +152,7 @@ const Page = props => {
     setMoveDirection: moveDirection => setMoveDirection(dispatch, uuid, moveDirection),
     focusSpecialBlock: (blockKey, moveDirection) => focusSpecialBlock(dispatch, uuid, blockKey, moveDirection),
     handleFocusEditor,
+    toggleInlineStyle: style => toggleStyle(dispatch, uuid, style),
   };
   const handleKeyCommand = (command, editorState, blockKey) => _handleKeyCommand(editorState, command, keyCommandDispatcher, blockKey);
 

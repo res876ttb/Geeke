@@ -17,6 +17,7 @@ import FormatColorTextIcon from '@material-ui/icons/FormatColorText';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import FontDownloadOutlinedIcon from '@material-ui/icons/FontDownloadOutlined';
 import FontDownloadIcon from '@material-ui/icons/FontDownload';
+import CodeIcon from '@material-ui/icons/Code';
 import throttle from 'lodash/throttle';
 
 /*************************************************
@@ -28,6 +29,7 @@ import {
   toggleItalic as _toggleItalic,
   toggleStrikethrough as _toggleStrikethrough,
   toggleUnderline as _toggleUnderline,
+  toggleCode as _toggleCode,
   setTextColor as _setTextColor,
   setBackgroundColor as _setBackgroundColor,
 } from '../states/editor';
@@ -128,6 +130,7 @@ const PopupMenu = props => {
   const toggleItalic = e => toggleStyle(_toggleItalic);
   const toggleUnderline = e => toggleStyle(_toggleUnderline);
   const toggleStrikethrough = e => toggleStyle(_toggleStrikethrough);
+  const toggleCode = e => toggleStyle(_toggleCode);
 
   const toggleFontColorMenu = e => {
     // Hide other menus
@@ -209,6 +212,7 @@ const PopupMenu = props => {
               <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleItalic}><FormatItalicIcon fontSize='small' /></Button>
               <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleUnderline}><FormatUnderlinedIcon fontSize='small' /></Button>
               <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleStrikethrough}><StrikethroughSIcon fontSize='small' /></Button>
+              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleCode}><CodeIcon fontSize='small' /></Button>
               {seperator}
               <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleFontColorMenu}><FormatColorTextIcon fontSize='small' /> {dropdownIcon}</Button>
               {seperator}
