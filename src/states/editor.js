@@ -150,26 +150,43 @@ export const toggleStrikethrough = (dispatch, pageUuid) => toggleStyle(dispatch,
 export const toggleUnderline = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'UNDERLINE');
 export const toggleCode = (dispatch, pageUuid) => toggleStyle(dispatch, pageUuid, 'CODE');
 
-export const toggleStyle = (dispatch, pageUuid, styleCode) => {
+// Reference: https://github.com/facebook/draft-js/blob/10ca1ad44843e970c4314f85a8f37d26f842ebf9/src/model/modifier/RichTextEditorUtil.js
+export const toggleStyle = (dispatch, pageUuid, inlineStyle) => {
   dispatch({type, callback: state => {
     let page = state.cachedPages.get(pageUuid);
     let editorState = page.get('content');
 
     let newContentState = editorState.getCurrentContent();
+    let newEditorState = editorState;
     const selectionState = editorState.getSelection();
-    const anchorBlock = newContentState.getBlockForKey(selectionState.getAnchorKey());
-    const anchorInlineStyle = anchorBlock.getInlineStyleAt(selectionState.getAnchorOffset());
-    const focusBlock = newContentState.getBlockForKey(selectionState.getFocusKey());
-    const focusInlineStyle = focusBlock.getInlineStyleAt(selectionState.getFocusOffset());
+    const currentStyle = editorState.getCurrentInlineStyle();
 
-    if (anchorInlineStyle.has(styleCode) || focusInlineStyle.has(styleCode)) {
-      newContentState = Modifier.removeInlineStyle(newContentState, selectionState, styleCode);
+    if (selectionState.isCollapsed()) {
+      // If the selection is collapsed, toggle the specified style on or off and
+      // set the result as the new inline style override. This will then be
+      // used as the inline style for the next character to be inserted.
+      newEditorState = EditorState.setInlineStyleOverride(
+        editorState,
+        currentStyle.has(inlineStyle)
+          ? currentStyle.remove(inlineStyle)
+          : currentStyle.add(inlineStyle),
+      );
     } else {
-      newContentState = Modifier.applyInlineStyle(newContentState, selectionState, styleCode);
+      // If characters are selected, immediately apply or remove the
+      // inline style on the document state itself.
+
+      // If the style is already present for the selection range, remove it.
+      // Otherwise, apply it.
+      if (currentStyle.has(inlineStyle)) {
+        newContentState = Modifier.removeInlineStyle(newContentState, selectionState, inlineStyle);
+      } else {
+        newContentState = Modifier.applyInlineStyle(newContentState, selectionState, inlineStyle);
+      }
+
+      // Push state
+      newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
     }
 
-    let newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
-    newEditorState = EditorState.forceSelection(newEditorState, selectionState);
     page.set('content', newEditorState);
 
     return state;

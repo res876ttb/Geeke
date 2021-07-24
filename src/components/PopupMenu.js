@@ -245,11 +245,15 @@ const PopupMenu = props => {
               <Tooltip title={<ButtonDescription style='Code' />} placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleCode}><CodeIcon fontSize='small' /></Button>
               </Tooltip>
+
               {seperator}
+
               <Tooltip title='Text Color' placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleFontColorMenu}><FormatColorTextIcon fontSize='small' /> {dropdownIcon}</Button>
               </Tooltip>
+
               {seperator}
+
               <Tooltip title='Highlight Color' placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleBackgroundColorMenu}><BorderColorIcon fontSize='small' /> {dropdownIcon}</Button>
               </Tooltip>
