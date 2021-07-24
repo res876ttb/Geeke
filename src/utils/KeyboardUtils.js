@@ -1131,7 +1131,7 @@ const handleKeyCommand_moveUpToSpecialBlock = (editorState, dispatcher) => {
   dispatcher.focusSpecialBlock(previousBlockKey, constMoveDirection.up);
 
   return 'handled';
-}
+};
 
 const handleKeyCommand_moveDownToSpecialBlock = (editorState, dispatcher) => {
   const contentState = editorState.getCurrentContent();
@@ -1159,7 +1159,7 @@ const handleKeyCommand_moveDownToSpecialBlock = (editorState, dispatcher) => {
   dispatcher.focusSpecialBlock(nextBlockKey, constMoveDirection.down);
 
   return 'handled';
-}
+};
 
 const handleKeyCommand_moveToPreviousBlock = (editorState, dispatcher, blockKey, restArgs=null) => {
   if (restArgs === null) return 'not-handled';
@@ -1316,7 +1316,7 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
       }
       return handleKeyCommand_default(editorState, command, dispatcher);
   }
-}
+};
 /// End handleKeyCommand
 
 /// Start handleReturn
@@ -1476,7 +1476,7 @@ export const handleReturn = (e, editorState, dispatcher, config=blockDataPreserv
   dispatcher.setEditorState(newEditorState);
 
   return true;
-}
+};
 /// End handleReturn
 
 /// Start handleAceEditor
@@ -1609,4 +1609,4 @@ export const handleAceEditor = (editor, action, dispatcher) => {
       console.error(`Unknown action in handleAceEditor: ${action}`);
       return false;
   }
-}
+};

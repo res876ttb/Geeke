@@ -8,7 +8,7 @@
  *************************************************/
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Fade, MenuItem, MenuList, Paper, Popper } from '@material-ui/core';
+import { Button, Fade, MenuItem, MenuList, Paper, Popper, Tooltip } from '@material-ui/core';
 import FormatBoldIcon from '@material-ui/icons/FormatBold';
 import FormatItalicIcon from '@material-ui/icons/FormatItalic';
 import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
@@ -44,6 +44,7 @@ import { remToPx } from '../constant';
  * Constant
  *************************************************/
 import { styleMap } from '../constant';
+
 const textColorList = [
   {text: 'Default', color: 'inherit'},
   {text: 'Red',     color: styleMap.TEXTRED.color},
@@ -56,6 +57,16 @@ const textColorList = [
   {text: 'Brown',   color: styleMap.TEXTBROWN.color},
   {text: 'Gray',    color: styleMap.TEXTGRAY.color},
 ];
+
+const isOSX = navigator.userAgent.indexOf('Mac') !== -1;
+
+const menuDescription = {
+  'Bold':           isOSX ? '⌘ + B' :         'Ctrl + B',
+  'Italic':         isOSX ? '⌘ + I' :         'Ctrl + I',
+  'Underline':      isOSX ? '⌘ + U' :         'Ctrl + U',
+  'Strikethrough':  isOSX ? '⌘ + Shift + S' : 'Ctrl + Shift + S',
+  'Code':           isOSX ? '⌘ + E' :         'Ctrl + E',
+}
 
 /*************************************************
  * Main components
@@ -219,15 +230,29 @@ const PopupMenu = props => {
         {({ TransitionProps }) => (
           <Fade {...TransitionProps} timeout={350}>
             <Paper elevation={3}>
-              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleBold}><FormatBoldIcon fontSize='small' /></Button>
-              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleItalic}><FormatItalicIcon fontSize='small' /></Button>
-              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleUnderline}><FormatUnderlinedIcon fontSize='small' /></Button>
-              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleStrikethrough}><StrikethroughSIcon fontSize='small' /></Button>
-              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleCode}><CodeIcon fontSize='small' /></Button>
+              <Tooltip title={<ButtonDescription style='Bold' />} placement='top' arrow>
+                <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleBold}><FormatBoldIcon fontSize='small' /></Button>
+              </Tooltip>
+              <Tooltip title={<ButtonDescription style='Italic' />} placement='top' arrow>
+                <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleItalic}><FormatItalicIcon fontSize='small' /></Button>
+              </Tooltip>
+              <Tooltip title={<ButtonDescription style='Underline' />} placement='top' arrow>
+                <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleUnderline}><FormatUnderlinedIcon fontSize='small' /></Button>
+              </Tooltip>
+              <Tooltip title={<ButtonDescription style='Strikethrough' />} placement='top' arrow>
+                <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleStrikethrough}><StrikethroughSIcon fontSize='small' /></Button>
+              </Tooltip>
+              <Tooltip title={<ButtonDescription style='Code' />} placement='top' arrow>
+                <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleCode}><CodeIcon fontSize='small' /></Button>
+              </Tooltip>
               {seperator}
-              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleFontColorMenu}><FormatColorTextIcon fontSize='small' /> {dropdownIcon}</Button>
+              <Tooltip title='Text Color' placement='top' arrow>
+                <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleFontColorMenu}><FormatColorTextIcon fontSize='small' /> {dropdownIcon}</Button>
+              </Tooltip>
               {seperator}
-              <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleBackgroundColorMenu}><BorderColorIcon fontSize='small' /> {dropdownIcon}</Button>
+              <Tooltip title='Highlight Color' placement='top' arrow>
+                <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleBackgroundColorMenu}><BorderColorIcon fontSize='small' /> {dropdownIcon}</Button>
+              </Tooltip>
             </Paper>
           </Fade>
         )}
@@ -237,5 +262,15 @@ const PopupMenu = props => {
     </>
   );
 }
+
+const ButtonDescription = props => {
+  const style = props.style;
+  return (
+    <div className='geeke-popupMenu-ButtonDescription'>
+      <div><b>{style}</b></div>
+      <div>{menuDescription[style]}</div>
+    </div>
+  );
+};
 
 export default PopupMenu;

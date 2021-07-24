@@ -458,6 +458,10 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   display: block;
 }
 
+.geeke-popupMenu-ButtonDescription {
+  text-align: center;
+}
+
 
 /* PageTitle */
 .Geeke-Page-Title {

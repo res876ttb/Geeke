@@ -46,6 +46,8 @@ export const constBlockType = {
   code: 'code',
 };
 
+
+// Heading type
 export const headingType = {
   h1: 'h1',
   h2: 'h2',
@@ -55,6 +57,8 @@ export const headingType = {
   h6: 'h6',
 };
 
+
+// Constants for editor inline style
 export const styleMap = {
   'STRIKETHROUGH': {
     textDecoration: 'line-through',
@@ -91,6 +95,8 @@ export const styleMap = {
 
 export const colorList = ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE', 'PINK', 'BROWN', 'GRAY'];
 
+
+// Constants for AceEditor
 export const constAceEditorAction = {
   left: 0,
   up: 1,
