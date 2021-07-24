@@ -128,7 +128,7 @@ const PopupMenu = props => {
     } else if (showMenu) {
       setShowMenu(false);
     }
-  }, [triggerEsc]);
+  }, [triggerEsc]); // eslint-disable-line
 
   // Functions
   const keepFocusOnEditor = (e) => {
@@ -223,6 +223,12 @@ const PopupMenu = props => {
     </Popper>
   );
 
+  const buttonDescription_Bold = <ButtonDescription style='Bold' />; // eslint-disable-line
+  const buttonDescription_Italic = <ButtonDescription style='Italic' />; // eslint-disable-line
+  const buttonDescription_Underline = <ButtonDescription style='Underline' />; // eslint-disable-line
+  const buttonDescription_Strikethrough = <ButtonDescription style='Strikethrough' />; // eslint-disable-line
+  const buttonDescription_Code = <ButtonDescription style='Code' />; // eslint-disable-line
+
   return (
     <>
       <div id={anchorId} className={'geeke-popupMenu-Anchor'} style={menuPosition}></div>
@@ -230,19 +236,19 @@ const PopupMenu = props => {
         {({ TransitionProps }) => (
           <Fade {...TransitionProps} timeout={350}>
             <Paper elevation={3}>
-              <Tooltip title={<ButtonDescription style='Bold' />} placement='top' arrow>
+              <Tooltip title={buttonDescription_Bold} placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleBold}><FormatBoldIcon fontSize='small' /></Button>
               </Tooltip>
-              <Tooltip title={<ButtonDescription style='Italic' />} placement='top' arrow>
+              <Tooltip title={buttonDescription_Italic} placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleItalic}><FormatItalicIcon fontSize='small' /></Button>
               </Tooltip>
-              <Tooltip title={<ButtonDescription style='Underline' />} placement='top' arrow>
+              <Tooltip title={buttonDescription_Underline} placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleUnderline}><FormatUnderlinedIcon fontSize='small' /></Button>
               </Tooltip>
-              <Tooltip title={<ButtonDescription style='Strikethrough' />} placement='top' arrow>
+              <Tooltip title={buttonDescription_Strikethrough} placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleStrikethrough}><StrikethroughSIcon fontSize='small' /></Button>
               </Tooltip>
-              <Tooltip title={<ButtonDescription style='Code' />} placement='top' arrow>
+              <Tooltip title={buttonDescription_Code} placement='top' arrow>
                 <Button className='geeke-popupMenuButton' onMouseDown={keepFocusOnEditor} onClick={toggleCode}><CodeIcon fontSize='small' /></Button>
               </Tooltip>
 
