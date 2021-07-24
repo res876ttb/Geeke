@@ -25,6 +25,7 @@ export const pmsc = { // Page Misc State Constants
   moveDirection: 8,
   selectedBlocks: 9,
   popupMenuRange: 10,
+  triggerEsc: 11,
 };
 
 const initPageMiscState = [
@@ -38,6 +39,7 @@ const initPageMiscState = [
   [pmsc.moveDirection, null],
   [pmsc.selectedBlocks, new Set()],
   [pmsc.popupMenuRange, null],
+  [pmsc.triggerEsc, 0],
 ];
 
 const initEditorMiscState = {
@@ -115,6 +117,15 @@ const setPageValue = (dispatch, pageUuid, pmscKey, value) => {
   dispatch({type, callback: state => {
     let page = state.pages.get(pageUuid);
     page.set(pmscKey, value);
+    return state;
+  }});
+};
+
+export const triggerEsc = (dispatch, pageUuid) => {
+  dispatch({type, callback: state => {
+    let page = state.pages.get(pageUuid);
+    let escNum = page.get(pmsc.triggerEsc);
+    page.set(pmsc.triggerEsc, (escNum + 1) % 87);
     return state;
   }});
 };

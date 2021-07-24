@@ -65,6 +65,7 @@ import {
   setMoveDirection,
   setPopupMenuRange,
   setSelectedBlocks,
+  triggerEsc,
 } from '../states/editorMisc';
 import { Button } from '@material-ui/core';
 import PopupMenu from './PopupMenu';
@@ -153,6 +154,7 @@ const Page = props => {
     focusSpecialBlock: (blockKey, moveDirection) => focusSpecialBlock(dispatch, uuid, blockKey, moveDirection),
     handleFocusEditor,
     toggleInlineStyle: style => toggleStyle(dispatch, uuid, style),
+    triggerEsc: () => triggerEsc(dispatch, uuid),
   };
   const handleKeyCommand = (command, editorState, blockKey) => _handleKeyCommand(editorState, command, keyCommandDispatcher, blockKey);
 

@@ -66,6 +66,7 @@ const keyCommandConst = {
   selectNextSpecialBlock: 13,
   toggleInlineStrikeThrough: 14,
   toggleInlineCode: 15,
+  triggerEditorEsc: 16,
 };
 
 /**
@@ -302,6 +303,10 @@ const mapKeyToEditorCommand_e = (e, config) => {
   return null;
 };
 
+const mapKeyToEditorCommand_esc = (e, config) => {
+  return keyCommandConst.triggerEditorEsc;
+};
+
 export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid) => {
   setMouseOverBlockKey(dispatch, pageUuid, null);
 
@@ -329,6 +334,9 @@ export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid
 
     case 69: // E
       return mapKeyToEditorCommand_e(e, config);
+
+    case 27: // Esc
+      return mapKeyToEditorCommand_esc(e, config);
 
     default:
       return getDefaultKeyBinding(e);
@@ -1240,13 +1248,18 @@ const handleKeyCommand_moveToNextBlock = (editorState, dispatcher, blockKey, res
   return 'handled';
 };
 
-const handleKeyCommand_toggleInlineStrikeThrough = (editorState, dispatcher) => {
+const handleKeyCommand_toggleInlineStrikeThrough = (dispatcher) => {
   dispatcher.toggleInlineStyle('STRIKETHROUGH');
   return 'handled';
 };
 
-const handleKeyCommand_toggleInlineCode = (editorState, dispatcher) => {
+const handleKeyCommand_toggleInlineCode = (dispatcher) => {
   dispatcher.toggleInlineStyle('CODE');
+  return 'handled';
+};
+
+const handleKeyCommand_triggerEditorEsc = (dispatcher) => {
+  dispatcher.triggerEsc();
   return 'handled';
 };
 
@@ -1280,10 +1293,13 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
       return handleKeyCommand_moveDownToSpecialBlock(editorState, dispatcher);
 
     case keyCommandConst.toggleInlineStrikeThrough:
-      return handleKeyCommand_toggleInlineStrikeThrough(editorState, dispatcher);
+      return handleKeyCommand_toggleInlineStrikeThrough(dispatcher);
 
     case keyCommandConst.toggleInlineCode:
-      return handleKeyCommand_toggleInlineCode(editorState, dispatcher);
+      return handleKeyCommand_toggleInlineCode(dispatcher);
+
+    case keyCommandConst.triggerEditorEsc:
+      return handleKeyCommand_triggerEditorEsc(dispatcher);
 
     default:
       if (typeof(command) === typeof([]) && command.length > 0 && command[0] === keyCommandConst.multiCommands) {

@@ -68,6 +68,7 @@ const PopupMenu = props => {
   // Reducers
   const dispatch = useDispatch();
   const menuRange = useSelector(state => state.editorMisc.pages.get(pageUuid).get(pmsc.popupMenuRange));
+  const triggerEsc = useSelector(state => state.editorMisc.pages.get(pageUuid).get(pmsc.triggerEsc));
   const [menuPosition, setMenuPosition] = useState({top: -1000, left: 0});
   const [showMenu, setShowMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -107,6 +108,16 @@ const PopupMenu = props => {
   useEffect(() => {
     throttle_updateMenuPosition(menuRange);
   }, [menuRange]); // eslint-disable-line
+
+  // Update anchorEl depends on esc
+  useEffect(() => {
+    if (textColorEl || backgroundColorEl) {
+      setTextColorEl(null);
+      setBackgroundColorEl(null);
+    } else if (showMenu) {
+      setShowMenu(false);
+    }
+  }, [triggerEsc]);
 
   // Functions
   const keepFocusOnEditor = (e) => {
