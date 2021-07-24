@@ -7,49 +7,49 @@
 export default class Dispatcher {
   constructor(dispatchFunc, isDispatch = false) {
     if (isDispatch) {
-      this.dispatch = dispatchFunc
+      this.dispatch = dispatchFunc;
     } else {
-      this.dispatch = dispatchFunc()
+      this.dispatch = dispatchFunc();
     }
 
-    this.reset()
+    this.reset();
   }
 
   add(func, ...args) {
     func((newStore) => {
       if (!this.type) {
-        this.callbacks.push(newStore.callback)
-        this.type = newStore.type
+        this.callbacks.push(newStore.callback);
+        this.type = newStore.type;
       } else if (this.type === newStore.type) {
-        this.callbacks.push(newStore.callback)
+        this.callbacks.push(newStore.callback);
       } else {
-        console.error(`Type is not the same as the previous function! (${this.type} !== ${newStore.type})`)
+        console.error(`Type is not the same as the previous function! (${this.type} !== ${newStore.type})`);
       }
-    }, ...args)
+    }, ...args);
 
-    return this
+    return this;
   }
 
   run(func, ...args) {
-    if (func) this.add(func, ...args)
+    if (func) this.add(func, ...args);
 
-    if (!this.type) return this.reset()
+    if (!this.type) return this.reset();
 
     this.dispatch({
       type: this.type,
       callback: (state) => {
         for (let i = 0; i < this.callbacks.length; i++) {
-          state = this.callbacks[i](state)
+          state = this.callbacks[i](state);
         }
-        return state
+        return state;
       },
-    })
+    });
 
-    this.reset()
+    this.reset();
   }
 
   reset() {
-    this.callbacks = []
-    this.type = null
+    this.callbacks = [];
+    this.type = null;
   }
 }

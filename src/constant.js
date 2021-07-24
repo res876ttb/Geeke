@@ -4,22 +4,22 @@
  */
 
 const getRem = () => {
-  let getRemEle = document.getElementById('geeke-getRem')
-  if (getRemEle) return parseFloat(getComputedStyle(getRemEle).fontSize)
-  else return parseFloat(getComputedStyle(document.body).fontSize)
-}
-export const oneRem = getRem()
-export const remToPx = (rem) => rem * oneRem // Unit: px
+  let getRemEle = document.getElementById('geeke-getRem');
+  if (getRemEle) return parseFloat(getComputedStyle(getRemEle).fontSize);
+  else return parseFloat(getComputedStyle(document.body).fontSize);
+};
+export const oneRem = getRem();
+export const remToPx = (rem) => rem * oneRem; // Unit: px
 
-export const indentWidth = 1.6 // Unit: rem
-export const draggableLeftPadding = 2 // Unit: rem
-export const editorLeftPadding = 3 // Unit: rem
-export const editorTopPadding = 0.3 // Unit: rem
-export const editorDraggableButtonLeftPadding = 1.6 // Unit: rem
-export const editorDraggableButtonWidth = 1.6 // Unit: rem
+export const indentWidth = 1.6; // Unit: rem
+export const draggableLeftPadding = 2; // Unit: rem
+export const editorLeftPadding = 3; // Unit: rem
+export const editorTopPadding = 0.3; // Unit: rem
+export const editorDraggableButtonLeftPadding = 1.6; // Unit: rem
+export const editorDraggableButtonWidth = 1.6; // Unit: rem
 
-export const dragMaskHeight = 0.25 // Unit: rem
-export const dragMaskIndentInterval = 0.15 // Unit: rem
+export const dragMaskHeight = 0.25; // Unit: rem
+export const dragMaskIndentInterval = 0.15; // Unit: rem
 
 export const blockDataKeys = {
   indentLevel: 'indentLevel',
@@ -33,7 +33,7 @@ export const blockDataKeys = {
   codeWrapping: 'codeWrapping',
   codeTheme: 'codeTheme',
   codeLineNumber: 'codeLineNumber',
-}
+};
 
 export const constBlockType = {
   default: 'unstyled',
@@ -44,7 +44,7 @@ export const constBlockType = {
   quote: 'quote',
   heading: 'heading',
   code: 'code',
-}
+};
 
 // Heading type
 export const headingType = {
@@ -54,7 +54,7 @@ export const headingType = {
   h4: 'h4',
   h5: 'h5',
   h6: 'h6',
-}
+};
 
 // Constants for editor inline style
 export const styleMap = {
@@ -89,9 +89,9 @@ export const styleMap = {
   BGPINK: { backgroundColor: '#f0629280' },
   BGBROWN: { backgroundColor: '#79554880' },
   BGGRAY: { backgroundColor: '#9e9e9e80' },
-}
+};
 
-export const colorList = ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE', 'PINK', 'BROWN', 'GRAY']
+export const colorList = ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE', 'PINK', 'BROWN', 'GRAY'];
 
 // Constants for AceEditor
 export const constAceEditorAction = {
@@ -100,12 +100,12 @@ export const constAceEditorAction = {
   down: 2,
   right: 3,
   backspace: 4,
-}
+};
 
 export const constMoveDirection = {
   up: 0,
   down: 1,
-}
+};
 
 export const languageMap = {
   abap: 'abap',
@@ -184,7 +184,7 @@ export const languageMap = {
   xml: 'xml',
   yaml: 'yaml',
   yml: 'yaml',
-}
+};
 
 export const languageList = [
   'ABAP',
@@ -250,7 +250,7 @@ export const languageList = [
   'VHDL',
   'XML',
   'YAML',
-]
+];
 
 export const codeBlockThemeList = [
   'ambiance',
@@ -291,7 +291,7 @@ export const codeBlockThemeList = [
   'twilight',
   'vibrant_ink',
   'xcode',
-]
+];
 
 export const codeBlockThemeMap = new Map([
   ['Ambiance', 'ambiance'],
@@ -332,32 +332,32 @@ export const codeBlockThemeMap = new Map([
   ['Twilight', 'twilight'],
   ['Vibrant Ink', 'vibrant_ink'],
   ['XCode', 'xcode'],
-])
+]);
 
 export const languageOptions = languageList.map((v) => {
   return {
     value: languageMap[v.toLowerCase()],
     label: v,
-  }
-})
+  };
+});
 
 export const languageReverseMap = new Map(
   languageList.map((v) => {
-    let lv = v.toLowerCase()
-    return [languageMap[lv], v]
+    let lv = v.toLowerCase();
+    return [languageMap[lv], v];
   }),
-)
+);
 
 export const codeBlockThemeReverseMap = new Map(
   Array.from(codeBlockThemeMap.keys()).map((k) => {
-    let v = codeBlockThemeMap.get(k)
-    return [v, k]
+    let v = codeBlockThemeMap.get(k);
+    return [v, k];
   }),
-)
+);
 
 export const themeOptions = codeBlockThemeList.map((v) => {
   return {
     value: v,
     label: codeBlockThemeReverseMap.get(v),
-  }
-})
+  };
+});

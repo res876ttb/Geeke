@@ -6,7 +6,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React from 'react'
+import React from 'react';
 
 /*************************************************
  * Utils & States
@@ -19,30 +19,30 @@ import React from 'react'
 /*************************************************
  * Constant
  *************************************************/
-import { indentWidth, editorLeftPadding, dragMaskIndentInterval, remToPx } from '../constant'
+import { indentWidth, editorLeftPadding, dragMaskIndentInterval, remToPx } from '../constant';
 
 /*************************************************
  * Main components
  *************************************************/
 const BlockDragMask = (props) => {
   // Props
-  const dragMaskParam = props.dragMaskParam
+  const dragMaskParam = props.dragMaskParam;
 
   // Check whether dragMaskParam is not empty
-  if (dragMaskParam === null) return null
+  if (dragMaskParam === null) return null;
 
   // Extract dragMaskParam
-  const left = dragMaskParam.left
-  const top = dragMaskParam.top
-  const depth = dragMaskParam.depth
-  const width = parseInt(dragMaskParam.width)
+  const left = dragMaskParam.left;
+  const top = dragMaskParam.top;
+  const depth = dragMaskParam.depth;
+  const width = parseInt(dragMaskParam.width);
 
   // Generate masks
-  let nopacity = 0.8
+  let nopacity = 0.8;
   let leftPadding = (
     <div key="-1" className="geeke-inlineBlock" style={{ paddingLeft: `${editorLeftPadding}rem` }}></div>
-  )
-  let masks = [leftPadding]
+  );
+  let masks = [leftPadding];
   for (let i = 0; i <= depth; i++) {
     let mask = (
       <div
@@ -54,11 +54,11 @@ const BlockDragMask = (props) => {
           width: `${indentWidth - dragMaskIndentInterval}rem`,
         }}
       ></div>
-    )
-    nopacity *= nopacity
-    masks.push(mask)
+    );
+    nopacity *= nopacity;
+    masks.push(mask);
   }
-  let lastMaskLeft = remToPx(editorLeftPadding + indentWidth * (depth + 1))
+  let lastMaskLeft = remToPx(editorLeftPadding + indentWidth * (depth + 1));
   masks.push(
     <div
       key="-2"
@@ -69,13 +69,13 @@ const BlockDragMask = (props) => {
         backgroundColor: `rgba(2, 141, 255, ${1 - nopacity})`,
       }}
     ></div>,
-  )
+  );
 
   return (
     <div className="geeke-blockDragMask" style={{ left: left, top: top }}>
       {masks}
     </div>
-  )
-}
+  );
+};
 
-export default BlockDragMask
+export default BlockDragMask;

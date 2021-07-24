@@ -6,34 +6,34 @@
 /*************************************************
  * IMPORT LIBRARIES
  *************************************************/
-import { render, screen } from '@testing-library/react'
-import React from 'react'
-import thunkMiddleware from 'redux-thunk'
-import { Provider } from 'react-redux'
-import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import thunkMiddleware from 'redux-thunk';
+import { Provider } from 'react-redux';
+import { createStore, combineReducers, compose, applyMiddleware } from 'redux';
 
 /*************************************************
  * COMPONENTS TO TEST
  *************************************************/
-import Geeke from '../components/Geeke.js'
+import Geeke from '../components/Geeke.js';
 
 /*************************************************
  * REDUX REDUCER
  *************************************************/
-import { editor } from '../states/editor.js'
+import { editor } from '../states/editor.js';
 
 /*************************************************
  * TEST CODE
  *************************************************/
 
 // Example
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(
   combineReducers({
     editor,
   }),
   composeEnhancers(applyMiddleware(thunkMiddleware)),
-)
+);
 
 test('renders learn init screen', () => {
   // render(
@@ -43,4 +43,4 @@ test('renders learn init screen', () => {
   // );
   // const hihiElement = screen.getByText(/hihi/i);
   // expect(hihiElement).toBeInTheDocument();
-})
+});

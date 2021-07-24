@@ -6,8 +6,8 @@
 /*************************************************
  * IMPORT LIBRARIES
  *************************************************/
-import { ContentState, EditorState } from 'draft-js'
-import { getInitState, _addPage, _addBlock, _parseBlockParents, _updateContent } from '../states/editor'
+import { ContentState, EditorState } from 'draft-js';
+import { getInitState, _addPage, _addBlock, _parseBlockParents, _updateContent } from '../states/editor';
 
 /*************************************************
  * CONSTANTS
@@ -18,28 +18,28 @@ import { getInitState, _addPage, _addBlock, _parseBlockParents, _updateContent }
  *************************************************/
 export const runMockup = (state, testFunc, args, callback) => {
   testFunc((action) => {
-    state = action.callback(state)
-    callback(state)
-  }, ...args)
-}
+    state = action.callback(state);
+    callback(state);
+  }, ...args);
+};
 
 export const getMockupPageUuid = (index) => {
-  return index.toString()
-}
+  return index.toString();
+};
 
 export const getMockupBlockUuid = (index) => {
-  return (100 + index).toString()
-}
+  return (100 + index).toString();
+};
 
 export const createMockupPageWithBlocks = (state, pageUuid, blockStructure, callback) => {
-  const gvbi = (obj, i) => obj[Object.keys(obj)[i]] // get value by index
-  const gkbi = (obj, i) => Object.keys(obj)[i] // get key by index
-  const gl = (obj) => Object.keys(obj).length // get length
+  const gvbi = (obj, i) => obj[Object.keys(obj)[i]]; // get value by index
+  const gkbi = (obj, i) => Object.keys(obj)[i]; // get key by index
+  const gl = (obj) => Object.keys(obj).length; // get length
 
   const createBlockUnderBlock = (i, state, parentUuid, partialStructure, callback) => {
     if (i >= gl(partialStructure)) {
-      callback(state)
-      return
+      callback(state);
+      return;
     }
 
     runMockup(
@@ -48,39 +48,39 @@ export const createMockupPageWithBlocks = (state, pageUuid, blockStructure, call
       [parentUuid, i === 0 ? null : gkbi(partialStructure, i - 1), gkbi(partialStructure, i)],
       (state) => {
         createBlockUnderBlock(0, state, gkbi(partialStructure, i), gvbi(partialStructure, i), (state) => {
-          createBlockUnderBlock(i + 1, state, parentUuid, partialStructure, callback)
-        })
+          createBlockUnderBlock(i + 1, state, parentUuid, partialStructure, callback);
+        });
       },
-    )
-  }
+    );
+  };
 
   const createBlockAtRoot = (i, state, callback) => {
     if (i >= gl(blockStructure)) {
-      callback(state)
-      return
+      callback(state);
+      return;
     }
 
     runMockup(state, _addBlock, [pageUuid, gkbi(blockStructure, i - 1), gkbi(blockStructure, i)], (state) => {
       createBlockUnderBlock(0, state, gkbi(blockStructure, i), gvbi(blockStructure, i), (state) => {
-        createBlockAtRoot(i + 1, state, callback)
-      })
-    })
-  }
+        createBlockAtRoot(i + 1, state, callback);
+      });
+    });
+  };
 
   runMockup(state, _addPage, [pageUuid, gkbi(blockStructure, 0), null], (state) => {
     createBlockUnderBlock(0, state, gkbi(blockStructure, 0), gvbi(blockStructure, 0), (state) => {
-      createBlockAtRoot(1, state, callback)
-    })
-  })
-}
+      createBlockAtRoot(1, state, callback);
+    });
+  });
+};
 
 export const createMockupPageWithBlocksAndParseParent = (state, pageUuid, blockStructure, callback) => {
   createMockupPageWithBlocks(state, pageUuid, blockStructure, (state) => {
     runMockup(state, _parseBlockParents, [pageUuid], (state) => {
-      callback(state)
-    })
-  })
-}
+      callback(state);
+    });
+  });
+};
 
 /**
  *
@@ -92,11 +92,11 @@ export function createFakePage(dispatch, callback) {
     dispatch({
       type: 'type',
       callback: () => {
-        state.focusedBlock[getMockupPageUuid(1)] = getMockupBlockUuid(1)
-        return state
+        state.focusedBlock[getMockupPageUuid(1)] = getMockupBlockUuid(1);
+        return state;
       },
-    })
-  }
+    });
+  };
 
   createMockupPageWithBlocksAndParseParent(
     getInitState(),
@@ -109,20 +109,20 @@ export function createFakePage(dispatch, callback) {
       },
     },
     (state) => {
-      let contentOfBlock1 = EditorState.createWithContent(ContentState.createFromText('This is block 1'))
-      let contentOfBlock2 = EditorState.createWithContent(ContentState.createFromText('This is block 2'))
-      let contentOfBlock3 = EditorState.createWithContent(ContentState.createFromText('This is block 3'))
-      let contentOfBlock4 = EditorState.createWithContent(ContentState.createFromText('This is block 4'))
+      let contentOfBlock1 = EditorState.createWithContent(ContentState.createFromText('This is block 1'));
+      let contentOfBlock2 = EditorState.createWithContent(ContentState.createFromText('This is block 2'));
+      let contentOfBlock3 = EditorState.createWithContent(ContentState.createFromText('This is block 3'));
+      let contentOfBlock4 = EditorState.createWithContent(ContentState.createFromText('This is block 4'));
       runMockup(state, _updateContent, [getMockupBlockUuid(1), contentOfBlock1], (state) => {
         runMockup(state, _updateContent, [getMockupBlockUuid(2), contentOfBlock2], (state) => {
           runMockup(state, _updateContent, [getMockupBlockUuid(3), contentOfBlock3], (state) => {
             runMockup(state, _updateContent, [getMockupBlockUuid(4), contentOfBlock4], (state) => {
-              if (callback) callback(state, runDisaptch)
-              else runDisaptch(state)
-            })
-          })
-        })
-      })
+              if (callback) callback(state, runDisaptch);
+              else runDisaptch(state);
+            });
+          });
+        });
+      });
     },
-  )
+  );
 }

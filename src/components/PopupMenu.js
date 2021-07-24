@@ -6,19 +6,19 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Button, Fade, MenuItem, MenuList, Paper, Popper, Tooltip } from '@material-ui/core'
-import FormatBoldIcon from '@material-ui/icons/FormatBold'
-import FormatItalicIcon from '@material-ui/icons/FormatItalic'
-import StrikethroughSIcon from '@material-ui/icons/StrikethroughS'
-import FormatUnderlinedIcon from '@material-ui/icons/FormatUnderlined'
-import FormatColorTextIcon from '@material-ui/icons/FormatColorText'
-import BorderColorIcon from '@material-ui/icons/BorderColor'
-import FontDownloadOutlinedIcon from '@material-ui/icons/FontDownloadOutlined'
-import FontDownloadIcon from '@material-ui/icons/FontDownload'
-import CodeIcon from '@material-ui/icons/Code'
-import throttle from 'lodash/throttle'
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Button, Fade, MenuItem, MenuList, Paper, Popper, Tooltip } from '@material-ui/core';
+import FormatBoldIcon from '@material-ui/icons/FormatBold';
+import FormatItalicIcon from '@material-ui/icons/FormatItalic';
+import StrikethroughSIcon from '@material-ui/icons/StrikethroughS';
+import FormatUnderlinedIcon from '@material-ui/icons/FormatUnderlined';
+import FormatColorTextIcon from '@material-ui/icons/FormatColorText';
+import BorderColorIcon from '@material-ui/icons/BorderColor';
+import FontDownloadOutlinedIcon from '@material-ui/icons/FontDownloadOutlined';
+import FontDownloadIcon from '@material-ui/icons/FontDownload';
+import CodeIcon from '@material-ui/icons/Code';
+import throttle from 'lodash/throttle';
 
 /*************************************************
  * Utils & States
@@ -32,9 +32,9 @@ import {
   toggleCode as _toggleCode,
   setTextColor as _setTextColor,
   setBackgroundColor as _setBackgroundColor,
-} from '../states/editor'
-import { pmsc } from '../states/editorMisc'
-import { remToPx } from '../constant'
+} from '../states/editor';
+import { pmsc } from '../states/editorMisc';
+import { remToPx } from '../constant';
 
 /*************************************************
  * Import Components
@@ -43,7 +43,7 @@ import { remToPx } from '../constant'
 /*************************************************
  * Constant
  *************************************************/
-import { styleMap } from '../constant'
+import { styleMap } from '../constant';
 
 const textColorList = [
   { text: 'Default', color: 'inherit' },
@@ -56,9 +56,9 @@ const textColorList = [
   { text: 'Pink', color: styleMap.TEXTPINK.color },
   { text: 'Brown', color: styleMap.TEXTBROWN.color },
   { text: 'Gray', color: styleMap.TEXTGRAY.color },
-]
+];
 
-const isOSX = navigator.userAgent.indexOf('Mac') !== -1
+const isOSX = navigator.userAgent.indexOf('Mac') !== -1;
 
 const menuDescription = {
   Bold: isOSX ? '⌘ + B' : 'Ctrl + B',
@@ -66,128 +66,128 @@ const menuDescription = {
   Underline: isOSX ? '⌘ + U' : 'Ctrl + U',
   Strikethrough: isOSX ? '⌘ + Shift + S' : 'Ctrl + Shift + S',
   Code: isOSX ? '⌘ + E' : 'Ctrl + E',
-}
+};
 
 /*************************************************
  * Main components
  *************************************************/
 const PopupMenu = (props) => {
   // Props
-  const pageUuid = props.pageUuid
-  const handleFocusEditor = props.handleFocusEditor
+  const pageUuid = props.pageUuid;
+  const handleFocusEditor = props.handleFocusEditor;
 
   // Reducers
-  const dispatch = useDispatch()
-  const menuRange = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.popupMenuRange))
-  const triggerEsc = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.triggerEsc))
-  const [menuPosition, setMenuPosition] = useState({ top: -1000, left: 0 })
-  const [showMenu, setShowMenu] = useState(false)
-  const [anchorEl, setAnchorEl] = useState(null)
-  const [textColorEl, setTextColorEl] = useState(null)
-  const [backgroundColorEl, setBackgroundColorEl] = useState(null)
+  const dispatch = useDispatch();
+  const menuRange = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.popupMenuRange));
+  const triggerEsc = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.triggerEsc));
+  const [menuPosition, setMenuPosition] = useState({ top: -1000, left: 0 });
+  const [showMenu, setShowMenu] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [textColorEl, setTextColorEl] = useState(null);
+  const [backgroundColorEl, setBackgroundColorEl] = useState(null);
 
   // Constants
-  const anchorId = `geeke-popupMenuAnchor-${pageUuid}`
+  const anchorId = `geeke-popupMenuAnchor-${pageUuid}`;
 
   // Set anchor
   useEffect(() => {
-    setAnchorEl(document.getElementById(anchorId))
-  }, []) // eslint-disable-line
+    setAnchorEl(document.getElementById(anchorId));
+  }, []); // eslint-disable-line
 
   // Update position info
   const throttle_updateMenuPosition = throttle(
     (menuRange) => {
       if (!menuRange) {
-        setShowMenu(false)
-        setTextColorEl(null)
-        setBackgroundColorEl(null)
+        setShowMenu(false);
+        setTextColorEl(null);
+        setBackgroundColorEl(null);
         setTimeout(() => {
-          setMenuPosition({ top: -1000, left: 0 })
-        }, 200)
+          setMenuPosition({ top: -1000, left: 0 });
+        }, 200);
       } else {
-        const editorDom = document.getElementById(`geeke-editor-${pageUuid}`)
-        const editorRect = editorDom.getBoundingClientRect()
-        const selectionRect = menuRange.getBoundingClientRect()
-        const menuHeight = remToPx(0.5)
+        const editorDom = document.getElementById(`geeke-editor-${pageUuid}`);
+        const editorRect = editorDom.getBoundingClientRect();
+        const selectionRect = menuRange.getBoundingClientRect();
+        const menuHeight = remToPx(0.5);
         const newPosition = {
           top: editorDom.offsetTop + (selectionRect.top - editorRect.top) - menuHeight,
           left: editorDom.offsetLeft + (selectionRect.left - editorRect.left) + selectionRect.width / 2,
-        }
-        setMenuPosition(newPosition)
-        setShowMenu(true)
+        };
+        setMenuPosition(newPosition);
+        setShowMenu(true);
       }
     },
     100,
     { trailing: true },
-  )
+  );
   useEffect(() => {
-    throttle_updateMenuPosition(menuRange)
-  }, [menuRange]) // eslint-disable-line
+    throttle_updateMenuPosition(menuRange);
+  }, [menuRange]); // eslint-disable-line
 
   // Update anchorEl depends on esc
   useEffect(() => {
     if (textColorEl || backgroundColorEl) {
-      setTextColorEl(null)
-      setBackgroundColorEl(null)
+      setTextColorEl(null);
+      setBackgroundColorEl(null);
     } else if (showMenu) {
-      setShowMenu(false)
+      setShowMenu(false);
     }
-  }, [triggerEsc]) // eslint-disable-line
+  }, [triggerEsc]); // eslint-disable-line
 
   // Functions
   const keepFocusOnEditor = (e) => {
-    e.stopPropagation()
-    handleFocusEditor()
+    e.stopPropagation();
+    handleFocusEditor();
     setTimeout(() => {
-      showEditorSelection(dispatch, pageUuid)
-    })
-  }
+      showEditorSelection(dispatch, pageUuid);
+    });
+  };
 
   const toggleStyle = (toggleFunc) => {
-    toggleFunc(dispatch, pageUuid)
+    toggleFunc(dispatch, pageUuid);
     if (textColorEl) {
-      setTextColorEl(null)
+      setTextColorEl(null);
     }
     if (backgroundColorEl) {
-      setBackgroundColorEl(null)
+      setBackgroundColorEl(null);
     }
-  }
-  const toggleBold = (e) => toggleStyle(_toggleBold)
-  const toggleItalic = (e) => toggleStyle(_toggleItalic)
-  const toggleUnderline = (e) => toggleStyle(_toggleUnderline)
-  const toggleStrikethrough = (e) => toggleStyle(_toggleStrikethrough)
-  const toggleCode = (e) => toggleStyle(_toggleCode)
+  };
+  const toggleBold = (e) => toggleStyle(_toggleBold);
+  const toggleItalic = (e) => toggleStyle(_toggleItalic);
+  const toggleUnderline = (e) => toggleStyle(_toggleUnderline);
+  const toggleStrikethrough = (e) => toggleStyle(_toggleStrikethrough);
+  const toggleCode = (e) => toggleStyle(_toggleCode);
 
   const toggleFontColorMenu = (e) => {
     // Hide other menus
-    setBackgroundColorEl(null)
+    setBackgroundColorEl(null);
 
     // Toggle fontColorMenu
     if (!textColorEl) {
-      setTextColorEl(e.currentTarget)
+      setTextColorEl(e.currentTarget);
     } else {
-      setTextColorEl(null)
+      setTextColorEl(null);
     }
-  }
+  };
 
   const toggleBackgroundColorMenu = (e) => {
     // Hide other menus
-    setTextColorEl(null)
+    setTextColorEl(null);
 
     // Toggle backgroundColorMenu
     if (!backgroundColorEl) {
-      setBackgroundColorEl(e.currentTarget)
+      setBackgroundColorEl(e.currentTarget);
     } else {
-      setBackgroundColorEl(null)
+      setBackgroundColorEl(null);
     }
-  }
+  };
 
-  const setTextColor = (color) => _setTextColor(dispatch, pageUuid, color)
-  const setBackgroundColor = (color) => _setBackgroundColor(dispatch, pageUuid, color)
+  const setTextColor = (color) => _setTextColor(dispatch, pageUuid, color);
+  const setBackgroundColor = (color) => _setBackgroundColor(dispatch, pageUuid, color);
 
   // Component
-  const seperator = <div className="geeke-popupMenuSeperator"></div>
-  const dropdownIcon = <span className="geeke-popupMenu-dropdownIcon">▾</span>
+  const seperator = <div className="geeke-popupMenuSeperator"></div>;
+  const dropdownIcon = <span className="geeke-popupMenu-dropdownIcon">▾</span>;
 
   const fontColorButtons = (
     <Popper
@@ -210,14 +210,14 @@ const PopupMenu = (props) => {
                     />
                     {context.text}
                   </MenuItem>
-                )
+                );
               })}
             </MenuList>
           </Paper>
         </Fade>
       )}
     </Popper>
-  )
+  );
 
   const backgroundColorButtons = (
     <Popper
@@ -242,20 +242,20 @@ const PopupMenu = (props) => {
                     <FontDownloadIcon fontSize="small" style={{ color: context.color, paddingRight: '0.5rem' }} />
                     {context.text}
                   </MenuItem>
-                )
+                );
               })}
             </MenuList>
           </Paper>
         </Fade>
       )}
     </Popper>
-  )
+  );
 
-  const buttonDescription_Bold = <ButtonDescription style="Bold" /> // eslint-disable-line
-  const buttonDescription_Italic = <ButtonDescription style="Italic" /> // eslint-disable-line
-  const buttonDescription_Underline = <ButtonDescription style="Underline" /> // eslint-disable-line
-  const buttonDescription_Strikethrough = <ButtonDescription style="Strikethrough" /> // eslint-disable-line
-  const buttonDescription_Code = <ButtonDescription style="Code" /> // eslint-disable-line
+  const buttonDescription_Bold = <ButtonDescription style="Bold" />; // eslint-disable-line
+  const buttonDescription_Italic = <ButtonDescription style="Italic" />; // eslint-disable-line
+  const buttonDescription_Underline = <ButtonDescription style="Underline" />; // eslint-disable-line
+  const buttonDescription_Strikethrough = <ButtonDescription style="Strikethrough" />; // eslint-disable-line
+  const buttonDescription_Code = <ButtonDescription style="Code" />; // eslint-disable-line
 
   return (
     <>
@@ -316,11 +316,11 @@ const PopupMenu = (props) => {
       {fontColorButtons}
       {backgroundColorButtons}
     </>
-  )
-}
+  );
+};
 
 const ButtonDescription = (props) => {
-  const style = props.style
+  const style = props.style;
   return (
     <div className="geeke-popupMenu-ButtonDescription">
       <div>
@@ -328,7 +328,7 @@ const ButtonDescription = (props) => {
       </div>
       <div>{menuDescription[style]}</div>
     </div>
-  )
-}
+  );
+};
 
-export default PopupMenu
+export default PopupMenu;
