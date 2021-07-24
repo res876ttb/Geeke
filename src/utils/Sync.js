@@ -19,5 +19,5 @@
  * TODO: Server side API
  */
 export function getRootPages() {
-  return []; // For testing only
+  return [] // For testing only
 }

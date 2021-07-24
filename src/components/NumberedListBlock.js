@@ -6,77 +6,70 @@
 /*************************************************
  * React Components
  *************************************************/
-import React from 'react';
-import { EditorBlock } from 'draft-js';
-import { useDispatch } from 'react-redux';
+import React from 'react'
+import { EditorBlock } from 'draft-js'
+import { useDispatch } from 'react-redux'
 
 /*************************************************
  * Utils & States
  *************************************************/
-import {
-  onMouseOver as _onMouseOver,
-  onMouseLeave as _onMouseLeave,
-} from '../utils/DraggableBlockUtils';
-import { isShowBlock } from '../utils/NumberListUtils';
+import { onMouseOver as _onMouseOver, onMouseLeave as _onMouseLeave } from '../utils/DraggableBlockUtils'
+import { isShowBlock } from '../utils/NumberListUtils'
 
 /*************************************************
  * Import Components
  *************************************************/
-import BlockDargButton from './BlcokDragButton';
+import BlockDargButton from './BlcokDragButton'
 
 /*************************************************
  * Constant
  *************************************************/
-import {
-  blockDataKeys,
-  editorLeftPadding,
-  indentWidth,
-  remToPx,
-} from '../constant';
+import { blockDataKeys, editorLeftPadding, indentWidth, remToPx } from '../constant'
 
 /*************************************************
  * Main components
  *************************************************/
-const NumberedListBlock = props => {
+const NumberedListBlock = (props) => {
   // Props
-  const pageUuid = props.blockProps.pageUuid;
-  const blockData = props.block.getData();
-  const blockKey = props.block.key;
-  const readOnly = props.blockProps.readOnly;
-  const handleBlockDargStart = props.blockProps.handleBlockDargStart;
-  const contentState = props.contentState;
+  const pageUuid = props.blockProps.pageUuid
+  const blockData = props.block.getData()
+  const blockKey = props.block.key
+  const readOnly = props.blockProps.readOnly
+  const handleBlockDargStart = props.blockProps.handleBlockDargStart
+  const contentState = props.contentState
 
   // Reducers
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
   // Check whether to show this block
   if (!isShowBlock(contentState, blockKey)) {
-    return null;
+    return null
   }
 
   // Variables
-  let indentLevel = 0;
+  let indentLevel = 0
 
   // Functions
-  const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
-  const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
+  const onMouseOver = (e) => _onMouseOver(e, dispatch, pageUuid, blockKey)
+  const onMouseLeave = (e) => _onMouseLeave(e, dispatch, pageUuid)
 
   // Get indent level from block data
   if (blockData.has(blockDataKeys.indentLevel)) {
-    indentLevel = blockData.get(blockDataKeys.indentLevel);
+    indentLevel = blockData.get(blockDataKeys.indentLevel)
   }
 
-  const paddingLeft = remToPx(indentWidth * indentLevel);
+  const paddingLeft = remToPx(indentWidth * indentLevel)
 
   // Get the number of this list
-  const numberListOrder = blockData.has(blockDataKeys.numberListOrder) ? blockData.get(blockDataKeys.numberListOrder) : 1;
+  const numberListOrder = blockData.has(blockDataKeys.numberListOrder)
+    ? blockData.get(blockDataKeys.numberListOrder)
+    : 1
 
   return (
     <div
-      className='geeke-blockWrapper'
-      style={{paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`}}
-      geeke='true'
-
+      className="geeke-blockWrapper"
+      style={{ paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px` }}
+      geeke="true"
       onMouseOver={onMouseOver}
       onMouseLeave={onMouseLeave}
     >
@@ -87,16 +80,18 @@ const NumberedListBlock = props => {
         handleBlockDargStart={handleBlockDargStart}
         paddingLeft={paddingLeft}
       />
-      <div className='geeke-numberedListMark noselect' contentEditable={false} style={{paddingLeft: `${paddingLeft}px`}}>
-        <div className='geeke-numberedListMarkInner'>
-          {numberListOrder}.
-        </div>
+      <div
+        className="geeke-numberedListMark noselect"
+        contentEditable={false}
+        style={{ paddingLeft: `${paddingLeft}px` }}
+      >
+        <div className="geeke-numberedListMarkInner">{numberListOrder}.</div>
       </div>
-      <div className='geeke-numberedListEditor'>
+      <div className="geeke-numberedListEditor">
         <EditorBlock {...props} />
       </div>
     </div>
   )
 }
 
-export default NumberedListBlock;
+export default NumberedListBlock

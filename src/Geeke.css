@@ -15,13 +15,11 @@
   --selectionColor: rgba(42, 165, 245, 0.5);
 }
 
-
 /* General Geeke styles */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -29,8 +27,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 .geeke-disableDrag {
@@ -62,11 +59,11 @@ code {
 /* Copied from https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
@@ -75,7 +72,6 @@ code {
   outline: none;
   box-shadow: none;
 }
-
 
 /* Basic Block */
 .geeke-draggableWrapper {
@@ -135,7 +131,6 @@ code {
   z-index: 1;
 }
 
-
 /* BlockDragMask */
 .geeke-blockDragMask {
   position: fixed;
@@ -159,14 +154,12 @@ code {
   position: absolute;
 }
 
-
 /* BlockSelector */
 .geeke-selector {
   height: 0px;
   width: 0px;
   overflow: hidden;
 }
-
 
 /* BulletListBlock */
 .geeke-bulletListMark {
@@ -188,7 +181,6 @@ code {
   margin-left: var(--indentWidth);
 }
 
-
 /* NumberedListBlock */
 .geeke-numberedListMark {
   height: 0px;
@@ -208,7 +200,6 @@ code {
   margin-left: var(--indentWidth);
 }
 
-
 /* CheckListBlock */
 .geeke-checkListMark {
   height: 0px;
@@ -227,7 +218,6 @@ code {
 .geeke-checkListEditor {
   margin-left: var(--indentWidth);
 }
-
 
 /* ToggleListBlock */
 .geeke-toggleListMark {
@@ -266,12 +256,10 @@ code {
   margin-left: var(--indentWidth);
 }
 
-
 /* Page */
 .geeke-pageBottom {
   height: 50%; /* TODO: To be adjusted */
 }
-
 
 /* PageDragShadow */
 .geeke-pageDragShadow {
@@ -283,7 +271,6 @@ code {
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
-
 
 /* Quote */
 .geeke-quoteBar {
@@ -305,11 +292,15 @@ code {
   font-style: italic;
 }
 
-
 /* Heading */
-.h1, .h2, .h3, .h4, .h5, .h6 {
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
   margin-top: 0;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
   font-weight: 500;
   line-height: 1.2;
   margin-block-start: 0rem !important;
@@ -333,7 +324,6 @@ code {
 .h6 {
   font-size: 1rem;
 }
-
 
 /* CodeEditor */
 .geeke-codeEditor {
@@ -400,7 +390,8 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   padding: 1rem 1rem 0.6rem 1rem;
 }
 
-.geeke-codeEditor-languageListWrapper, .geeke-codeEditor-themeListWrapper {
+.geeke-codeEditor-languageListWrapper,
+.geeke-codeEditor-themeListWrapper {
   height: 300px;
   width: 12rem;
   overflow-y: hidden;
@@ -426,7 +417,6 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
 .geeke-codeBlockSelected {
   background-color: var(--selectionColor);
 }
-
 
 /* Popup Menu */
 .geeke-popupMenuButton {
@@ -461,7 +451,6 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
 .geeke-popupMenu-ButtonDescription {
   text-align: center;
 }
-
 
 /* PageTitle */
 .Geeke-Page-Title {

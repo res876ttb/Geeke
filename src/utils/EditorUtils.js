@@ -37,12 +37,12 @@ export const colorConst = {
   PURPLE: 'p',
   RED: 'r',
   YELLOW: 'y',
-};
+}
 
 const prepostConst = {
   PREFIX: 0,
   POSTFIX: 1,
-};
+}
 
 const _stylerConst = {
   PREFIX: '«',
@@ -77,7 +77,7 @@ const _stylerConst = {
   BACKGROUND_PURPLE: 'bp',
   BACKGROUND_RED: 'br',
   BACKGROUND_YELLOW: 'by',
-};
+}
 
 export const stylerConst = {
   PREFIX_LEN: 4,
@@ -150,17 +150,17 @@ export const stylerConst = {
   POSTFIX_BACKGROUND_PURPLE: stylerPostfix(_stylerConst.BACKGROUND_PURPLE),
   POSTFIX_BACKGROUND_RED: stylerPostfix(_stylerConst.BACKGROUND_RED),
   POSTFIX_BACKGROUND_YELLOW: stylerPostfix(_stylerConst.BACKGROUND_YELLOW),
-};
+}
 
 /*************************************************
  * FUNCTIONS
  *************************************************/
 function stylerPrefix(type) {
-  return `${_stylerConst.PREFIX}${type}${_stylerConst.MARK}`;
+  return `${_stylerConst.PREFIX}${type}${_stylerConst.MARK}`
 }
 
 function stylerPostfix(type) {
-  return `${_stylerConst.MARK}${type}${_stylerConst.POSTFIX}`;
+  return `${_stylerConst.MARK}${type}${_stylerConst.POSTFIX}`
 }
 
 /**
@@ -174,122 +174,122 @@ function getColorStyle(type, color, prepost) {
   switch (type) {
     case styleType.COLOR:
       if (prepost == prepostConst.PREFIX) {
-        switch(color) {
+        switch (color) {
           case colorConst.BLUE:
-            return stylerConst.PREFIX_COLOR_BLUE;
+            return stylerConst.PREFIX_COLOR_BLUE
           case colorConst.BROWN:
-            return stylerConst.PREFIX_COLOR_BROWN;
+            return stylerConst.PREFIX_COLOR_BROWN
           case colorConst.DEFAULT:
-            return stylerConst.PREFIX_COLOR_DEFAULT;
+            return stylerConst.PREFIX_COLOR_DEFAULT
           case colorConst.GRAY:
-            return stylerConst.PREFIX_COLOR_GRAY;
+            return stylerConst.PREFIX_COLOR_GRAY
           case colorConst.GREEN:
-            return stylerConst.PREFIX_COLOR_GREEN;
+            return stylerConst.PREFIX_COLOR_GREEN
           case colorConst.ORANGE:
-            return stylerConst.PREFIX_COLOR_ORANGE;
+            return stylerConst.PREFIX_COLOR_ORANGE
           case colorConst.PINK:
-            return stylerConst.PREFIX_COLOR_PINK;
+            return stylerConst.PREFIX_COLOR_PINK
           case colorConst.PURPLE:
-            return stylerConst.PREFIX_COLOR_PURPLE;
+            return stylerConst.PREFIX_COLOR_PURPLE
           case colorConst.RED:
-            return stylerConst.PREFIX_COLOR_RED;
+            return stylerConst.PREFIX_COLOR_RED
           case colorConst.YELLOW:
-            return stylerConst.PREFIX_COLOR_YELLOW;
+            return stylerConst.PREFIX_COLOR_YELLOW
           default:
             console.error(`Unknown color: ${color}.`)
-            return null;
+            return null
         }
       } else if (prepost == prepostConst.POSTFIX) {
-        switch(color) {
+        switch (color) {
           case colorConst.BLUE:
-            return stylerConst.POSTFIX_COLOR_BLUE;
+            return stylerConst.POSTFIX_COLOR_BLUE
           case colorConst.BROWN:
-            return stylerConst.POSTFIX_COLOR_BROWN;
+            return stylerConst.POSTFIX_COLOR_BROWN
           case colorConst.DEFAULT:
-            return stylerConst.POSTFIX_COLOR_DEFAULT;
+            return stylerConst.POSTFIX_COLOR_DEFAULT
           case colorConst.GRAY:
-            return stylerConst.POSTFIX_COLOR_GRAY;
+            return stylerConst.POSTFIX_COLOR_GRAY
           case colorConst.GREEN:
-            return stylerConst.POSTFIX_COLOR_GREEN;
+            return stylerConst.POSTFIX_COLOR_GREEN
           case colorConst.ORANGE:
-            return stylerConst.POSTFIX_COLOR_ORANGE;
+            return stylerConst.POSTFIX_COLOR_ORANGE
           case colorConst.PINK:
-            return stylerConst.POSTFIX_COLOR_PINK;
+            return stylerConst.POSTFIX_COLOR_PINK
           case colorConst.PURPLE:
-            return stylerConst.POSTFIX_COLOR_PURPLE;
+            return stylerConst.POSTFIX_COLOR_PURPLE
           case colorConst.RED:
-            return stylerConst.POSTFIX_COLOR_RED;
+            return stylerConst.POSTFIX_COLOR_RED
           case colorConst.YELLOW:
-            return stylerConst.POSTFIX_COLOR_YELLOW;
+            return stylerConst.POSTFIX_COLOR_YELLOW
           default:
             console.error(`Unknown color: ${color}.`)
-            return null;
+            return null
         }
       } else {
-        console.error(`Unknown prepost: ${prepost}.`);
-        return null;
+        console.error(`Unknown prepost: ${prepost}.`)
+        return null
       }
-    
+
     case styleType.BACKGROUND:
       if (prepost == prepostConst.PREFIX) {
-        switch(color) {
+        switch (color) {
           case colorConst.BLUE:
-            return stylerConst.PREFIX_BACKGROUND_BLUE;
+            return stylerConst.PREFIX_BACKGROUND_BLUE
           case colorConst.BROWN:
-            return stylerConst.PREFIX_BACKGROUND_BROWN;
+            return stylerConst.PREFIX_BACKGROUND_BROWN
           case colorConst.DEFAULT:
-            return stylerConst.PREFIX_BACKGROUND_DEFAULT;
+            return stylerConst.PREFIX_BACKGROUND_DEFAULT
           case colorConst.GRAY:
-            return stylerConst.PREFIX_BACKGROUND_GRAY;
+            return stylerConst.PREFIX_BACKGROUND_GRAY
           case colorConst.GREEN:
-            return stylerConst.PREFIX_BACKGROUND_GREEN;
+            return stylerConst.PREFIX_BACKGROUND_GREEN
           case colorConst.ORANGE:
-            return stylerConst.PREFIX_BACKGROUND_ORANGE;
+            return stylerConst.PREFIX_BACKGROUND_ORANGE
           case colorConst.PINK:
-            return stylerConst.PREFIX_BACKGROUND_PINK;
+            return stylerConst.PREFIX_BACKGROUND_PINK
           case colorConst.PURPLE:
-            return stylerConst.PREFIX_BACKGROUND_PURPLE;
+            return stylerConst.PREFIX_BACKGROUND_PURPLE
           case colorConst.RED:
-            return stylerConst.PREFIX_BACKGROUND_RED;
+            return stylerConst.PREFIX_BACKGROUND_RED
           case colorConst.YELLOW:
-            return stylerConst.PREFIX_BACKGROUND_YELLOW;
+            return stylerConst.PREFIX_BACKGROUND_YELLOW
           default:
             console.error(`Unknown color: ${color}.`)
-            return null;
+            return null
         }
       } else if (prepost == prepostConst.POSTFIX) {
-        switch(color) {
+        switch (color) {
           case colorConst.BLUE:
-            return stylerConst.POSTFIX_BACKGROUND_BLUE;
+            return stylerConst.POSTFIX_BACKGROUND_BLUE
           case colorConst.BROWN:
-            return stylerConst.POSTFIX_BACKGROUND_BROWN;
+            return stylerConst.POSTFIX_BACKGROUND_BROWN
           case colorConst.DEFAULT:
-            return stylerConst.POSTFIX_BACKGROUND_DEFAULT;
+            return stylerConst.POSTFIX_BACKGROUND_DEFAULT
           case colorConst.GRAY:
-            return stylerConst.POSTFIX_BACKGROUND_GRAY;
+            return stylerConst.POSTFIX_BACKGROUND_GRAY
           case colorConst.GREEN:
-            return stylerConst.POSTFIX_BACKGROUND_GREEN;
+            return stylerConst.POSTFIX_BACKGROUND_GREEN
           case colorConst.ORANGE:
-            return stylerConst.POSTFIX_BACKGROUND_ORANGE;
+            return stylerConst.POSTFIX_BACKGROUND_ORANGE
           case colorConst.PINK:
-            return stylerConst.POSTFIX_BACKGROUND_PINK;
+            return stylerConst.POSTFIX_BACKGROUND_PINK
           case colorConst.PURPLE:
-            return stylerConst.POSTFIX_BACKGROUND_PURPLE;
+            return stylerConst.POSTFIX_BACKGROUND_PURPLE
           case colorConst.RED:
-            return stylerConst.POSTFIX_BACKGROUND_RED;
+            return stylerConst.POSTFIX_BACKGROUND_RED
           case colorConst.YELLOW:
-            return stylerConst.POSTFIX_BACKGROUND_YELLOW;
+            return stylerConst.POSTFIX_BACKGROUND_YELLOW
           default:
             console.error(`Unknown color: ${color}.`)
-            return null;
+            return null
         }
       } else {
-        console.error(`Unknown prepost: ${prepost}.`);
-        return null;
+        console.error(`Unknown prepost: ${prepost}.`)
+        return null
       }
-    
+
     default:
-      console.error(`Unknown type: ${type}.`);
+      console.error(`Unknown type: ${type}.`)
       break
   }
 }
@@ -304,80 +304,80 @@ function getColorStyle(type, color, prepost) {
  * @param {any} param
  */
 export function contentStyler(content, type, start, end, param) {
-  let PREFIX, POSTFIX;
+  let PREFIX, POSTFIX
 
-  switch(type) {
+  switch (type) {
     case styleType.BOLD:
-      PREFIX = stylerConst.PREFIX_BOLD;
-      POSTFIX = stylerConst.POSTFIX_BOLD;
-      break;
-    
+      PREFIX = stylerConst.PREFIX_BOLD
+      POSTFIX = stylerConst.POSTFIX_BOLD
+      break
+
     case styleType.ITALIC:
-      PREFIX = stylerConst.PREFIX_ITALIC;
-      POSTFIX = stylerConst.POSTFIX_ITALIC;
-      break;
-    
+      PREFIX = stylerConst.PREFIX_ITALIC
+      POSTFIX = stylerConst.POSTFIX_ITALIC
+      break
+
     case styleType.UNDERLINE:
-      PREFIX = stylerConst.PREFIX_UNDERLINE;
-      POSTFIX = stylerConst.POSTFIX_UNDERLINE;
-      break;
-    
+      PREFIX = stylerConst.PREFIX_UNDERLINE
+      POSTFIX = stylerConst.POSTFIX_UNDERLINE
+      break
+
     case styleType.STRIKETHROUGH:
-      PREFIX = stylerConst.PREFIX_STRIKETHROUGH;
-      POSTFIX = stylerConst.POSTFIX_STRIKETHROUGH;
-      break;
-    
+      PREFIX = stylerConst.PREFIX_STRIKETHROUGH
+      POSTFIX = stylerConst.POSTFIX_STRIKETHROUGH
+      break
+
     case styleType.LINK:
-      PREFIX = stylerConst.PREFIX_LINK;
-      POSTFIX = stylerConst.POSTFIX_LINK;
-      break;
-      
+      PREFIX = stylerConst.PREFIX_LINK
+      POSTFIX = stylerConst.POSTFIX_LINK
+      break
+
     case styleType.CODE:
-      PREFIX = stylerConst.PREFIX_CODE;
-      POSTFIX = stylerConst.POSTFIX_CODE;
-      break;
-    
+      PREFIX = stylerConst.PREFIX_CODE
+      POSTFIX = stylerConst.POSTFIX_CODE
+      break
+
     case styleType.MATH:
-      PREFIX = stylerConst.PREFIX_MATH;
-      POSTFIX = stylerConst.POSTFIX_MATH;
-      break;
-    
+      PREFIX = stylerConst.PREFIX_MATH
+      POSTFIX = stylerConst.POSTFIX_MATH
+      break
+
     case styleType.COLOR:
-      PREFIX = getColorStyle(styleType.COLOR, param, prepostConst.PREFIX);
-      POSTFIX = getColorStyle(styleType.COLOR, param, prepostConst.POSTFIX);
-      break;
+      PREFIX = getColorStyle(styleType.COLOR, param, prepostConst.PREFIX)
+      POSTFIX = getColorStyle(styleType.COLOR, param, prepostConst.POSTFIX)
+      break
 
     case styleType.BACKGROUND:
-      PREFIX = getColorStyle(styleType.BACKGROUND, param, prepostConst.PREFIX);
-      POSTFIX = getColorStyle(styleType.BACKGROUND, param, prepostConst.POSTFIX);
-      break;
+      PREFIX = getColorStyle(styleType.BACKGROUND, param, prepostConst.PREFIX)
+      POSTFIX = getColorStyle(styleType.BACKGROUND, param, prepostConst.POSTFIX)
+      break
 
-    case styleType.HYPERLINK:  // TODO
-      break;
-    
-    case styleType.MENTION:    // TODO: pages, blocks, users, dates
-      break;
-    
+    case styleType.HYPERLINK: // TODO
+      break
+
+    case styleType.MENTION: // TODO: pages, blocks, users, dates
+      break
+
     default:
-      console.error('Unknown type:', type);
-      break;
+      console.error('Unknown type:', type)
+      break
   }
 
-  content = styleToggler(content, start, end, PREFIX, POSTFIX);
-  content = splitStyle(content);
-  return content;
+  content = styleToggler(content, start, end, PREFIX, POSTFIX)
+  content = splitStyle(content)
+  return content
 }
 
 /**
  * @function styleToggler
  * @description Toggle string bold status in content.
- * @param {string} content 
- * @param {int} start 
- * @param {int} end 
+ * @param {string} content
+ * @param {int} start
+ * @param {int} end
  * «sb:bold»
  */
 export function styleToggler(content, start, end, PREFIX, POSTFIX) {
-  let pairList = findStylerPair(content, PREFIX, POSTFIX); // return: [{start, end}, {start, end}] <- position of start/end char
+  let pairList = findStylerPair(content, PREFIX, POSTFIX) // return: [{start, end}, {start, end}] <- position of start/end char
 
   /**
    * Remove style
@@ -387,34 +387,35 @@ export function styleToggler(content, start, end, PREFIX, POSTFIX) {
   for (let i = 0; i < pairList.length; i++) {
     // 1. Exactly overlapped
     if (start == pairList[i].start && end == pairList[i].end) {
-      let part1 = content.substring(0, start - stylerConst.PREFIX_LEN);
-      let part2 = content.substring(start, end + 1);
-      let part3 = content.substring(end + 1 + stylerConst.POSTFIX_LEN);
-      return part1 + part2 + part3;
+      let part1 = content.substring(0, start - stylerConst.PREFIX_LEN)
+      let part2 = content.substring(start, end + 1)
+      let part3 = content.substring(end + 1 + stylerConst.POSTFIX_LEN)
+      return part1 + part2 + part3
     }
 
     // 2. Overlapped by another bigger range
     if (start >= pairList[i].start && end <= pairList[i].end) {
-      let res = '', tmp = '';
+      let res = '',
+        tmp = ''
       // Remove start
       if (pairList[i].start == start) {
-        res = content.substring(0, start - stylerConst.PREFIX_LEN);
+        res = content.substring(0, start - stylerConst.PREFIX_LEN)
       } else {
-        res = content.substring(0, start);
-        res += POSTFIX;
+        res = content.substring(0, start)
+        res += POSTFIX
       }
 
-      res += content.substring(start, end + 1);
-      
+      res += content.substring(start, end + 1)
+
       // Remove end
       if (pairList[i].end == end) {
-        res += content.substring(end + 1 + stylerConst.POSTFIX_LEN);
+        res += content.substring(end + 1 + stylerConst.POSTFIX_LEN)
       } else {
-        res += PREFIX;
-        res += content.substring(end + 1);
+        res += PREFIX
+        res += content.substring(end + 1)
       }
 
-      return res;
+      return res
     }
   }
 
@@ -425,91 +426,97 @@ export function styleToggler(content, start, end, PREFIX, POSTFIX) {
    * 3. Repeat 1 & 2.
    * 4. Remove continuous bold prefix/postfix.
    */
-  let i = pairList.length - 1;
-  let lastEnd = end;
-  let res = '';
+  let i = pairList.length - 1
+  let lastEnd = end
+  let res = ''
   for (; i >= 0 && start < lastEnd; i--) {
-    if (pairList[i].end < start) break;
+    if (pairList[i].end < start) break
 
     // Move lastEnd
     if (pairList[i].start > start && pairList[i].start <= end && pairList[i].end > end) {
-      lastEnd = pairList[i].start - stylerConst.PREFIX_LEN - 1;
-      res = content.substring(lastEnd + 1);
+      lastEnd = pairList[i].start - stylerConst.PREFIX_LEN - 1
+      res = content.substring(lastEnd + 1)
     }
     // Check whether this bold range overlaps with current range.
     else if (pairList[i].end < end && pairList[i].end >= start) {
       if (lastEnd == end) {
-        res = content.substring(lastEnd + 1);
+        res = content.substring(lastEnd + 1)
       }
       // Add bold string
-      res = PREFIX + content.substring(pairList[i].end + stylerConst.POSTFIX_LEN + 1, lastEnd + 1) + POSTFIX + res;
-      res = content.substring(pairList[i].start - stylerConst.PREFIX_LEN, pairList[i].end + stylerConst.POSTFIX_LEN + 1) + res;
-      lastEnd = pairList[i].start - stylerConst.PREFIX_LEN - 1;
+      res = PREFIX + content.substring(pairList[i].end + stylerConst.POSTFIX_LEN + 1, lastEnd + 1) + POSTFIX + res
+      res =
+        content.substring(pairList[i].start - stylerConst.PREFIX_LEN, pairList[i].end + stylerConst.POSTFIX_LEN + 1) +
+        res
+      lastEnd = pairList[i].start - stylerConst.PREFIX_LEN - 1
     }
   }
 
   if (lastEnd == end) {
     // No overlapping
-    res = content.substring(0, start) + PREFIX + content.substring(start, end + 1) + POSTFIX + content.substring(end + 1);
+    res =
+      content.substring(0, start) + PREFIX + content.substring(start, end + 1) + POSTFIX + content.substring(end + 1)
   } else if (lastEnd >= start) {
     // If 1 or more overlapping, but not left partial overlapping
-    res = PREFIX + content.substring(start, lastEnd + 1) + POSTFIX + res;
-    res = content.substring(0, start) + res;
+    res = PREFIX + content.substring(start, lastEnd + 1) + POSTFIX + res
+    res = content.substring(0, start) + res
   } else {
     // Left partial overlapping
-    res = content.substring(0, pairList[i + 1].start - stylerConst.PREFIX_LEN) + res;
+    res = content.substring(0, pairList[i + 1].start - stylerConst.PREFIX_LEN) + res
   }
 
   // Remove continuous bold symbols
-  res = res.replace(RegExp(`${POSTFIX}${PREFIX}`, 'g'), '');
+  res = res.replace(RegExp(`${POSTFIX}${PREFIX}`, 'g'), '')
 
-  return res;
+  return res
 }
 
 /**
  * @function findStylerPair
  * @description Find position of bold symbol.
- * @param {string} content 
+ * @param {string} content
  * @returns A list of styler string position, which includes the start and end position.
  *          EX: "abcd«sb:efg:sb»higj" will output [[8,10]] for bold style.
  *                       ^ ^
  */
 export function findStylerPair(content, PREFIX, POSTFIX) {
-  let result = [];
-  let start = -1;
+  let result = []
+  let start = -1
 
   for (let i = 0; i < content.length; i++) {
     if (content[i] == stylerConst.PREFIX) {
-    if (content.substr(i, stylerConst.PREFIX_LEN) == PREFIX) {
-      i += stylerConst.PREFIX_LEN;
-      start = i;
+      if (content.substr(i, stylerConst.PREFIX_LEN) == PREFIX) {
+        i += stylerConst.PREFIX_LEN
+        start = i
 
-      for (; i < content.length; i++) {
-        if (content[i] == stylerConst.MARK) {
-        if (content.substr(i, stylerConst.POSTFIX_LEN) == POSTFIX) {
-          result.push({start: start, end: i - 1});
-          i = i + stylerConst.POSTFIX_LEN - 1;
-          break;
-        }}
+        for (; i < content.length; i++) {
+          if (content[i] == stylerConst.MARK) {
+            if (content.substr(i, stylerConst.POSTFIX_LEN) == POSTFIX) {
+              result.push({ start: start, end: i - 1 })
+              i = i + stylerConst.POSTFIX_LEN - 1
+              break
+            }
+          }
+        }
       }
-    }}
+    }
   }
 
-  return result;
+  return result
 }
 
 /**
  * @function splitStyle
  * @description Split 2 overlapped styles.
- * @param {string} content 
+ * @param {string} content
  */
 export function splitStyle(content) {
-  let stylePairs = findAllStylerPair(content);
-  if (stylePairs.length < 2) return content;
+  let stylePairs = findAllStylerPair(content)
+  if (stylePairs.length < 2) return content
 
-  let i = stylePairs.length - 2;
-  let curPair = stylePairs[i + 1], prePair;
-  
+  let i = stylePairs.length - 2
+  let curPair = stylePairs[i + 1],
+    prePair
+
   /**
    * 1. Check pairs from the end.
    * 1.1. If the previous pair does not partially overlap with the current one, move to the previous pairs and repelat step 1.
@@ -517,7 +524,7 @@ export function splitStyle(content) {
    * 2. Split the previous pairs. Then, move to the previous pair and repeat step 1.
    */
   while (i >= 0) {
-    prePair = stylePairs[i];
+    prePair = stylePairs[i]
 
     // 1. Check pairs from the end.
     if (prePair.end > curPair.start && prePair.end <= curPair.end) {
@@ -526,25 +533,28 @@ export function splitStyle(content) {
         // 2. Split the previous pairs.
         //    xxxAxxxCxxxBxxxDxxx <- Before. AB is a pair, CD is a pair
         //    xxxAxxBCAxxBxxxDxxx <- After.
-        let PREPAIR_POSTFIX = content.substr(prePair.end + 1, stylerConst.POSTFIX_LEN);
-        let PREPAIR_PREFIX = content.substr(prePair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN);
-        let CURPAIR_PREFIX = content.substr(curPair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN);
-        content = content.substring(0, curPair.start - stylerConst.PREFIX_LEN) + 
-                  PREPAIR_POSTFIX + CURPAIR_PREFIX + PREPAIR_PREFIX +
-                  content.substring(curPair.start);
+        let PREPAIR_POSTFIX = content.substr(prePair.end + 1, stylerConst.POSTFIX_LEN)
+        let PREPAIR_PREFIX = content.substr(prePair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN)
+        let CURPAIR_PREFIX = content.substr(curPair.start - stylerConst.PREFIX_LEN, stylerConst.PREFIX_LEN)
+        content =
+          content.substring(0, curPair.start - stylerConst.PREFIX_LEN) +
+          PREPAIR_POSTFIX +
+          CURPAIR_PREFIX +
+          PREPAIR_PREFIX +
+          content.substring(curPair.start)
 
         // 2. Move to the previous pair and repeat step 1.
-        curPair = prePair;
+        curPair = prePair
       }
     } else {
       // 1.1. Move to the previous pair.
-      curPair = prePair;
+      curPair = prePair
     }
 
-    i--;
+    i--
   }
 
-  return content;
+  return content
 }
 
 /**
@@ -554,34 +564,34 @@ export function splitStyle(content) {
  * @returns A list sorted by end position.
  */
 export function findAllStylerPair(content) {
-  let i = 0;
-  let pairs = [];
-  let prefixes = [];
+  let i = 0
+  let pairs = []
+  let prefixes = []
 
   for (; i < content.length; i++) {
     if (content[i] == stylerConst.PREFIX) {
-      let prefix = content.substr(i, stylerConst.PREFIX_LEN);
-      if (Object.values(stylerConst).indexOf(prefix) == -1) continue;
+      let prefix = content.substr(i, stylerConst.PREFIX_LEN)
+      if (Object.values(stylerConst).indexOf(prefix) == -1) continue
 
-      prefixes.push(i + stylerConst.PREFIX_LEN);
+      prefixes.push(i + stylerConst.PREFIX_LEN)
     } else if (content[i] == stylerConst.POSTFIX) {
-      let postfix = content.substr(i - stylerConst.POSTFIX_LEN + 1, stylerConst.POSTFIX_LEN);
-      if (Object.values(stylerConst).indexOf(postfix) == -1) continue;
+      let postfix = content.substr(i - stylerConst.POSTFIX_LEN + 1, stylerConst.POSTFIX_LEN)
+      if (Object.values(stylerConst).indexOf(postfix) == -1) continue
 
-      let type = postfix.substr(1, stylerConst.TYPE_LEN);
+      let type = postfix.substr(1, stylerConst.TYPE_LEN)
       for (let j = 0; j < prefixes.length; j++) {
         if (type == content.substr(prefixes[j] - stylerConst.PREFIX_LEN + 1, stylerConst.TYPE_LEN)) {
-          pairs.push({start: prefixes[j], end: i - stylerConst.POSTFIX_LEN});
-          prefixes.splice(j, 1);
-          break;
+          pairs.push({ start: prefixes[j], end: i - stylerConst.POSTFIX_LEN })
+          prefixes.splice(j, 1)
+          break
         }
       }
     }
   }
 
   if (prefixes.length > 0) {
-    console.error(`Something went wrong in findAllStylerPair. Prefixes: ${prefixes}`);
+    console.error(`Something went wrong in findAllStylerPair. Prefixes: ${prefixes}`)
   }
 
-  return pairs;
+  return pairs
 }

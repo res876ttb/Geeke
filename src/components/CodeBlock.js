@@ -6,158 +6,142 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { EditorBlock, EditorState } from 'draft-js';
-import Select from 'react-select';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Snackbar from '@material-ui/core/Snackbar';
-import Switch from '@material-ui/core/Switch';
-import {
-  Button,
-  ButtonGroup,
-  Popover,
-} from '@material-ui/core';
+import React, { useEffect, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { EditorBlock, EditorState } from 'draft-js'
+import Select from 'react-select'
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz'
+import Snackbar from '@material-ui/core/Snackbar'
+import Switch from '@material-ui/core/Switch'
+import { Button, ButtonGroup, Popover } from '@material-ui/core'
 
-import AceEditor from "react-ace";
-import "ace-builds/webpack-resolver";
+import AceEditor from 'react-ace'
+import 'ace-builds/webpack-resolver'
 
 // TODO: Are there any better method to import these stuff...?
 // Import ace mode
-import "ace-builds/src-min-noconflict/mode-abap";
-import "ace-builds/src-min-noconflict/mode-assembly_x86";
-import "ace-builds/src-min-noconflict/mode-autohotkey";
-import "ace-builds/src-min-noconflict/mode-batchfile";
-import "ace-builds/src-min-noconflict/mode-c_cpp";
-import "ace-builds/src-min-noconflict/mode-clojure";
-import "ace-builds/src-min-noconflict/mode-coffee";
-import "ace-builds/src-min-noconflict/mode-csharp";
-import "ace-builds/src-min-noconflict/mode-css";
-import "ace-builds/src-min-noconflict/mode-dart";
-import "ace-builds/src-min-noconflict/mode-diff";
-import "ace-builds/src-min-noconflict/mode-dockerfile";
-import "ace-builds/src-min-noconflict/mode-elixir";
-import "ace-builds/src-min-noconflict/mode-elm";
-import "ace-builds/src-min-noconflict/mode-erlang";
-import "ace-builds/src-min-noconflict/mode-fortran";
-import "ace-builds/src-min-noconflict/mode-fsharp";
-import "ace-builds/src-min-noconflict/mode-gherkin";
-import "ace-builds/src-min-noconflict/mode-glsl";
-import "ace-builds/src-min-noconflict/mode-golang";
-import "ace-builds/src-min-noconflict/mode-graphqlschema";
-import "ace-builds/src-min-noconflict/mode-groovy";
-import "ace-builds/src-min-noconflict/mode-haskell";
-import "ace-builds/src-min-noconflict/mode-html";
-import "ace-builds/src-min-noconflict/mode-java";
-import "ace-builds/src-min-noconflict/mode-javascript";
-import "ace-builds/src-min-noconflict/mode-json";
-import "ace-builds/src-min-noconflict/mode-kotlin";
-import "ace-builds/src-min-noconflict/mode-latex";
-import "ace-builds/src-min-noconflict/mode-less";
-import "ace-builds/src-min-noconflict/mode-lisp";
-import "ace-builds/src-min-noconflict/mode-livescript";
-import "ace-builds/src-min-noconflict/mode-lua";
-import "ace-builds/src-min-noconflict/mode-makefile";
-import "ace-builds/src-min-noconflict/mode-markdown";
-import "ace-builds/src-min-noconflict/mode-matlab";
-import "ace-builds/src-min-noconflict/mode-nix";
-import "ace-builds/src-min-noconflict/mode-objectivec";
-import "ace-builds/src-min-noconflict/mode-ocaml";
-import "ace-builds/src-min-noconflict/mode-pascal";
-import "ace-builds/src-min-noconflict/mode-perl";
-import "ace-builds/src-min-noconflict/mode-php";
-import "ace-builds/src-min-noconflict/mode-plain_text";
-import "ace-builds/src-min-noconflict/mode-powershell";
-import "ace-builds/src-min-noconflict/mode-prolog";
-import "ace-builds/src-min-noconflict/mode-python";
-import "ace-builds/src-min-noconflict/mode-r";
-import "ace-builds/src-min-noconflict/mode-ruby";
-import "ace-builds/src-min-noconflict/mode-rust";
-import "ace-builds/src-min-noconflict/mode-sass";
-import "ace-builds/src-min-noconflict/mode-scala";
-import "ace-builds/src-min-noconflict/mode-scheme";
-import "ace-builds/src-min-noconflict/mode-scss";
-import "ace-builds/src-min-noconflict/mode-sh";
-import "ace-builds/src-min-noconflict/mode-sql";
-import "ace-builds/src-min-noconflict/mode-swift";
-import "ace-builds/src-min-noconflict/mode-tcl";
-import "ace-builds/src-min-noconflict/mode-typescript";
-import "ace-builds/src-min-noconflict/mode-verilog";
-import "ace-builds/src-min-noconflict/mode-vhdl";
-import "ace-builds/src-min-noconflict/mode-xml";
-import "ace-builds/src-min-noconflict/mode-yaml";
+import 'ace-builds/src-min-noconflict/mode-abap'
+import 'ace-builds/src-min-noconflict/mode-assembly_x86'
+import 'ace-builds/src-min-noconflict/mode-autohotkey'
+import 'ace-builds/src-min-noconflict/mode-batchfile'
+import 'ace-builds/src-min-noconflict/mode-c_cpp'
+import 'ace-builds/src-min-noconflict/mode-clojure'
+import 'ace-builds/src-min-noconflict/mode-coffee'
+import 'ace-builds/src-min-noconflict/mode-csharp'
+import 'ace-builds/src-min-noconflict/mode-css'
+import 'ace-builds/src-min-noconflict/mode-dart'
+import 'ace-builds/src-min-noconflict/mode-diff'
+import 'ace-builds/src-min-noconflict/mode-dockerfile'
+import 'ace-builds/src-min-noconflict/mode-elixir'
+import 'ace-builds/src-min-noconflict/mode-elm'
+import 'ace-builds/src-min-noconflict/mode-erlang'
+import 'ace-builds/src-min-noconflict/mode-fortran'
+import 'ace-builds/src-min-noconflict/mode-fsharp'
+import 'ace-builds/src-min-noconflict/mode-gherkin'
+import 'ace-builds/src-min-noconflict/mode-glsl'
+import 'ace-builds/src-min-noconflict/mode-golang'
+import 'ace-builds/src-min-noconflict/mode-graphqlschema'
+import 'ace-builds/src-min-noconflict/mode-groovy'
+import 'ace-builds/src-min-noconflict/mode-haskell'
+import 'ace-builds/src-min-noconflict/mode-html'
+import 'ace-builds/src-min-noconflict/mode-java'
+import 'ace-builds/src-min-noconflict/mode-javascript'
+import 'ace-builds/src-min-noconflict/mode-json'
+import 'ace-builds/src-min-noconflict/mode-kotlin'
+import 'ace-builds/src-min-noconflict/mode-latex'
+import 'ace-builds/src-min-noconflict/mode-less'
+import 'ace-builds/src-min-noconflict/mode-lisp'
+import 'ace-builds/src-min-noconflict/mode-livescript'
+import 'ace-builds/src-min-noconflict/mode-lua'
+import 'ace-builds/src-min-noconflict/mode-makefile'
+import 'ace-builds/src-min-noconflict/mode-markdown'
+import 'ace-builds/src-min-noconflict/mode-matlab'
+import 'ace-builds/src-min-noconflict/mode-nix'
+import 'ace-builds/src-min-noconflict/mode-objectivec'
+import 'ace-builds/src-min-noconflict/mode-ocaml'
+import 'ace-builds/src-min-noconflict/mode-pascal'
+import 'ace-builds/src-min-noconflict/mode-perl'
+import 'ace-builds/src-min-noconflict/mode-php'
+import 'ace-builds/src-min-noconflict/mode-plain_text'
+import 'ace-builds/src-min-noconflict/mode-powershell'
+import 'ace-builds/src-min-noconflict/mode-prolog'
+import 'ace-builds/src-min-noconflict/mode-python'
+import 'ace-builds/src-min-noconflict/mode-r'
+import 'ace-builds/src-min-noconflict/mode-ruby'
+import 'ace-builds/src-min-noconflict/mode-rust'
+import 'ace-builds/src-min-noconflict/mode-sass'
+import 'ace-builds/src-min-noconflict/mode-scala'
+import 'ace-builds/src-min-noconflict/mode-scheme'
+import 'ace-builds/src-min-noconflict/mode-scss'
+import 'ace-builds/src-min-noconflict/mode-sh'
+import 'ace-builds/src-min-noconflict/mode-sql'
+import 'ace-builds/src-min-noconflict/mode-swift'
+import 'ace-builds/src-min-noconflict/mode-tcl'
+import 'ace-builds/src-min-noconflict/mode-typescript'
+import 'ace-builds/src-min-noconflict/mode-verilog'
+import 'ace-builds/src-min-noconflict/mode-vhdl'
+import 'ace-builds/src-min-noconflict/mode-xml'
+import 'ace-builds/src-min-noconflict/mode-yaml'
 
 // Import ace theme
-import "ace-builds/src-min-noconflict/theme-ambiance";
-import "ace-builds/src-min-noconflict/theme-merbivore";
-import "ace-builds/src-min-noconflict/theme-chaos";
-import "ace-builds/src-min-noconflict/theme-merbivore_soft";
-import "ace-builds/src-min-noconflict/theme-chrome";
-import "ace-builds/src-min-noconflict/theme-mono_industrial";
-import "ace-builds/src-min-noconflict/theme-clouds";
-import "ace-builds/src-min-noconflict/theme-monokai";
-import "ace-builds/src-min-noconflict/theme-clouds_midnight";
-import "ace-builds/src-min-noconflict/theme-nord_dark";
-import "ace-builds/src-min-noconflict/theme-cobalt";
-import "ace-builds/src-min-noconflict/theme-pastel_on_dark";
-import "ace-builds/src-min-noconflict/theme-crimson_editor";
-import "ace-builds/src-min-noconflict/theme-solarized_dark";
-import "ace-builds/src-min-noconflict/theme-dawn";
-import "ace-builds/src-min-noconflict/theme-solarized_light";
-import "ace-builds/src-min-noconflict/theme-dracula";
-import "ace-builds/src-min-noconflict/theme-sqlserver";
-import "ace-builds/src-min-noconflict/theme-dreamweaver";
-import "ace-builds/src-min-noconflict/theme-terminal";
-import "ace-builds/src-min-noconflict/theme-eclipse";
-import "ace-builds/src-min-noconflict/theme-textmate";
-import "ace-builds/src-min-noconflict/theme-github";
-import "ace-builds/src-min-noconflict/theme-tomorrow";
-import "ace-builds/src-min-noconflict/theme-gob";
-import "ace-builds/src-min-noconflict/theme-tomorrow_night";
-import "ace-builds/src-min-noconflict/theme-gruvbox";
-import "ace-builds/src-min-noconflict/theme-tomorrow_night_blue";
-import "ace-builds/src-min-noconflict/theme-idle_fingers";
-import "ace-builds/src-min-noconflict/theme-tomorrow_night_bright";
-import "ace-builds/src-min-noconflict/theme-iplastic";
-import "ace-builds/src-min-noconflict/theme-tomorrow_night_eighties";
-import "ace-builds/src-min-noconflict/theme-katzenmilch";
-import "ace-builds/src-min-noconflict/theme-twilight";
-import "ace-builds/src-min-noconflict/theme-kr_theme";
-import "ace-builds/src-min-noconflict/theme-vibrant_ink";
-import "ace-builds/src-min-noconflict/theme-kuroir";
-import "ace-builds/src-min-noconflict/theme-xcode";
+import 'ace-builds/src-min-noconflict/theme-ambiance'
+import 'ace-builds/src-min-noconflict/theme-merbivore'
+import 'ace-builds/src-min-noconflict/theme-chaos'
+import 'ace-builds/src-min-noconflict/theme-merbivore_soft'
+import 'ace-builds/src-min-noconflict/theme-chrome'
+import 'ace-builds/src-min-noconflict/theme-mono_industrial'
+import 'ace-builds/src-min-noconflict/theme-clouds'
+import 'ace-builds/src-min-noconflict/theme-monokai'
+import 'ace-builds/src-min-noconflict/theme-clouds_midnight'
+import 'ace-builds/src-min-noconflict/theme-nord_dark'
+import 'ace-builds/src-min-noconflict/theme-cobalt'
+import 'ace-builds/src-min-noconflict/theme-pastel_on_dark'
+import 'ace-builds/src-min-noconflict/theme-crimson_editor'
+import 'ace-builds/src-min-noconflict/theme-solarized_dark'
+import 'ace-builds/src-min-noconflict/theme-dawn'
+import 'ace-builds/src-min-noconflict/theme-solarized_light'
+import 'ace-builds/src-min-noconflict/theme-dracula'
+import 'ace-builds/src-min-noconflict/theme-sqlserver'
+import 'ace-builds/src-min-noconflict/theme-dreamweaver'
+import 'ace-builds/src-min-noconflict/theme-terminal'
+import 'ace-builds/src-min-noconflict/theme-eclipse'
+import 'ace-builds/src-min-noconflict/theme-textmate'
+import 'ace-builds/src-min-noconflict/theme-github'
+import 'ace-builds/src-min-noconflict/theme-tomorrow'
+import 'ace-builds/src-min-noconflict/theme-gob'
+import 'ace-builds/src-min-noconflict/theme-tomorrow_night'
+import 'ace-builds/src-min-noconflict/theme-gruvbox'
+import 'ace-builds/src-min-noconflict/theme-tomorrow_night_blue'
+import 'ace-builds/src-min-noconflict/theme-idle_fingers'
+import 'ace-builds/src-min-noconflict/theme-tomorrow_night_bright'
+import 'ace-builds/src-min-noconflict/theme-iplastic'
+import 'ace-builds/src-min-noconflict/theme-tomorrow_night_eighties'
+import 'ace-builds/src-min-noconflict/theme-katzenmilch'
+import 'ace-builds/src-min-noconflict/theme-twilight'
+import 'ace-builds/src-min-noconflict/theme-kr_theme'
+import 'ace-builds/src-min-noconflict/theme-vibrant_ink'
+import 'ace-builds/src-min-noconflict/theme-kuroir'
+import 'ace-builds/src-min-noconflict/theme-xcode'
 
 // Import ace plugins
-import "ace-builds/src-min-noconflict/ext-language_tools";
+import 'ace-builds/src-min-noconflict/ext-language_tools'
 
 /*************************************************
  * Utils & States
  *************************************************/
-import { isShowBlock } from '../utils/NumberListUtils';
-import { handleAceEditor, handleKeyCommand } from '../utils/KeyboardUtils';
-import {
-  onMouseOver as _onMouseOver,
-  onMouseLeave as _onMouseLeave,
-} from '../utils/DraggableBlockUtils';
-import {
-  GeekeMap,
-  getBackgroundColorWithClass,
-  updateBlockData,
-} from '../utils/Misc';
+import { isShowBlock } from '../utils/NumberListUtils'
+import { handleAceEditor, handleKeyCommand } from '../utils/KeyboardUtils'
+import { onMouseOver as _onMouseOver, onMouseLeave as _onMouseLeave } from '../utils/DraggableBlockUtils'
+import { GeekeMap, getBackgroundColorWithClass, updateBlockData } from '../utils/Misc'
 
-import { setEditorState } from '../states/editor';
-import {
-  pmsc,
-  setEditingCode,
-  setEditingMenu,
-  setSpecialFocusFunc,
-} from '../states/editorMisc';
+import { setEditorState } from '../states/editor'
+import { pmsc, setEditingCode, setEditingMenu, setSpecialFocusFunc } from '../states/editorMisc'
 
 /*************************************************
  * Import Components
  *************************************************/
-import BlockDargButton from './BlcokDragButton';
+import BlockDargButton from './BlcokDragButton'
 
 /*************************************************
  * Constant
@@ -173,98 +157,98 @@ import {
   languageReverseMap,
   remToPx,
   themeOptions,
-} from '../constant';
-import { Alert } from '@material-ui/lab';
+} from '../constant'
+import { Alert } from '@material-ui/lab'
 
 /*************************************************
  * Main components
  *************************************************/
-const CodeBlock = props => {
+const CodeBlock = (props) => {
   // Props
-  const blockData = props.block.getData();
-  const blockKey = props.block.key;
-  const contentState = props.contentState;
-  const selectionState = props.selection;
-  const handleBlockDargStart = props.blockProps.handleBlockDargStart;
-  const pageUuid = props.blockProps.pageUuid;
-  const readOnly = props.blockProps.readOnly;
-  const handleFocusEditor = props.blockProps.handleFocusEditor;
-  const updateSelectionState = props.blockProps.updateSelectionState;
-  const keyCommandDispatcher = props.blockProps.keyCommandDispatcher;
-  const editorState = props.blockProps.editorState;
+  const blockData = props.block.getData()
+  const blockKey = props.block.key
+  const contentState = props.contentState
+  const selectionState = props.selection
+  const handleBlockDargStart = props.blockProps.handleBlockDargStart
+  const pageUuid = props.blockProps.pageUuid
+  const readOnly = props.blockProps.readOnly
+  const handleFocusEditor = props.blockProps.handleFocusEditor
+  const updateSelectionState = props.blockProps.updateSelectionState
+  const keyCommandDispatcher = props.blockProps.keyCommandDispatcher
+  const editorState = props.blockProps.editorState
 
   // Reducers
-  const dispatch = useDispatch();
-  const aceEditor = useRef(null);
-  const [editorKeyCommand, setEditorKeyCommand] = useState(null);
-  const [backgroundColor, setBackgroundColor] = useState('rgba(0,0,0,0)');
+  const dispatch = useDispatch()
+  const aceEditor = useRef(null)
+  const [editorKeyCommand, setEditorKeyCommand] = useState(null)
+  const [backgroundColor, setBackgroundColor] = useState('rgba(0,0,0,0)')
 
   // Register focus function
-  const focusCodeBlock = moveDirection => {
+  const focusCodeBlock = (moveDirection) => {
     if (moveDirection === constMoveDirection.up) {
-      aceEditor.current.editor.navigateFileEnd();
+      aceEditor.current.editor.navigateFileEnd()
     } else if (moveDirection === constMoveDirection.down) {
-      aceEditor.current.editor.navigateFileStart();
+      aceEditor.current.editor.navigateFileStart()
     } else {
-      console.error(`Unknown move direction: ${moveDirection}`);
+      console.error(`Unknown move direction: ${moveDirection}`)
     }
     // Use timeout to prevent dispatch runs in dispatch because onFocus dispatch something
-    setTimeout(() => aceEditor.current.editor.focus(), 1);
-  };
-  useEffect(() => setSpecialFocusFunc(dispatch, pageUuid, blockKey, focusCodeBlock), []); // eslint-disable-line
+    setTimeout(() => aceEditor.current.editor.focus(), 1)
+  }
+  useEffect(() => setSpecialFocusFunc(dispatch, pageUuid, blockKey, focusCodeBlock), []) // eslint-disable-line
 
   // Focus code block if it is created by converting from other type of block
   useEffect(() => {
-    if (selectionState.getFocusKey() !== blockKey) return;
-    setTimeout(() => aceEditor.current.editor.focus(), 1);
-  }, []); // eslint-disable-line
+    if (selectionState.getFocusKey() !== blockKey) return
+    setTimeout(() => aceEditor.current.editor.focus(), 1)
+  }, []) // eslint-disable-line
 
   // Variables
-  const codeContent = blockData.has(blockDataKeys.codeContent) ? blockData.get(blockDataKeys.codeContent) : '';
-  let indentLevel = 0;
-  let codeLanguage = 'plain_text';
-  let codeWrapping = false; // TODO: make the default value to user-specieifed.
-  let codeTheme = 'github'; // TODO: make the default value to user-specieifed.
-  let showLineNumber = true;
-  let codeWrapperBorder = '0px';
+  const codeContent = blockData.has(blockDataKeys.codeContent) ? blockData.get(blockDataKeys.codeContent) : ''
+  let indentLevel = 0
+  let codeLanguage = 'plain_text'
+  let codeWrapping = false // TODO: make the default value to user-specieifed.
+  let codeTheme = 'github' // TODO: make the default value to user-specieifed.
+  let showLineNumber = true
+  let codeWrapperBorder = '0px'
 
   // Functions
-  const onMouseOver = e => _onMouseOver(e, dispatch, pageUuid, blockKey);
-  const onMouseLeave = e => _onMouseLeave(e, dispatch, pageUuid);
-  const focusAceEditor = () => aceEditor.current.editor.focus();
-  const blurAceEditor = () => aceEditor.current.editor.blur();
-  const onBlur = e => {
-    aceEditor.current.editor.clearSelection();
-    setEditingCode(dispatch, pageUuid, false);
-  };
-  const onFocus = e => {
-    setEditingCode(dispatch, pageUuid, true);
-    updateSelectionState();
-  };
+  const onMouseOver = (e) => _onMouseOver(e, dispatch, pageUuid, blockKey)
+  const onMouseLeave = (e) => _onMouseLeave(e, dispatch, pageUuid)
+  const focusAceEditor = () => aceEditor.current.editor.focus()
+  const blurAceEditor = () => aceEditor.current.editor.blur()
+  const onBlur = (e) => {
+    aceEditor.current.editor.clearSelection()
+    setEditingCode(dispatch, pageUuid, false)
+  }
+  const onFocus = (e) => {
+    setEditingCode(dispatch, pageUuid, true)
+    updateSelectionState()
+  }
 
   // Calculate indent level
   if (blockData.has(blockDataKeys.indentLevel)) {
-    indentLevel = blockData.get(blockDataKeys.indentLevel);
+    indentLevel = blockData.get(blockDataKeys.indentLevel)
   }
 
   // Get code language
   if (blockData.has(blockDataKeys.codeLanguage)) {
-    codeLanguage = blockData.get(blockDataKeys.codeLanguage);
+    codeLanguage = blockData.get(blockDataKeys.codeLanguage)
   }
 
   // Get wrapping status
   if (blockData.has(blockDataKeys.codeWrapping)) {
-    codeWrapping = blockData.get(blockDataKeys.codeWrapping);
+    codeWrapping = blockData.get(blockDataKeys.codeWrapping)
   }
 
   // Get code theme
   if (blockData.has(blockDataKeys.codeTheme)) {
-    codeTheme = blockData.get(blockDataKeys.codeTheme);
+    codeTheme = blockData.get(blockDataKeys.codeTheme)
   }
 
   // Get show line number
   if (blockData.has(blockDataKeys.codeLineNumber)) {
-    showLineNumber = blockData.get(blockDataKeys.codeLineNumber);
+    showLineNumber = blockData.get(blockDataKeys.codeLineNumber)
   }
 
   // Set border width
@@ -273,77 +257,89 @@ const CodeBlock = props => {
   }
 
   // Calculate paddingLeft depends on indent level
-  const paddingLeft = remToPx(indentWidth * indentLevel);
+  const paddingLeft = remToPx(indentWidth * indentLevel)
 
   // Function to update blockData of block data
   const updateCodeBlockData = (blockDataKey, changeType, newValue) => {
-    let newBlockData = new GeekeMap(blockData);
-    newBlockData.set(blockDataKey, newValue);
-    let newContentState = updateBlockData(contentState, blockKey, newBlockData);
-    let newEditorState = EditorState.push(editorState, newContentState, changeType);
-    setEditorState(dispatch, pageUuid, newEditorState);
-  };
+    let newBlockData = new GeekeMap(blockData)
+    newBlockData.set(blockDataKey, newValue)
+    let newContentState = updateBlockData(contentState, blockKey, newBlockData)
+    let newEditorState = EditorState.push(editorState, newContentState, changeType)
+    setEditorState(dispatch, pageUuid, newEditorState)
+  }
 
   // Function to update content, language, theme, and wrapping status
-  const updateCodeContent = newValue => updateCodeBlockData(blockDataKeys.codeContent, 'insert-characters', newValue);
-  const updateCodeLanguage = language => updateCodeBlockData(blockDataKeys.codeLanguage, 'change-block-data', language);
-  const updateCodeTheme = theme => updateCodeBlockData(blockDataKeys.codeTheme, 'change-block-data', theme);
-  const updateCodeWrapping = wrapping => updateCodeBlockData(blockDataKeys.codeWrapping, 'change-block-data', wrapping);
-  const updateShowLineNumber = showLineNumber => updateCodeBlockData(blockDataKeys.codeLineNumber, 'change-block-data', showLineNumber);
+  const updateCodeContent = (newValue) => updateCodeBlockData(blockDataKeys.codeContent, 'insert-characters', newValue)
+  const updateCodeLanguage = (language) =>
+    updateCodeBlockData(blockDataKeys.codeLanguage, 'change-block-data', language)
+  const updateCodeTheme = (theme) => updateCodeBlockData(blockDataKeys.codeTheme, 'change-block-data', theme)
+  const updateCodeWrapping = (wrapping) =>
+    updateCodeBlockData(blockDataKeys.codeWrapping, 'change-block-data', wrapping)
+  const updateShowLineNumber = (showLineNumber) =>
+    updateCodeBlockData(blockDataKeys.codeLineNumber, 'change-block-data', showLineNumber)
 
   // Handle moveCursor
   // Because moveCursor cannot be updated to Ace Editor when editorState is updated (i.e. using useCallback),
   // we have to use useEffect to get the latest editorState when editorKeyCommand is updated.
-  const moveCursor = editorKeyCommand => setEditorKeyCommand(editorKeyCommand);
+  const moveCursor = (editorKeyCommand) => setEditorKeyCommand(editorKeyCommand)
   useEffect(() => {
-    if (!editorKeyCommand) return;
-    setEditorKeyCommand(null);
-    handleKeyCommand(editorState, editorKeyCommand, keyCommandDispatcher, blockKey, {blurAceEditor, handleFocusEditor});
-  }, [editorKeyCommand, editorState]); // eslint-disable-line
+    if (!editorKeyCommand) return
+    setEditorKeyCommand(null)
+    handleKeyCommand(editorState, editorKeyCommand, keyCommandDispatcher, blockKey, {
+      blurAceEditor,
+      handleFocusEditor,
+    })
+  }, [editorKeyCommand, editorState]) // eslint-disable-line
 
   // Set codeblock background color
   useEffect(() => {
-    let processedCodeTheme = codeTheme.replace('_', '-');
-    let targetClass = showLineNumber ? `.ace-${processedCodeTheme} .ace_gutter` : `.ace-${processedCodeTheme}`;
-    let newBackgroundColor = getBackgroundColorWithClass(targetClass);
+    let processedCodeTheme = codeTheme.replace('_', '-')
+    let targetClass = showLineNumber ? `.ace-${processedCodeTheme} .ace_gutter` : `.ace-${processedCodeTheme}`
+    let newBackgroundColor = getBackgroundColorWithClass(targetClass)
     if (newBackgroundColor) {
-      setBackgroundColor(newBackgroundColor);
+      setBackgroundColor(newBackgroundColor)
     }
-  }, [codeTheme, showLineNumber]);
+  }, [codeTheme, showLineNumber])
 
   // Check whether to show this block
   if (!isShowBlock(contentState, blockKey)) {
-    return null;
+    return null
   }
 
   // Compose aceEditor command
   const aceEditorCommands = [
     {
       name: 'moveCursorUp',
-      bindKey: {win: 'up', mac: 'up'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.up, {moveCursor})
+      bindKey: { win: 'up', mac: 'up' },
+      exec: (editor) => handleAceEditor(editor, constAceEditorAction.up, { moveCursor }),
     },
     {
       name: 'moveCursorDown',
-      bindKey: {win: 'down', mac: 'down'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.down, {moveCursor})
+      bindKey: { win: 'down', mac: 'down' },
+      exec: (editor) => handleAceEditor(editor, constAceEditorAction.down, { moveCursor }),
     },
     {
       name: 'moveCursorLeft',
-      bindKey: {win: 'left', mac: 'left'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.left, {moveCursor})
+      bindKey: { win: 'left', mac: 'left' },
+      exec: (editor) => handleAceEditor(editor, constAceEditorAction.left, { moveCursor }),
     },
     {
       name: 'moveCursorRight',
-      bindKey: {win: 'right', mac: 'right'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.right, {moveCursor})
+      bindKey: { win: 'right', mac: 'right' },
+      exec: (editor) => handleAceEditor(editor, constAceEditorAction.right, { moveCursor }),
     },
     {
       name: 'removeBlockType',
-      bindKey: {win: 'backspace', mac: 'backspace'},
-      exec: editor => handleAceEditor(editor, constAceEditorAction.backspace, {moveCursor, onBlur, handleFocusEditor, updateSelectionState}),
+      bindKey: { win: 'backspace', mac: 'backspace' },
+      exec: (editor) =>
+        handleAceEditor(editor, constAceEditorAction.backspace, {
+          moveCursor,
+          onBlur,
+          handleFocusEditor,
+          updateSelectionState,
+        }),
     },
-  ];
+  ]
 
   // Compose aceEditor Props
   const aceEditorProps = {
@@ -368,17 +364,16 @@ const CodeBlock = props => {
     setOptions: {
       enableBasicAutocompletion: true,
       enableLiveAutocompletion: true,
-      enableSnippets: true
+      enableSnippets: true,
     },
     commands: aceEditorCommands,
-  };
+  }
 
   return (
     <div
-      className='geeke-blockWrapper'
-      style={{paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`, margin: '1rem 0rem 0rem'}}
-      geeke='true'
-
+      className="geeke-blockWrapper"
+      style={{ paddingLeft: `${paddingLeft + remToPx(editorLeftPadding)}px`, margin: '1rem 0rem 0rem' }}
+      geeke="true"
       onMouseOver={onMouseOver}
       onMouseLeave={onMouseLeave}
     >
@@ -406,150 +401,145 @@ const CodeBlock = props => {
         updateShowLineNumber={updateShowLineNumber}
       />
 
-      <div className='geeke-codeBlockEditor'>
+      <div className="geeke-codeBlockEditor">
         <EditorBlock {...props} />
       </div>
       <CodeBlockSelection blockKey={blockKey} pageUuid={pageUuid}>
         <div
-          className='geeke-codeEditorWrapper'
-          style={{backgroundColor: backgroundColor, border: codeWrapperBorder}}
+          className="geeke-codeEditorWrapper"
+          style={{ backgroundColor: backgroundColor, border: codeWrapperBorder }}
           onClick={focusAceEditor} // Need to force focus on mouse click because in some situation, click on the last line cannot focus the AceEditor...
-          contentEditable={false}  // Make this block not contenteditable to prevent from modify some DOM by accident...
+          contentEditable={false} // Make this block not contenteditable to prevent from modify some DOM by accident...
         >
           <AceEditor {...aceEditorProps} />
         </div>
       </CodeBlockSelection>
-
     </div>
   )
 }
 
-const CodeBlockSelection = props => {
+const CodeBlockSelection = (props) => {
   // Props
-  const blockKey = props.blockKey;
-  const pageUuid = props.pageUuid;
-  const children = props.children;
+  const blockKey = props.blockKey
+  const pageUuid = props.pageUuid
+  const children = props.children
 
   // Reducers
-  const selectedBlocks = useSelector(state => state.editorMisc.pages.get(pageUuid).get(pmsc.selectedBlocks));
+  const selectedBlocks = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.selectedBlocks))
 
   // Constants
-  const isSelected = selectedBlocks.has(blockKey);
-  const className = 'geeke-codeBlockSelectionMask' + (isSelected ? ' geeke-codeBlockSelected' : '');
+  const isSelected = selectedBlocks.has(blockKey)
+  const className = 'geeke-codeBlockSelectionMask' + (isSelected ? ' geeke-codeBlockSelected' : '')
 
-  return (
-    <div className={className}>
-      {children}
-    </div>
-  );
-};
+  return <div className={className}>{children}</div>
+}
 
-const CodeBlockMenuButtons = props => {
+const CodeBlockMenuButtons = (props) => {
   // Props
-  const pageUuid = props.pageUuid;
-  const blockKey = props.blockKey;
-  const updateCodeLanguage = props.updateCodeLanguage;
-  const updateCodeTheme = props.updateCodeTheme;
-  const updateCodeWrapping = props.updateCodeWrapping;
-  const updateShowLineNumber = props.updateShowLineNumber;
-  const focusAceEditor = props.focusAceEditor;
-  const codeLanguage = props.codeLanguage;
-  const codeTheme = props.codeTheme;
-  const codeContent = props.codeContent;
-  const codeWrapping = props.codeWrapping;
-  const showLineNumber = props.showLineNumber;
-  const languageName = languageReverseMap.has(codeLanguage) ? languageReverseMap.get(codeLanguage) : 'PlainText';
-  const themeName = codeBlockThemeReverseMap.has(codeTheme) ? codeBlockThemeReverseMap.get(codeTheme) : 'GitHub';
+  const pageUuid = props.pageUuid
+  const blockKey = props.blockKey
+  const updateCodeLanguage = props.updateCodeLanguage
+  const updateCodeTheme = props.updateCodeTheme
+  const updateCodeWrapping = props.updateCodeWrapping
+  const updateShowLineNumber = props.updateShowLineNumber
+  const focusAceEditor = props.focusAceEditor
+  const codeLanguage = props.codeLanguage
+  const codeTheme = props.codeTheme
+  const codeContent = props.codeContent
+  const codeWrapping = props.codeWrapping
+  const showLineNumber = props.showLineNumber
+  const languageName = languageReverseMap.has(codeLanguage) ? languageReverseMap.get(codeLanguage) : 'PlainText'
+  const themeName = codeBlockThemeReverseMap.has(codeTheme) ? codeBlockThemeReverseMap.get(codeTheme) : 'GitHub'
 
   // Reducers
-  const dispatch = useDispatch();
-  const [languageAnchorEl, setLanguageAnchorEl] = useState(null);
-  const [themeAnchorEl, setThemeAnchorEl] = useState(null);
-  const [settingAnchorEl, setSettingAnchorEl] = useState(null);
-  const [showCopyMessage, setShowCopyMessage] = useState(false);
-  const languageMenuOpen = Boolean(languageAnchorEl);
-  const themeMenuOpen = Boolean(themeAnchorEl);
-  const settingmenuOpen = Boolean(settingAnchorEl);
-  const editorMiscPages = useSelector(state => state.editorMisc.pages);
-  const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover);
+  const dispatch = useDispatch()
+  const [languageAnchorEl, setLanguageAnchorEl] = useState(null)
+  const [themeAnchorEl, setThemeAnchorEl] = useState(null)
+  const [settingAnchorEl, setSettingAnchorEl] = useState(null)
+  const [showCopyMessage, setShowCopyMessage] = useState(false)
+  const languageMenuOpen = Boolean(languageAnchorEl)
+  const themeMenuOpen = Boolean(themeAnchorEl)
+  const settingmenuOpen = Boolean(settingAnchorEl)
+  const editorMiscPages = useSelector((state) => state.editorMisc.pages)
+  const mouseOverBlockKey = editorMiscPages.get(pageUuid).get(pmsc.hover)
 
   // handleClickLanguageMenu
-  const handleClickLanguageMenu = e => {
-    setLanguageAnchorEl(e.currentTarget);
-    setEditingMenu(dispatch, pageUuid, true);
-  };
+  const handleClickLanguageMenu = (e) => {
+    setLanguageAnchorEl(e.currentTarget)
+    setEditingMenu(dispatch, pageUuid, true)
+  }
 
   // handleCloseLanguageMenu
   const handleCloseLanguageMenu = () => {
-    setLanguageAnchorEl(null);
-    setEditingMenu(dispatch, pageUuid, false);
+    setLanguageAnchorEl(null)
+    setEditingMenu(dispatch, pageUuid, false)
     setTimeout(() => {
-      focusAceEditor();
-    }, 1);
-  };
+      focusAceEditor()
+    }, 1)
+  }
 
   // handleChangeCodeLanguage
-  const handleChangeCodeLanguage = v => {
-    if (!v) return;
-    handleCloseLanguageMenu();
-    updateCodeLanguage(v.value);
-  };
+  const handleChangeCodeLanguage = (v) => {
+    if (!v) return
+    handleCloseLanguageMenu()
+    updateCodeLanguage(v.value)
+  }
 
   // handleClickThemeMenu
-  const handleClickThemeMenu = e => {
-    setThemeAnchorEl(e.currentTarget);
-    setEditingMenu(dispatch, pageUuid, true);
-  };
+  const handleClickThemeMenu = (e) => {
+    setThemeAnchorEl(e.currentTarget)
+    setEditingMenu(dispatch, pageUuid, true)
+  }
 
   // handleCloseThemeMenu
-  const handleCloseThemeMenu = e => {
-    setThemeAnchorEl(null);
-    setEditingMenu(dispatch, pageUuid, false);
+  const handleCloseThemeMenu = (e) => {
+    setThemeAnchorEl(null)
+    setEditingMenu(dispatch, pageUuid, false)
     setTimeout(() => {
-      focusAceEditor();
-    }, 1);
-  };
+      focusAceEditor()
+    }, 1)
+  }
 
   // handleChangeCodeTheme
-  const handleChangeCodeTheme = v => {
-    if (!v) return;
-    handleCloseThemeMenu();
-    updateCodeTheme(v.value);
-  };
+  const handleChangeCodeTheme = (v) => {
+    if (!v) return
+    handleCloseThemeMenu()
+    updateCodeTheme(v.value)
+  }
 
   // handleShowCopyMessage
   const handleShowCopyMessage = () => {
-    setShowCopyMessage(true);
+    setShowCopyMessage(true)
     setTimeout(() => {
-      focusAceEditor();
-    }, 1);
-  };
+      focusAceEditor()
+    }, 1)
+  }
 
   // handleCloseCopyMessage
   const handleCloseCopyMessage = () => {
-    setShowCopyMessage(false);
-  };
+    setShowCopyMessage(false)
+  }
 
   // handleOpenSettingMenu
-  const handleOpenSettingMenu = e => {
-    setSettingAnchorEl(e.currentTarget);
-    setEditingMenu(dispatch, pageUuid, true);
-  };
+  const handleOpenSettingMenu = (e) => {
+    setSettingAnchorEl(e.currentTarget)
+    setEditingMenu(dispatch, pageUuid, true)
+  }
 
   // handleCloseSettingMenu
   const handleCloseSettingMenu = () => {
-    setSettingAnchorEl(null);
-    setEditingMenu(dispatch, pageUuid, false);
+    setSettingAnchorEl(null)
+    setEditingMenu(dispatch, pageUuid, false)
     setTimeout(() => {
-      focusAceEditor();
-    }, 1);
-  };
+      focusAceEditor()
+    }, 1)
+  }
 
   // handleToggleCodeWrapping
-  const handleToggleCodeWrapping = () => updateCodeWrapping(!codeWrapping);
+  const handleToggleCodeWrapping = () => updateCodeWrapping(!codeWrapping)
 
   // handleToggleShowLineNumber
-  const handleToggleShowLineNumber = () => updateShowLineNumber(!showLineNumber);
+  const handleToggleShowLineNumber = () => updateShowLineNumber(!showLineNumber)
 
   // Styles...
   const codeBlockMenuStyles = {
@@ -577,32 +567,34 @@ const CodeBlockMenuButtons = props => {
       padding: '6px 12px',
       fontSize: '0.9rem',
     }),
-  };
+  }
 
   return (
-    <div className='geeke-codeEditor-dropdownWrapper' contentEditable={false}>
-      <div className={'geeke-codeEditor-buttonWrapper' + (mouseOverBlockKey === blockKey ? ' geeke-codeEditor-button-active' : '')}>
-        <ButtonGroup className='geeke-codeEditor-buttonGroup' variant="outlined" size="small">
-          <Button
-            className='geeke-codeEditor-button'
-            onClick={handleClickLanguageMenu}
-          >{languageName} ▾</Button>
+    <div className="geeke-codeEditor-dropdownWrapper" contentEditable={false}>
+      <div
+        className={
+          'geeke-codeEditor-buttonWrapper' + (mouseOverBlockKey === blockKey ? ' geeke-codeEditor-button-active' : '')
+        }
+      >
+        <ButtonGroup className="geeke-codeEditor-buttonGroup" variant="outlined" size="small">
+          <Button className="geeke-codeEditor-button" onClick={handleClickLanguageMenu}>
+            {languageName} ▾
+          </Button>
 
-          <Button
-            className='geeke-codeEditor-button'
-            onClick={handleClickThemeMenu}
-          >{themeName} ▾</Button>
+          <Button className="geeke-codeEditor-button" onClick={handleClickThemeMenu}>
+            {themeName} ▾
+          </Button>
 
           <CopyToClipboard text={codeContent}>
             <Button
-              style={{textTransform: 'none'}} // I don't know why className not work when using button group...
+              style={{ textTransform: 'none' }} // I don't know why className not work when using button group...
               onClick={handleShowCopyMessage}
-            >Copy</Button>
+            >
+              Copy
+            </Button>
           </CopyToClipboard>
 
-          <Button
-            onClick={handleOpenSettingMenu}
-          >
+          <Button onClick={handleOpenSettingMenu}>
             <MoreHorizIcon />
           </Button>
         </ButtonGroup>
@@ -622,14 +614,14 @@ const CodeBlockMenuButtons = props => {
           horizontal: 'left',
         }}
       >
-        <div className='geeke-codeEditor-languageListWrapper'>
+        <div className="geeke-codeEditor-languageListWrapper">
           <Select
             options={languageOptions}
             autoFocus={true}
             menuIsOpen={true}
             maxMenuHeight={255}
             styles={codeBlockMenuStyles}
-            placeholder='Language'
+            placeholder="Language"
             onChange={handleChangeCodeLanguage}
           />
         </div>
@@ -649,14 +641,14 @@ const CodeBlockMenuButtons = props => {
           horizontal: 'left',
         }}
       >
-        <div className='geeke-codeEditor-themeListWrapper'>
+        <div className="geeke-codeEditor-themeListWrapper">
           <Select
             options={themeOptions}
             autoFocus={true}
             menuIsOpen={true}
             maxMenuHeight={255}
             styles={codeBlockMenuStyles}
-            placeholder='Theme'
+            placeholder="Theme"
             onChange={handleChangeCodeTheme}
           />
         </div>
@@ -676,29 +668,19 @@ const CodeBlockMenuButtons = props => {
           horizontal: 'left',
         }}
       >
-        <div className='geeke-codeblockSettingMenu noselect'>
+        <div className="geeke-codeblockSettingMenu noselect">
           <table>
             <tbody>
               <tr>
                 <td>Wrapping</td>
                 <td>
-                  <Switch
-                    size="small"
-                    checked={codeWrapping}
-                    onChange={handleToggleCodeWrapping}
-                    color='primary'
-                  />
+                  <Switch size="small" checked={codeWrapping} onChange={handleToggleCodeWrapping} color="primary" />
                 </td>
               </tr>
               <tr>
                 <td>Line Number</td>
                 <td>
-                  <Switch
-                    size="small"
-                    checked={showLineNumber}
-                    onChange={handleToggleShowLineNumber}
-                    color='primary'
-                  />
+                  <Switch size="small" checked={showLineNumber} onChange={handleToggleShowLineNumber} color="primary" />
                 </td>
               </tr>
             </tbody>
@@ -708,10 +690,12 @@ const CodeBlockMenuButtons = props => {
 
       {/* Copy Message */}
       <Snackbar
-        open={showCopyMessage} autoHideDuration={5000} onClose={handleCloseCopyMessage}
+        open={showCopyMessage}
+        autoHideDuration={5000}
+        onClose={handleCloseCopyMessage}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={handleCloseCopyMessage} severity='success'>
+        <Alert onClose={handleCloseCopyMessage} severity="success">
           Copied!
         </Alert>
       </Snackbar>
@@ -719,4 +703,4 @@ const CodeBlockMenuButtons = props => {
   )
 }
 
-export default CodeBlock;
+export default CodeBlock
