@@ -13,6 +13,7 @@ import throttle from 'lodash/throttle';
 import debounce from 'lodash/debounce';
 import { useDispatch, useSelector } from 'react-redux';
 import { Editor, convertToRaw } from 'draft-js';
+import { Button } from '@material-ui/core';
 
 /*************************************************
  * Utils & States
@@ -39,6 +40,7 @@ import PageDragShadow from './PageDragShadow';
 import PageTitle from './PageTitle';
 import QuoteBlock from './QuoteBlock';
 import ToggleListBlock from './ToggleListBlock';
+import PopupMenu from './PopupMenu';
 
 /*************************************************
  * Constants
@@ -50,13 +52,14 @@ import {
   focusSpecialBlock,
   pmsc,
   setFocusBlockKey,
+  setFocusEditorUuid,
+  setLinkRange,
   setMoveDirection,
   setPopupMenuRange,
   setSelectedBlocks,
   triggerEsc,
 } from '../states/editorMisc';
-import { Button } from '@material-ui/core';
-import PopupMenu from './PopupMenu';
+import InlineStyleLinkEditor from './InlineStyleLinkEditor';
 
 /*************************************************
  * Main components
@@ -72,6 +75,7 @@ const Page = (props) => {
   const editingCode = useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.editingCode));
   const editingMenu = useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.editingMenu));
   const selectedBlocks = useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.selectedBlocks));
+  const editingLink = Boolean(useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.linkRange)));
   const editor = useRef(null);
 
   // Constants
@@ -147,6 +151,7 @@ const Page = (props) => {
     handleFocusEditor,
     toggleInlineStyle: (style) => toggleStyle(dispatch, uuid, style),
     triggerEsc: () => triggerEsc(dispatch, uuid),
+    setLinkRange: (selectionState) => setLinkRange(dispatch, uuid, selectionState),
   };
   const handleKeyCommand = (command, editorState, blockKey) =>
     _handleKeyCommand(editorState, command, keyCommandDispatcher, blockKey);
@@ -236,11 +241,13 @@ const Page = (props) => {
           handleReturn={handleReturn}
           blockRendererFn={blockDecorator}
           spellCheck={true}
-          readOnly={readOnly || editingCode || editingMenu}
+          readOnly={readOnly || editingCode || editingMenu || editingLink}
           customStyleMap={styleMap}
+          onFocus={() => setFocusEditorUuid(dispatch, uuid)}
           // placeholder={'Write something here...'}
         />
         <PopupMenu pageUuid={uuid} handleFocusEditor={handleFocusEditor} />
+        <InlineStyleLinkEditor handleFocusEditor={handleFocusEditor} />
       </div>
 
       <PageDragShadow

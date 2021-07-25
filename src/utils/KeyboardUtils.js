@@ -49,6 +49,7 @@ const keyCommandConst = {
   toggleInlineStrikeThrough: 14,
   toggleInlineCode: 15,
   triggerEditorEsc: 16,
+  toggleInlineLink: 17,
 };
 
 /**
@@ -276,6 +277,7 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
 };
 
 const mapKeyToEditorCommand_s = (e, config) => {
+  // If (command(on mac) or ctrl(on win)) and shift are pressed
   if (((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) && e.shiftKey) {
     return keyCommandConst.toggleInlineStrikeThrough;
   }
@@ -284,6 +286,7 @@ const mapKeyToEditorCommand_s = (e, config) => {
 };
 
 const mapKeyToEditorCommand_e = (e, config) => {
+  // If command(on mac) or ctrl(on win) is pressed
   if ((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) {
     return keyCommandConst.toggleInlineCode;
   }
@@ -293,6 +296,13 @@ const mapKeyToEditorCommand_e = (e, config) => {
 
 const mapKeyToEditorCommand_esc = (e, config) => {
   return keyCommandConst.triggerEditorEsc;
+};
+
+const mapKeyToEditorCommand_k = (e, config) => {
+  // If command(on mac) or ctrl(on win) is pressed
+  if ((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) {
+    return keyCommandConst.toggleInlineLink;
+  }
 };
 
 export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid) => {
@@ -325,6 +335,9 @@ export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid
 
     case 27: // Esc
       return mapKeyToEditorCommand_esc(e, config);
+
+    case 75: // K
+      return mapKeyToEditorCommand_k(e, config);
 
     default:
       return getDefaultKeyBinding(e);
@@ -1331,6 +1344,12 @@ const handleKeyCommand_triggerEditorEsc = (dispatcher) => {
   return 'handled';
 };
 
+const handleKeyCommand_toggleInlineLink = (editorState, dispatcher) => {
+  const selectionState = editorState.getSelection();
+  dispatcher.setLinkRange(selectionState);
+  return 'handled';
+};
+
 export const handleKeyCommand = (editorState, command, dispatcher, blockKey, restArgs = null) => {
   switch (command) {
     case keyCommandConst.moreIndent:
@@ -1368,6 +1387,9 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
 
     case keyCommandConst.triggerEditorEsc:
       return handleKeyCommand_triggerEditorEsc(dispatcher);
+
+    case keyCommandConst.toggleInlineLink:
+      return handleKeyCommand_toggleInlineLink(editorState, dispatcher);
 
     default:
       if (typeof command === typeof [] && command.length > 0 && command[0] === keyCommandConst.multiCommands) {

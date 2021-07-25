@@ -6,9 +6,9 @@
 /*************************************************
  * IMPORT
  *************************************************/
-import { EditorState, Modifier } from 'draft-js';
+import { EditorState, Modifier, SelectionState } from 'draft-js';
 import produce from 'immer';
-import { GeekeMap } from '../utils/Misc';
+import { checkOverlap, GeekeMap } from '../utils/Misc';
 
 /*************************************************
  * CONST
@@ -141,13 +141,13 @@ export const setEditorState = (dispatch, pageUuid, editorState) => {
   });
 };
 
-export const showEditorSelection = (dispatch, pageUuid) => {
+export const showEditorSelection = (dispatch, pageUuid, newSelectionState = null) => {
   dispatch({
     type,
     callback: (state) => {
       let page = state.cachedPages.get(pageUuid);
       const editorState = page.get('content');
-      const selectionState = editorState.getSelection();
+      const selectionState = newSelectionState ? newSelectionState : editorState.getSelection();
       const newEditorState = EditorState.forceSelection(editorState, selectionState);
       page.set('content', newEditorState);
 
@@ -198,6 +198,122 @@ export const toggleStyle = (dispatch, pageUuid, inlineStyle) => {
         // Push state
         newEditorState = EditorState.push(editorState, newContentState, 'change-inline-style');
       }
+
+      page.set('content', newEditorState);
+
+      return state;
+    },
+  });
+};
+
+export const toggleLink = (dispatch, pageUuid, link) => {
+  dispatch({
+    type,
+    callback: (state) => {
+      let page = state.cachedPages.get(pageUuid);
+      let editorState = page.get('content');
+      let validUrl = true;
+      let plink = null;
+      let clearLink = false;
+
+      const selectionState = editorState.getSelection();
+      const contentState = editorState.getCurrentContent();
+      let newContentState = contentState;
+      let newEditorState = editorState;
+
+      // Check whether the selected text are all in the same block
+      if (selectionState.getAnchorKey() !== selectionState.getFocusKey()) {
+        return state;
+      }
+
+      // Get entities ranges
+      const anchorBlock = contentState.getBlockForKey(selectionState.getAnchorKey());
+      let firstLinkEntityKey = null;
+      let curEntityKey = null;
+      let clearMin = 10e9;
+      let clearMax = -1;
+      let rangesOfOverlapLink = [];
+      anchorBlock.findEntityRanges(
+        (value) => {
+          curEntityKey = value.entity;
+          return true;
+        },
+        (start, end) => {
+          if (!curEntityKey) return;
+          const curEntity = contentState.getEntity(curEntityKey);
+          const startOffset = selectionState.getStartOffset();
+          const endOffset = selectionState.getEndOffset();
+          if (checkOverlap(start, end, startOffset, endOffset, false)) {
+            if (curEntity.type === 'LINK') {
+              if (!firstLinkEntityKey) firstLinkEntityKey = curEntityKey;
+              rangesOfOverlapLink.push({ start, end });
+            }
+            clearMin = Math.min(start, clearMin);
+            clearMax = Math.max(end, clearMax);
+          }
+        },
+      );
+      clearMin = Math.min(selectionState.getStartOffset(), clearMin);
+      clearMax = Math.max(selectionState.getEndOffset(), clearMax);
+
+      // Clear overlapping entities
+      newContentState = Modifier.applyEntity(
+        newContentState,
+        new SelectionState({
+          anchorKey: anchorBlock.getKey(),
+          anchorOffset: clearMin,
+          focusKey: anchorBlock.getKey(),
+          focusOffset: clearMax,
+        }),
+        null,
+      );
+
+      // Try to parse the link first
+      try {
+        // If no http:// before the url, add it
+        if (link && !link.match(/:\/\//)) {
+          link = 'http://' + link;
+        }
+        plink = new URL(link);
+      } catch {
+        // Something went wrong when parsing the given link
+        if (link) {
+          console.warn(`Invalid url: ${link}`);
+        }
+        validUrl = false;
+      }
+
+      // If this is valid link
+      if (validUrl) {
+        // Get range of new link
+        let left = 10e9;
+        let right = -1;
+        for (let i in rangesOfOverlapLink) {
+          left = Math.min(left, rangesOfOverlapLink[i].start);
+          right = Math.max(right, rangesOfOverlapLink[i].end);
+        }
+        left = Math.min(left, selectionState.getStartOffset());
+        right = Math.max(right, selectionState.getEndOffset());
+
+        // Create entity and apply url
+        newContentState = newContentState.createEntity('LINK', 'MUTABLE', { url: plink.href });
+        const entityKey = newContentState.getLastCreatedEntityKey();
+        newEditorState = EditorState.set(newEditorState, { currentContent: newContentState });
+        newContentState = Modifier.applyEntity(
+          newContentState,
+          new SelectionState({
+            anchorKey: anchorBlock.getKey(),
+            anchorOffset: left,
+            focusKey: anchorBlock.getKey(),
+            focusOffset: right,
+          }),
+          entityKey,
+        );
+      }
+
+      // Push edit record
+      newEditorState = EditorState.push(editorState, newContentState, 'apply-entity');
+      // newEditorState = EditorState.push(newEditorState, newContentState, 'apply-entity'); // Why this?
 
       page.set('content', newEditorState);
 

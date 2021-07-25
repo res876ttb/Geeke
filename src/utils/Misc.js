@@ -104,3 +104,12 @@ export const getCaretRange = () => {
   }
   return null;
 };
+
+export const checkOverlap = (s1, e1, s2, e2, includeLast = false) => {
+  if (includeLast) {
+    if ((s1 < s2 && e1 < s2) || (s2 < s1 && e2 < s1)) return false;
+  } else {
+    if ((s1 < s2 && e1 <= s2) || (s2 < s1 && e2 <= s1)) return false;
+  }
+  return true;
+};

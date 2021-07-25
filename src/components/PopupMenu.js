@@ -18,6 +18,7 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import FontDownloadOutlinedIcon from '@material-ui/icons/FontDownloadOutlined';
 import FontDownloadIcon from '@material-ui/icons/FontDownload';
 import CodeIcon from '@material-ui/icons/Code';
+import LinkIcon from '@material-ui/icons/Link';
 import throttle from 'lodash/throttle';
 
 /*************************************************
@@ -33,7 +34,7 @@ import {
   setTextColor as _setTextColor,
   setBackgroundColor as _setBackgroundColor,
 } from '../states/editor';
-import { pmsc } from '../states/editorMisc';
+import { pmsc, setLinkRange } from '../states/editorMisc';
 import { remToPx } from '../constant';
 
 /*************************************************
@@ -66,6 +67,7 @@ const menuDescription = {
   Underline: isOSX ? '⌘ + U' : 'Ctrl + U',
   Strikethrough: isOSX ? '⌘ + Shift + S' : 'Ctrl + Shift + S',
   Code: isOSX ? '⌘ + E' : 'Ctrl + E',
+  Link: isOSX ? '⌘ + K' : 'Ctrl + K',
 };
 
 /*************************************************
@@ -80,6 +82,7 @@ const PopupMenu = (props) => {
   const dispatch = useDispatch();
   const menuRange = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.popupMenuRange));
   const triggerEsc = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.triggerEsc));
+  const editorState = useSelector((state) => state.editor.cachedPages.get(pageUuid).get('content'));
   const [menuPosition, setMenuPosition] = useState({ top: -1000, left: 0 });
   const [showMenu, setShowMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -157,6 +160,7 @@ const PopupMenu = (props) => {
   const toggleUnderline = (e) => toggleStyle(_toggleUnderline);
   const toggleStrikethrough = (e) => toggleStyle(_toggleStrikethrough);
   const toggleCode = (e) => toggleStyle(_toggleCode);
+  const toggleLink = (e) => toggleStyle(() => setLinkRange(dispatch, pageUuid, editorState.getSelection()));
 
   const toggleFontColorMenu = (e) => {
     // Hide other menus
@@ -256,10 +260,11 @@ const PopupMenu = (props) => {
   const buttonDescription_Underline = <ButtonDescription style="Underline" />; // eslint-disable-line
   const buttonDescription_Strikethrough = <ButtonDescription style="Strikethrough" />; // eslint-disable-line
   const buttonDescription_Code = <ButtonDescription style="Code" />; // eslint-disable-line
+  const buttonDescription_Link = <ButtonDescription style="Link" />; // eslint-disable-line
 
   return (
     <>
-      <div id={anchorId} className={'geeke-popupMenu-Anchor'} style={menuPosition}></div>
+      <div id={anchorId} className="geeke-popupMenu-Anchor" style={menuPosition}></div>
       <Popper open={showMenu} transition anchorEl={anchorEl} placement="top-start">
         {({ TransitionProps }) => (
           <Fade {...TransitionProps} timeout={350}>
@@ -287,6 +292,11 @@ const PopupMenu = (props) => {
               <Tooltip title={buttonDescription_Code} placement="top" arrow>
                 <Button className="geeke-popupMenuButton" onMouseDown={keepFocusOnEditor} onClick={toggleCode}>
                   <CodeIcon fontSize="small" />
+                </Button>
+              </Tooltip>
+              <Tooltip title={buttonDescription_Link} placement="top" arrow>
+                <Button className="geeke-popupMenuButton" onMouseDown={keepFocusOnEditor} onClick={toggleLink}>
+                  <LinkIcon fontSize="small" />
                 </Button>
               </Tooltip>
 

@@ -452,6 +452,34 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   text-align: center;
 }
 
+/* Inline style */
+/* Link */
+.geeke-outlink {
+  color: gray;
+  transition: color 0.2s;
+}
+
+.geeke-outlink:hover {
+  color: unset;
+}
+
+.geeke-outlink-nostyle {
+  color: unset;
+  text-decoration: unset;
+}
+
+.geeke-outlink-text {
+  padding: 0rem 0rem 0rem 0.25rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 20rem;
+}
+
+.geeke-inlineStyleLinkEditor-Anchor {
+  position: absolute;
+}
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);

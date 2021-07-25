@@ -27,6 +27,7 @@ export const pmsc = {
   selectedBlocks: 9,
   popupMenuRange: 10,
   triggerEsc: 11,
+  linkRange: 12,
 };
 
 const initPageMiscState = [
@@ -41,10 +42,12 @@ const initPageMiscState = [
   [pmsc.selectedBlocks, new Set()],
   [pmsc.popupMenuRange, null],
   [pmsc.triggerEsc, 0],
+  [pmsc.linkRange, null],
 ];
 
 const initEditorMiscState = {
   pages: new Map(),
+  focusEditor: null,
 };
 
 /*************************************************
@@ -58,6 +61,16 @@ export const initPage = (dispatch, pageUuid) => {
         state.pages.set(pageUuid, new Map(initPageMiscState));
       }
 
+      return state;
+    },
+  });
+};
+
+export const setFocusEditorUuid = (dispatch, pageUuid) => {
+  dispatch({
+    type,
+    callback: (state) => {
+      state.focusEditor = pageUuid;
       return state;
     },
   });
@@ -119,6 +132,8 @@ export const setSelectedBlocks = (dispatch, pageUuid, editorState) => {
 
 export const setPopupMenuRange = (dispatch, pageUuid, menuRange) =>
   setPageValue(dispatch, pageUuid, pmsc.popupMenuRange, menuRange);
+export const setLinkRange = (dispatch, pageUuid, linkRange) =>
+  setPageValue(dispatch, pageUuid, pmsc.linkRange, linkRange);
 export const setMouseOverBlockKey = (dispatch, pageUuid, blockKey) =>
   setPageValue(dispatch, pageUuid, pmsc.hover, blockKey);
 export const setDragShadowPos = (dispatch, pageUuid, dragShadowPos) =>

@@ -17,6 +17,7 @@ import { initPage as initPageMisc } from '../states/editorMisc';
 import { initPage, setEditorState } from '../states/editor';
 import { trimNumberListInWholePage } from '../utils/NumberListUtils';
 import Dispatcher from '../utils/Dispatcher';
+import { decorator } from '../utils/Decorator';
 
 /*************************************************
  * Import Components
@@ -52,7 +53,7 @@ const Geeke = () => {
       .add(
         setEditorState,
         fakePageUuid,
-        EditorState.createWithContent(trimNumberListInWholePage(convertFromRaw(JSON.parse(testString)))),
+        EditorState.createWithContent(trimNumberListInWholePage(convertFromRaw(JSON.parse(testString))), decorator),
       )
       .run();
     dispatcher.add(initPageMisc, fakePageUuid).run();
