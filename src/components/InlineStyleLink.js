@@ -45,13 +45,13 @@ const CustomButton = withStyles({
 })(Button);
 const CustomCopyIcon = withStyles({
   root: {
-    fontSize: '1rem'
-  }
+    fontSize: '1rem',
+  },
 })(FileCopyIcon);
 const CustomEditIcon = withStyles({
   root: {
-    fontSize: '1rem'
-  }
+    fontSize: '1rem',
+  },
 })(EditIcon);
 
 /*************************************************
@@ -75,32 +75,41 @@ const InlineStyleLink = (props) => {
   }, [triggerEsc]);
 
   // Handle copy link
-  const handleCopyLink = e => {
+  const handleCopyLink = (e) => {
     setShowCopyMessage(true);
   };
-  const handleCloseCopyMessage = e => setShowCopyMessage(false);
+  const handleCloseCopyMessage = (e) => setShowCopyMessage(false);
 
   // Handle remove link
-  const handleRemoveLink = e => {
-    removeEntity(dispatch, pageUuid, new SelectionState({
-      focusKey: props.blockKey,
-      focusOffset: props.end,
-      anchorKey: props.blockKey,
-      anchorOffset: props.start
-    }), true);
+  const handleRemoveLink = (e) => {
+    removeEntity(
+      dispatch,
+      pageUuid,
+      new SelectionState({
+        focusKey: props.blockKey,
+        focusOffset: props.end,
+        anchorKey: props.blockKey,
+        anchorOffset: props.start,
+      }),
+      true,
+    );
   };
 
   // Handle edit link
-  const handleEditLink = e => {
+  const handleEditLink = (e) => {
     console.log(props);
     setOpen(false);
     setKeepClose(true);
-    setPreLinkRange(dispatch, pageUuid, new SelectionState({
-      focusKey: props.blockKey,
-      focusOffset: props.end,
-      anchorKey: props.blockKey,
-      anchorOffset: props.start
-    }));
+    setPreLinkRange(
+      dispatch,
+      pageUuid,
+      new SelectionState({
+        focusKey: props.blockKey,
+        focusOffset: props.end,
+        anchorKey: props.blockKey,
+        anchorOffset: props.start,
+      }),
+    );
     setTimeout(() => setKeepClose(false), 300);
   };
 
@@ -112,17 +121,23 @@ const InlineStyleLink = (props) => {
   // Use noopener & noreferrer to enhance security
   const title = (
     <Grid container direction="row" justifyContent="center" alignItems="center">
-      <CopyToClipboard text={purl.href}>
-        <CustomButton onClick={handleCopyLink}>
-          <CustomCopyIcon />
+      <Tooltip title="Copy Link" placement="top">
+        <CopyToClipboard text={purl.href}>
+          <CustomButton onClick={handleCopyLink}>
+            <CustomCopyIcon />
+          </CustomButton>
+        </CopyToClipboard>
+      </Tooltip>
+      <Tooltip title="Edit Link" placement="top">
+        <CustomButton onClick={handleEditLink}>
+          <CustomEditIcon />
         </CustomButton>
-      </CopyToClipboard>
-      <CustomButton onClick={handleEditLink}>
-        <CustomEditIcon />
-      </CustomButton>
-      <CustomButton onClick={handleRemoveLink}>
-        <LinkOffIcon fontSize='small' />
-      </CustomButton>
+      </Tooltip>
+      <Tooltip title="Remove Link" placement="top">
+        <CustomButton onClick={handleRemoveLink}>
+          <LinkOffIcon fontSize="small" />
+        </CustomButton>
+      </Tooltip>
       <div className="geeke-outlink-seperator"></div>
       <a className="geeke-outlink-nostyle" target="_blank" rel="noopener noreferrer" href={purl.href}>
         <Grid container direction="row" justifyContent="center" alignItems="center">
@@ -140,7 +155,7 @@ const InlineStyleLink = (props) => {
         arrow
         title={title}
         open={open && !keepClose}
-        onOpen={() => keepClose ? null : setOpen(true)}
+        onOpen={() => (keepClose ? null : setOpen(true))}
         onClose={() => setOpen(false)}
       >
         <a className="geeke-outlink" href={purl.href}>

@@ -174,7 +174,7 @@ const InlineStyleLinkEditor = (props) => {
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorPosition.left)}
-        onClose={e => closeEditor(e)}
+        onClose={(e) => closeEditor(e)}
         getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',

@@ -321,23 +321,26 @@ export const toggleLink = (dispatch, pageUuid, link) => {
   });
 };
 
-export const removeEntity = (dispatch, pageUuid, selectionState, setSelectionState=false) => {
-  dispatch({type, callback: state => {
-    let page = state.cachedPages.get(pageUuid);
-    let newEditorState = page.get('content');
-    let newContentState = newEditorState.getCurrentContent();
+export const removeEntity = (dispatch, pageUuid, selectionState, setSelectionState = false) => {
+  dispatch({
+    type,
+    callback: (state) => {
+      let page = state.cachedPages.get(pageUuid);
+      let newEditorState = page.get('content');
+      let newContentState = newEditorState.getCurrentContent();
 
-    newContentState = Modifier.applyEntity(newContentState, selectionState, null);
-    newEditorState = EditorState.push(newEditorState, newContentState, 'apply-entity');
+      newContentState = Modifier.applyEntity(newContentState, selectionState, null);
+      newEditorState = EditorState.push(newEditorState, newContentState, 'apply-entity');
 
-    if (setSelectionState) {
-      newEditorState = EditorState.forceSelection(newEditorState, selectionState);
-    }
+      if (setSelectionState) {
+        newEditorState = EditorState.forceSelection(newEditorState, selectionState);
+      }
 
-    page.set('content', newEditorState);
+      page.set('content', newEditorState);
 
-    return state;
-  }});
+      return state;
+    },
+  });
 };
 
 export const setTextColor = (dispatch, pageUuid, color) => {
