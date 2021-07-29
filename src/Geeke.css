@@ -480,6 +480,14 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   position: absolute;
 }
 
+.geeke-outlink-seperator {
+  width: 1px;
+  height: 1rem;
+  background-color: rgb(201, 201, 201);
+  display: inline-flex;
+  margin: 0rem 0.25rem;
+}
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);

@@ -28,6 +28,7 @@ export const pmsc = {
   popupMenuRange: 10,
   triggerEsc: 11,
   linkRange: 12,
+  preLinkRange: 13,
 };
 
 const initPageMiscState = [
@@ -43,6 +44,7 @@ const initPageMiscState = [
   [pmsc.popupMenuRange, null],
   [pmsc.triggerEsc, 0],
   [pmsc.linkRange, null],
+  [pmsc.preLinkRange, null], // Set selectionState and focus editor before editing the link
 ];
 
 const initEditorMiscState = {
@@ -134,6 +136,8 @@ export const setPopupMenuRange = (dispatch, pageUuid, menuRange) =>
   setPageValue(dispatch, pageUuid, pmsc.popupMenuRange, menuRange);
 export const setLinkRange = (dispatch, pageUuid, linkRange) =>
   setPageValue(dispatch, pageUuid, pmsc.linkRange, linkRange);
+export const setPreLinkRange = (dispatch, pageUuid, preLinkRange) =>
+  setPageValue(dispatch, pageUuid, pmsc.preLinkRange, preLinkRange);
 export const setMouseOverBlockKey = (dispatch, pageUuid, blockKey) =>
   setPageValue(dispatch, pageUuid, pmsc.hover, blockKey);
 export const setDragShadowPos = (dispatch, pageUuid, dragShadowPos) =>

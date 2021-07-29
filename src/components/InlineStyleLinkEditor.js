@@ -15,7 +15,7 @@ import { Alert } from '@material-ui/lab';
  * Utils & States
  *************************************************/
 import { checkOverlap, getCaretRange } from '../utils/Misc';
-import { pmsc, setLinkRange } from '../states/editorMisc';
+import { pmsc, setLinkRange, setPreLinkRange } from '../states/editorMisc';
 import { showEditorSelection, toggleLink } from '../states/editor';
 
 /*************************************************
@@ -44,6 +44,7 @@ const InlineStyleLinkEditor = (props) => {
   const [showEmptySelectionWarning, setShowEmptySelectionWarning] = useState(false);
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
   const linkRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.linkRange));
+  const preLinkRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.preLinkRange));
   const editorState = useSelector((state) => state.editor.cachedPages.get(pageUuid)?.get('content'));
 
   // Constants
@@ -66,6 +67,7 @@ const InlineStyleLinkEditor = (props) => {
     );
   };
 
+  // Open link editor when linkRange is updated
   useEffect(() => {
     if (linkRange) {
       // Get position
@@ -132,6 +134,19 @@ const InlineStyleLinkEditor = (props) => {
     }
   }, [linkRange]); // eslint-disable-line
 
+  // When preLinkRange is set, focus editor, force selection, then trigger linkRange
+  useEffect(() => {
+    if (!preLinkRange) return;
+
+    const selectionState = preLinkRange;
+    setPreLinkRange(dispatch, pageUuid, null);
+    handleFocusEditor();
+    setTimeout(() => {
+      showEditorSelection(dispatch, pageUuid, selectionState);
+      setLinkRange(dispatch, pageUuid, selectionState);
+    }, 0);
+  }, [preLinkRange]); // eslint-disable-line
+
   // Set anchor position
   useEffect(() => {
     setAnchorEl(document.getElementById(anchorId));
@@ -159,7 +174,7 @@ const InlineStyleLinkEditor = (props) => {
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorPosition.left)}
-        onClose={closeEditor}
+        onClose={e => closeEditor(e)}
         getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
