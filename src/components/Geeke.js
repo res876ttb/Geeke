@@ -28,6 +28,7 @@ import Page from './Page';
  * Styles
  *************************************************/
 import '../Geeke.css';
+import '../../node_modules/katex/dist/katex.css';
 
 /*************************************************
  * Main components

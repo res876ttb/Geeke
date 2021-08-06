@@ -29,6 +29,8 @@ export const pmsc = {
   triggerEsc: 11,
   linkRange: 12,
   preLinkRange: 13,
+  mathRange: 14,
+  editingMath: 15,
 };
 
 const initPageMiscState = [
@@ -45,6 +47,8 @@ const initPageMiscState = [
   [pmsc.triggerEsc, 0],
   [pmsc.linkRange, null],
   [pmsc.preLinkRange, null], // Set selectionState and focus editor before editing the link
+  [pmsc.mathRange, null],
+  [pmsc.editingMath, false],
 ];
 
 const initEditorMiscState = {
@@ -138,6 +142,8 @@ export const setLinkRange = (dispatch, pageUuid, linkRange) =>
   setPageValue(dispatch, pageUuid, pmsc.linkRange, linkRange);
 export const setPreLinkRange = (dispatch, pageUuid, preLinkRange) =>
   setPageValue(dispatch, pageUuid, pmsc.preLinkRange, preLinkRange);
+export const setMathRange = (dispatch, pageUuid, mathRange) =>
+  setPageValue(dispatch, pageUuid, pmsc.mathRange, mathRange);
 export const setMouseOverBlockKey = (dispatch, pageUuid, blockKey) =>
   setPageValue(dispatch, pageUuid, pmsc.hover, blockKey);
 export const setDragShadowPos = (dispatch, pageUuid, dragShadowPos) =>
@@ -152,6 +158,8 @@ export const setFocusBlockKey = (dispatch, pageUuid, focusBlockKey) =>
   setPageValue(dispatch, pageUuid, pmsc.focusBlockKey, focusBlockKey);
 export const setMoveDirection = (dispatch, pageUuid, moveDirection) =>
   setPageValue(dispatch, pageUuid, pmsc.moveDirection, moveDirection);
+export const setEditingMath = (dispatch, pageUuid, editingMath) =>
+  setPageValue(dispatch, pageUuid, pmsc.editingMath, editingMath);
 
 const setPageValue = (dispatch, pageUuid, pmscKey, value) => {
   dispatch({

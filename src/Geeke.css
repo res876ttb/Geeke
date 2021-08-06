@@ -488,6 +488,11 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   margin: 0rem 0.25rem;
 }
 
+/* Math */
+.geeke-inlineStyleMathEditor-Anchor {
+  position: absolute;
+}
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);

@@ -41,6 +41,8 @@ import PageTitle from './PageTitle';
 import QuoteBlock from './QuoteBlock';
 import ToggleListBlock from './ToggleListBlock';
 import PopupMenu from './PopupMenu';
+import InlineStyleLinkEditor from './InlineStyleLinkEditor';
+import InlineStyleMathEditor from './InlineStyleMathEditor';
 
 /*************************************************
  * Constants
@@ -54,12 +56,12 @@ import {
   setFocusBlockKey,
   setFocusEditorUuid,
   setLinkRange,
+  setMathRange,
   setMoveDirection,
   setPopupMenuRange,
   setSelectedBlocks,
   triggerEsc,
 } from '../states/editorMisc';
-import InlineStyleLinkEditor from './InlineStyleLinkEditor';
 
 /*************************************************
  * Main components
@@ -75,6 +77,7 @@ const Page = (props) => {
   const editingCode = useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.editingCode));
   const editingMenu = useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.editingMenu));
   const selectedBlocks = useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.selectedBlocks));
+  const editingMath = useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.editingMath));
   const editingLink = Boolean(useSelector((state) => state.editorMisc.pages.get(uuid).get(pmsc.linkRange)));
   const editor = useRef(null);
 
@@ -152,6 +155,7 @@ const Page = (props) => {
     toggleInlineStyle: (style) => toggleStyle(dispatch, uuid, style),
     triggerEsc: () => triggerEsc(dispatch, uuid),
     setLinkRange: (selectionState) => setLinkRange(dispatch, uuid, selectionState),
+    setMathRange: (selectionState) => setMathRange(dispatch, uuid, selectionState),
   };
   const handleKeyCommand = (command, editorState, blockKey) =>
     _handleKeyCommand(editorState, command, keyCommandDispatcher, blockKey);
@@ -241,13 +245,14 @@ const Page = (props) => {
           handleReturn={handleReturn}
           blockRendererFn={blockDecorator}
           spellCheck={true}
-          readOnly={readOnly || editingCode || editingMenu || editingLink}
+          readOnly={readOnly || editingCode || editingMenu || editingLink || editingMath}
           customStyleMap={styleMap}
           onFocus={() => setFocusEditorUuid(dispatch, uuid)}
           // placeholder={'Write something here...'}
         />
         <PopupMenu pageUuid={uuid} handleFocusEditor={handleFocusEditor} />
         <InlineStyleLinkEditor handleFocusEditor={handleFocusEditor} />
+        <InlineStyleMathEditor handleFocusEditor={handleFocusEditor} />
       </div>
 
       <PageDragShadow

@@ -1,6 +1,6 @@
 /*************************************************
- * @file InlineStyleLinkEditor.js
- * @description Editor for inline link.
+ * @file InlineStyleMathEditor.js
+ * @description Editor for inline math.
  *************************************************/
 
 /*************************************************
@@ -15,8 +15,8 @@ import { Alert } from '@material-ui/lab';
  * Utils & States
  *************************************************/
 import { checkOverlap, getCaretRange } from '../utils/Misc';
-import { pmsc, setLinkRange, setPreLinkRange } from '../states/editorMisc';
-import { showEditorSelection, toggleLink } from '../states/editor';
+import { pmsc, setEditingMath, setMathRange } from '../states/editorMisc';
+import { createEmptyInlineMath, showEditorSelection, updateInlineMathData } from '../states/editor';
 
 /*************************************************
  * Import Components
@@ -30,7 +30,7 @@ import { remToPx } from '../constant';
 /*************************************************
  * Main components
  *************************************************/
-const InlineStyleLinkEditor = (props) => {
+const InlineStyleMathEditor = (props) => {
   // Props
   const handleFocusEditor = props.handleFocusEditor;
 
@@ -39,36 +39,41 @@ const InlineStyleLinkEditor = (props) => {
   const [anchorPosition, setAnchorPosition] = useState({ top: -1000, left: 0 });
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectionState, setSelectionState] = useState(null);
-  const [linkContent, setLinkContent] = useState('');
+  const [mathContent, setMathContent] = useState('');
   const [showCorssLineWarning, setShowCrossLineWarning] = useState(false);
-  const [showEmptySelectionWarning, setShowEmptySelectionWarning] = useState(false);
+  const [mathEntityKey, setMathEntityKey] = useState(null);
+  const [focusEditor, setFocusEditor] = useState(false);
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
-  const linkRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.linkRange));
-  const preLinkRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.preLinkRange));
+  const mathRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.mathRange));
   const editorState = useSelector((state) => state.editor.cachedPages.get(pageUuid)?.get('content'));
 
   // Constants
-  const anchorId = `geeke-inlineStyleLinkEditor-${pageUuid}`;
+  const anchorId = `geeke-inlineStyleMathEditor-${pageUuid}`;
   const initAnchorPosition = { top: -1000, left: 0 };
 
   const clearState = () => {
     setAnchorPosition(initAnchorPosition);
-    setLinkRange(dispatch, pageUuid, null);
-    setLinkContent('');
+    setMathRange(dispatch, pageUuid, null);
+    setMathContent('');
+    setFocusEditor(false);
   };
 
   const closeEditor = (e, curSelectionState = null) => {
     e?.stopPropagation();
-    clearState();
-    setTimeout(
-      () => showEditorSelection(dispatch, pageUuid, curSelectionState ? curSelectionState : selectionState),
-      0,
-    );
+    setEditingMath(dispatch, pageUuid, true);
+    setTimeout(() => {
+      clearState();
+      setEditingMath(dispatch, pageUuid, false);
+      setTimeout(
+        () => showEditorSelection(dispatch, pageUuid, curSelectionState ? curSelectionState : selectionState),
+        0,
+      );
+    });
   };
 
-  // Open link editor when linkRange is updated
+  // Open math editor when mathRange is updated
   useEffect(() => {
-    if (linkRange) {
+    if (mathRange) {
       // Get position
       const editorDom = document.getElementById(`geeke-editor-${pageUuid}`);
       const editorRect = editorDom.getBoundingClientRect();
@@ -80,7 +85,7 @@ const InlineStyleLinkEditor = (props) => {
       };
 
       // Get entity data
-      // Rule: if there are any link entity in the selection range,
+      // Rule: if there are any math entity in the selection range,
       const selectionState = editorState.getSelection();
       const contentState = editorState.getCurrentContent();
 
@@ -92,7 +97,7 @@ const InlineStyleLinkEditor = (props) => {
       }
 
       const anchorBlock = contentState.getBlockForKey(selectionState.getAnchorKey());
-      let firstLinkEntityKey = null;
+      let firstMathEntityKey = null;
       let curEntityKey = null;
       anchorBlock.findEntityRanges(
         (value) => {
@@ -105,46 +110,48 @@ const InlineStyleLinkEditor = (props) => {
           const startOffset = selectionState.getStartOffset();
           const endOffset = selectionState.getEndOffset();
           if (checkOverlap(start, end, startOffset, endOffset, false)) {
-            if (curEntity.type === 'LINK' && !firstLinkEntityKey) {
-              firstLinkEntityKey = curEntityKey;
+            if (curEntity.type === 'MATH' && !firstMathEntityKey) {
+              firstMathEntityKey = curEntityKey;
             }
           }
         },
       );
 
-      let url = '';
-      if (firstLinkEntityKey) {
-        const entity = contentState.getEntity(firstLinkEntityKey);
-        url = entity.data.url;
+      let newMathEntityKey = null;
+
+      // If firstMathEntityKey is not null, then get the math content
+      let math = '';
+      if (firstMathEntityKey) {
+        const entity = contentState.getEntity(firstMathEntityKey);
+        math = entity.data.math;
+        newMathEntityKey = firstMathEntityKey;
       }
 
-      // If url is empty and the selection is collapsed, it is not possible to create link
-      if (url.length === 0 && selectionState.isCollapsed()) {
-        closeEditor(null, selectionState);
-        setShowEmptySelectionWarning(true);
-        return;
+      // If math is empty, we have to create a character that represent the inline style.
+      if (math.length === 0) {
+        if (selectionState.isCollapsed()) {
+          // If math is empty string, create a default one
+          createEmptyInlineMath(dispatch, pageUuid, null, null, (entityKey) => {
+            newMathEntityKey = entityKey;
+          });
+        } else {
+          let curBlock = contentState.getBlockForKey(selectionState.getFocusKey());
+          math = curBlock.getText().slice(selectionState.getStartOffset(), selectionState.getEndOffset());
+          createEmptyInlineMath(dispatch, pageUuid, math, null, (entityKey) => {
+            newMathEntityKey = entityKey;
+          });
+        }
       }
 
-      setLinkContent(url);
+      setMathEntityKey(newMathEntityKey);
+      setMathContent(math);
       setAnchorPosition(newPosition);
-      setSelectionState(linkRange);
+      setSelectionState(mathRange);
+      setFocusEditor(true);
     } else if (anchorPosition.left !== 0) {
       clearState();
     }
-  }, [linkRange]); // eslint-disable-line
-
-  // When preLinkRange is set, focus editor, force selection, then trigger linkRange
-  useEffect(() => {
-    if (!preLinkRange) return;
-
-    const selectionState = preLinkRange;
-    setPreLinkRange(dispatch, pageUuid, null);
-    handleFocusEditor();
-    setTimeout(() => {
-      showEditorSelection(dispatch, pageUuid, selectionState);
-      setLinkRange(dispatch, pageUuid, selectionState);
-    }, 0);
-  }, [preLinkRange]); // eslint-disable-line
+  }, [mathRange]); // eslint-disable-line
 
   // Set anchor position
   useEffect(() => {
@@ -156,7 +163,6 @@ const InlineStyleLinkEditor = (props) => {
     const key = e.nativeEvent.keyCode;
     switch (key) {
       case 13: // Enter
-        toggleLink(dispatch, pageUuid, linkContent);
         closeEditor(e);
         break;
       case 27: // Esc
@@ -167,9 +173,19 @@ const InlineStyleLinkEditor = (props) => {
     }
   };
 
+  // handleUpdateMathContent
+  const handleUpdateMathContent = (e) => {
+    setMathContent(e.target.value);
+    setFocusEditor(true);
+    updateInlineMathData(dispatch, pageUuid, mathEntityKey, e.target.value);
+
+    // Used for triggerring draftjs re-render
+    if (focusEditor) handleFocusEditor();
+  };
+
   return (
     <>
-      <div className="geeke-inlineStyleLinkEditor-Anchor" id={anchorId} style={anchorPosition}></div>
+      <div className="geeke-inlineStyleMathEditor-Anchor" id={anchorId} style={anchorPosition}></div>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorPosition.left)}
@@ -188,29 +204,18 @@ const InlineStyleLinkEditor = (props) => {
         <div>
           <label style={{ fontSize: '0px' }}>å</label>
           <TextField
-            label="Edit Link"
-            placeholder="Paste link here"
+            label="Edit Math Equation"
+            placeholder={'1+e^{i\\pi}=0'}
             size="small"
             variant="outlined"
             style={{ margin: '0rem 1rem' }}
-            value={linkContent}
-            onChange={(e) => setLinkContent(e.target.value)}
+            value={mathContent}
+            onChange={handleUpdateMathContent}
+            inputRef={(input) => input && focusEditor && input.focus()}
             autoFocus
           />
         </div>
       </Menu>
-
-      {/* Collapsed Message */}
-      <Snackbar
-        open={showEmptySelectionWarning}
-        autoHideDuration={5000}
-        onClose={(e) => setShowEmptySelectionWarning(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={(e) => setShowEmptySelectionWarning(false)} severity="warning">
-          Unable to create link without selecting any text!
-        </Alert>
-      </Snackbar>
 
       {/* Cross Line Warning */}
       <Snackbar
@@ -220,11 +225,11 @@ const InlineStyleLinkEditor = (props) => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert onClose={(e) => setShowCrossLineWarning(false)} severity="warning">
-          Unable to create link when selection across multiple lines!
+          Unable to create inline math when selection across multiple lines!
         </Alert>
       </Snackbar>
     </>
   );
 };
 
-export default InlineStyleLinkEditor;
+export default InlineStyleMathEditor;

@@ -50,6 +50,7 @@ const keyCommandConst = {
   toggleInlineCode: 15,
   triggerEditorEsc: 16,
   toggleInlineLink: 17,
+  toggleInlineMath: 18,
 };
 
 /**
@@ -288,7 +289,11 @@ const mapKeyToEditorCommand_s = (e, config) => {
 const mapKeyToEditorCommand_e = (e, config) => {
   // If command(on mac) or ctrl(on win) is pressed
   if ((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) {
-    return keyCommandConst.toggleInlineCode;
+    if (e.shiftKey) {
+      return keyCommandConst.toggleInlineMath;
+    } else {
+      return keyCommandConst.toggleInlineCode;
+    }
   }
 
   return null;
@@ -597,7 +602,13 @@ const handleKeyCommand_checkBlockTypeConversion = (editorState, command, dispatc
     // Before conver the block into another type, insert a space first for a better undo
     let newContentState = contentState;
     let newEditorState = editorState;
-    newContentState = Modifier.insertText(contentState, selectionState, ' ');
+
+    // Get entity by key and offset
+    let focusInlineStyle = focusBlock.getInlineStyleAt(caretPosition - 1);
+    let focusEntity = focusBlock.getEntityAt(caretPosition - 1);
+
+    // Insert space with style
+    newContentState = Modifier.insertText(contentState, selectionState, ' ', focusInlineStyle, focusEntity);
     newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
 
     // Convert the type of the block
@@ -1350,6 +1361,12 @@ const handleKeyCommand_toggleInlineLink = (editorState, dispatcher) => {
   return 'handled';
 };
 
+const handleKeyCommand_toggleInlineMath = (editorState, dispatcher) => {
+  const selectionState = editorState.getSelection();
+  dispatcher.setMathRange(selectionState);
+  return 'handled';
+};
+
 export const handleKeyCommand = (editorState, command, dispatcher, blockKey, restArgs = null) => {
   switch (command) {
     case keyCommandConst.moreIndent:
@@ -1390,6 +1407,9 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
 
     case keyCommandConst.toggleInlineLink:
       return handleKeyCommand_toggleInlineLink(editorState, dispatcher);
+
+    case keyCommandConst.toggleInlineMath:
+      return handleKeyCommand_toggleInlineMath(editorState, dispatcher);
 
     default:
       if (typeof command === typeof [] && command.length > 0 && command[0] === keyCommandConst.multiCommands) {
