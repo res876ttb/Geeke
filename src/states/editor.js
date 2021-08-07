@@ -18,6 +18,8 @@ import { colorList } from '../constant';
 // The reducer is `editor`
 const type = 'editor';
 
+const magicMathStr = '¡™¡';
+
 // Permission
 const permissionConst = {
   members: 0,
@@ -321,100 +323,6 @@ export const toggleLink = (dispatch, pageUuid, link) => {
   });
 };
 
-export const toggleMath = (dispatch, pageUuid, math, customSelection = null) => {
-  dispatch({
-    type,
-    callback: (state) => {
-      let page = state.cachedPages.get(pageUuid);
-      let editorState = page.get('content');
-
-      const selectionState = customSelection ? customSelection : editorState.getSelection();
-      const contentState = editorState.getCurrentContent();
-      let newContentState = contentState;
-      let newEditorState = editorState;
-
-      // Check whether the selected text are all in the same block
-      if (selectionState.getAnchorKey() !== selectionState.getFocusKey()) {
-        return state;
-      }
-
-      // Get entities ranges
-      const anchorBlock = contentState.getBlockForKey(selectionState.getAnchorKey());
-      let firstLinkEntityKey = null;
-      let curEntityKey = null;
-      let clearMin = 10e9;
-      let clearMax = -1;
-      let rangesOfOverlapMath = [];
-      anchorBlock.findEntityRanges(
-        (value) => {
-          curEntityKey = value.entity;
-          return true;
-        },
-        (start, end) => {
-          if (!curEntityKey) return;
-          const curEntity = contentState.getEntity(curEntityKey);
-          const startOffset = selectionState.getStartOffset();
-          const endOffset = selectionState.getEndOffset();
-          if (checkOverlap(start, end, startOffset, endOffset, false)) {
-            if (curEntity.type === 'MATH') {
-              if (!firstLinkEntityKey) firstLinkEntityKey = curEntityKey;
-              rangesOfOverlapMath.push({ start, end });
-            }
-            clearMin = Math.min(start, clearMin);
-            clearMax = Math.max(end, clearMax);
-          }
-        },
-      );
-      clearMin = Math.min(selectionState.getStartOffset(), clearMin);
-      clearMax = Math.max(selectionState.getEndOffset(), clearMax);
-
-      // Clear overlapping entities
-      newContentState = Modifier.applyEntity(
-        newContentState,
-        new SelectionState({
-          anchorKey: anchorBlock.getKey(),
-          anchorOffset: clearMin,
-          focusKey: anchorBlock.getKey(),
-          focusOffset: clearMax,
-        }),
-        null,
-      );
-
-      // Get range of new math
-      let left = 10e9;
-      let right = -1;
-      for (let i in rangesOfOverlapMath) {
-        left = Math.min(left, rangesOfOverlapMath[i].start);
-        right = Math.max(right, rangesOfOverlapMath[i].end);
-      }
-      left = Math.min(left, selectionState.getStartOffset());
-      right = Math.max(right, selectionState.getEndOffset());
-
-      // Create entity and apply url
-      newContentState = newContentState.createEntity('MATH', 'MUTABLE', { math });
-      const entityKey = newContentState.getLastCreatedEntityKey();
-      newEditorState = EditorState.set(newEditorState, { currentContent: newContentState });
-      newContentState = Modifier.applyEntity(
-        newContentState,
-        new SelectionState({
-          anchorKey: anchorBlock.getKey(),
-          anchorOffset: left,
-          focusKey: anchorBlock.getKey(),
-          focusOffset: right,
-        }),
-        entityKey,
-      );
-
-      // Push edit record
-      newEditorState = EditorState.push(editorState, newContentState, 'apply-entity');
-
-      page.set('content', newEditorState);
-
-      return state;
-    },
-  });
-};
-
 // Create empty inline math
 export const createEmptyInlineMath = (
   dispatch,
@@ -440,7 +348,7 @@ export const createEmptyInlineMath = (
 
       if (selectionState.isCollapsed()) {
         // If current selection is collapsed, let's insert an character to represent the inline math
-        newContentState = Modifier.insertText(newContentState, selectionState, ' ', null, entityKey);
+        newContentState = Modifier.insertText(newContentState, selectionState, magicMathStr, null, entityKey);
       } else {
         // If current selection is not collapsed, let's apply the entity to the selected text
         newContentState = Modifier.applyEntity(newContentState, selectionState, entityKey);
@@ -457,6 +365,49 @@ export const createEmptyInlineMath = (
       return state;
     },
   });
+};
+
+// Remove inline math entity
+export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey) => {
+  dispatch({type, callback: state => {
+    let page = state.cachedPages.get(pageUuid);
+    let newEditorState = page.get('content');
+    let newContentState = newEditorState.getCurrentContent();
+    const curBlock = newContentState.getBlockForKey(blockKey);
+
+    let anchorOffset = -1;
+    let focusOffset = -1;
+
+    // Find and clear target entity
+    curBlock.findEntityRanges((value) => {
+      if (value.entity === entityKey) return true;
+    }, (start, end) => {
+      anchorOffset = start;
+      focusOffset = end;
+    });
+
+    // Sanity check whether we find the target entity
+    if (anchorOffset === -1) return state;
+
+    // Check whether the entity string is magicMathStr. If true, it means that we have to remove this string as well.
+    let text = curBlock.getText();
+    if (text.slice(anchorOffset, focusOffset) === magicMathStr) {
+      newContentState = Modifier.removeRange(newContentState, new SelectionState({
+        anchorKey: blockKey,
+        anchorOffset: anchorOffset,
+        focusKey: blockKey,
+        focusOffset: focusOffset
+      }), 'backward');
+    }
+
+    // Push undo stack (this operation should not be record, so we use insert-characters here)
+    newEditorState = EditorState.push(newEditorState, newContentState, 'insert-characters');
+
+    // Update reducer
+    page.set('content', newEditorState);
+
+    return state;
+  }});
 };
 
 export const updateInlineMathData = (dispatch, pageUuid, entityKey, math) => {

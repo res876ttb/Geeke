@@ -16,7 +16,7 @@ import { Alert } from '@material-ui/lab';
  *************************************************/
 import { checkOverlap, getCaretRange } from '../utils/Misc';
 import { pmsc, setEditingMath, setMathRange } from '../states/editorMisc';
-import { createEmptyInlineMath, showEditorSelection, updateInlineMathData } from '../states/editor';
+import { createEmptyInlineMath, removeInlineMath, showEditorSelection, updateInlineMathData } from '../states/editor';
 
 /*************************************************
  * Import Components
@@ -40,8 +40,10 @@ const InlineStyleMathEditor = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectionState, setSelectionState] = useState(null);
   const [mathContent, setMathContent] = useState('');
+  const [lastMathContent, setLastMathContent] = useState('');
   const [showCorssLineWarning, setShowCrossLineWarning] = useState(false);
   const [mathEntityKey, setMathEntityKey] = useState(null);
+  const [curBlockKey, setCurBlockKey] = useState(null);
   const [focusEditor, setFocusEditor] = useState(false);
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
   const mathRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.mathRange));
@@ -56,6 +58,7 @@ const InlineStyleMathEditor = (props) => {
     setMathRange(dispatch, pageUuid, null);
     setMathContent('');
     setFocusEditor(false);
+    setCurBlockKey(null);
   };
 
   const closeEditor = (e, curSelectionState = null) => {
@@ -141,9 +144,14 @@ const InlineStyleMathEditor = (props) => {
             newMathEntityKey = entityKey;
           });
         }
+
+        setLastMathContent('');
+      } else {
+        setLastMathContent(math);
       }
 
       setMathEntityKey(newMathEntityKey);
+      setCurBlockKey(selectionState.getFocusKey());
       setMathContent(math);
       setAnchorPosition(newPosition);
       setSelectionState(mathRange);
@@ -158,6 +166,17 @@ const InlineStyleMathEditor = (props) => {
     setAnchorEl(document.getElementById(anchorId));
   }, []); // eslint-disable-line
 
+  // revertEntity
+  const revertEntity = () => {
+    if (lastMathContent === '') {
+      // This entity is newly created. Remove the entity to revert the change.
+      removeInlineMath(dispatch, pageUuid, curBlockKey, mathEntityKey);
+    } else {
+      // This entity is not newly created. Set original math content to revert the change.
+      updateInlineMathData(dispatch, pageUuid, mathEntityKey, lastMathContent);
+    }
+  };
+
   // Handle keypress
   const onKeyDown = (e) => {
     const key = e.nativeEvent.keyCode;
@@ -166,6 +185,8 @@ const InlineStyleMathEditor = (props) => {
         closeEditor(e);
         break;
       case 27: // Esc
+        // Remove entity
+        revertEntity();
         closeEditor(e);
         break;
       default:
