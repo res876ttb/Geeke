@@ -392,7 +392,9 @@ export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey) => {
       // Sanity check whether we find the target entity
       if (anchorOffset === -1) return state;
 
-      // Check whether the entity string is magicMathStr. If true, it means that we have to remove this string as well.
+      // Check whether the entity string is magicMathStr.
+      // If true, it means that this is a newly created inline math, then we have to remove this string as well.
+      // Else, just remove the entity.
       let text = curBlock.getText();
       if (text.slice(anchorOffset, focusOffset) === magicMathStr) {
         newContentState = Modifier.removeRange(
@@ -404,6 +406,17 @@ export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey) => {
             focusOffset: focusOffset,
           }),
           'backward',
+        );
+      } else {
+        newContentState = Modifier.applyEntity(
+          newContentState,
+          new SelectionState({
+            anchorKey: blockKey,
+            anchorOffset: anchorOffset,
+            focusKey: blockKey,
+            focusOffset: focusOffset,
+          }),
+          null,
         );
       }
 

@@ -7,13 +7,16 @@
  * React Components
  *************************************************/
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { SelectionState } from 'draft-js';
 import katex from 'katex';
 
 /*************************************************
  * Utils & States
  *************************************************/
-import { pmsc } from '../states/editorMisc';
+import { pmsc, setMathRange } from '../states/editorMisc';
+import { checkOverlap } from '../utils/Misc';
+import { showEditorSelection } from '../states/editor';
 
 /*************************************************
  * Import Components
@@ -23,7 +26,6 @@ import { pmsc } from '../states/editorMisc';
  * Constant
  *************************************************/
 import { magicMathStr } from '../constant';
-import { checkOverlap } from '../utils/Misc';
 
 /*************************************************
  * Main components
@@ -36,6 +38,7 @@ const InlineStyleMath = (props) => {
   const endOffset = props.end;
 
   // State & Reducer
+  const dispatch = useDispatch();
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
   const mathRange = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.mathRange));
 
@@ -47,12 +50,26 @@ const InlineStyleMath = (props) => {
     checkOverlap(startOffset, endOffset, mathRange.getStartOffset(), mathRange.getEndOffset());
   const styleClass = editingMath ? 'geeke-inlineStyleMath-editingStyle' : 'geeke-inlineStyleMath-defaultStyle';
 
+  // Functions
+  const handleClick = (e) => {
+    console.log(startOffset, endOffset);
+    let selectionState = new SelectionState({
+      anchorKey: blockKey,
+      anchorOffset: startOffset,
+      focusKey: blockKey,
+      focusOffset: endOffset,
+    });
+    showEditorSelection(dispatch, pageUuid, selectionState);
+    setMathRange(dispatch, pageUuid, selectionState);
+  };
+
+  let mathDom = null;
   if (math === magicMathStr) {
     // Render default math
     let html = katex.renderToString('\\sqrt{x}', {
       throwOnError: false,
     });
-    return (
+    mathDom = (
       <span className={styleClass} style={{ color: 'gray' }} contentEditable={false}>
         <span dangerouslySetInnerHTML={{ __html: html }}></span>
         <span className="geeke-inlineStyleMath-newEq">New Equation</span>
@@ -64,8 +81,11 @@ const InlineStyleMath = (props) => {
       throwOnError: false,
     });
 
-    return <span className={styleClass} contentEditable={false} dangerouslySetInnerHTML={{ __html: html }}></span>;
+    mathDom = <span className={styleClass} contentEditable={false} dangerouslySetInnerHTML={{ __html: html }}></span>;
   }
+
+  // Render the result
+  return <span onClick={handleClick}>{mathDom}</span>;
 };
 
 export default InlineStyleMath;

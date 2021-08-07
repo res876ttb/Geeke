@@ -494,12 +494,12 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
 }
 
 .geeke-inlineStyleMath-defaultStyle {
-  padding: 0rem 0.25rem;
+  padding: 0rem 0.125rem;
 }
 
 .geeke-inlineStyleMath-editingStyle {
   border: solid 0.125rem var(--selectionColor);
-  padding: 0.25rem 0.125rem;
+  padding: 0.25rem 0rem;
   border-radius: 0.25rem;
   min-width: 1rem;
 }
