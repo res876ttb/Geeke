@@ -366,7 +366,7 @@ export const createEmptyInlineMath = (
 };
 
 // Remove inline math entity
-export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey) => {
+export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey, removeText=false) => {
   dispatch({
     type,
     callback: (state) => {
@@ -396,7 +396,7 @@ export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey) => {
       // If true, it means that this is a newly created inline math, then we have to remove this string as well.
       // Else, just remove the entity.
       let text = curBlock.getText();
-      if (text.slice(anchorOffset, focusOffset) === magicMathStr) {
+      if (text.slice(anchorOffset, focusOffset) === magicMathStr || removeText) {
         newContentState = Modifier.removeRange(
           newContentState,
           new SelectionState({

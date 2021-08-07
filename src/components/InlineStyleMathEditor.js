@@ -8,6 +8,7 @@
  *************************************************/
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { SelectionState } from 'draft-js';
 import { Menu, Snackbar, TextField } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 
@@ -63,9 +64,11 @@ const InlineStyleMathEditor = (props) => {
 
   const closeEditor = (e, curSelectionState = null) => {
     e?.stopPropagation();
+    // Lock editor to prevent rendering cursor
     setEditingMath(dispatch, pageUuid, true);
     setTimeout(() => {
       clearState();
+      // Unlock editor to enable editing
       setEditingMath(dispatch, pageUuid, false);
       setTimeout(
         () => showEditorSelection(dispatch, pageUuid, curSelectionState ? curSelectionState : selectionState),
@@ -182,7 +185,17 @@ const InlineStyleMathEditor = (props) => {
     const key = e.nativeEvent.keyCode;
     switch (key) {
       case 13: // Enter
-        closeEditor(e);
+        if (mathContent === '') {
+          removeInlineMath(dispatch, pageUuid, curBlockKey, mathEntityKey, true);
+          closeEditor(e, new SelectionState({
+            anchorKey: selectionState.getStartKey(),
+            anchorOffset: selectionState.getStartOffset(),
+            focusKey: selectionState.getStartKey(),
+            focusOffset: selectionState.getStartOffset(),
+          }));
+        } else {
+          closeEditor(e);
+        }
         break;
       case 27: // Esc
         // Remove entity
