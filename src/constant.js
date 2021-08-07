@@ -21,6 +21,8 @@ export const editorDraggableButtonWidth = 1.6; // Unit: rem
 export const dragMaskHeight = 0.25; // Unit: rem
 export const dragMaskIndentInterval = 0.15; // Unit: rem
 
+export const selectionBackgroundColor = 'rgba(42, 165, 245, 0.5)';
+
 export const blockDataKeys = {
   indentLevel: 'indentLevel',
   numberListOrder: 'numberListOrder',
@@ -55,6 +57,9 @@ export const headingType = {
   h5: 'h5',
   h6: 'h6',
 };
+
+// Special string for inline math
+export const magicMathStr = '¡™¡';
 
 // Constants for editor inline style
 export const styleMap = {

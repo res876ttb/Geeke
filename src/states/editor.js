@@ -13,12 +13,10 @@ import { checkOverlap, GeekeMap } from '../utils/Misc';
 /*************************************************
  * CONST
  *************************************************/
-import { colorList } from '../constant';
+import { colorList, magicMathStr } from '../constant';
 
 // The reducer is `editor`
 const type = 'editor';
-
-const magicMathStr = '¡™¡';
 
 // Permission
 const permissionConst = {
@@ -342,7 +340,7 @@ export const createEmptyInlineMath = (
       let selectionState = customSelection ? customSelection : editorState.getSelection();
 
       // Create entity key
-      newContentState = newContentState.createEntity('MATH', 'IMMUTABLE', { math: math ? math : '1+e^{i\\pi}=0' });
+      newContentState = newContentState.createEntity('MATH', 'IMMUTABLE', { math: math ? math : magicMathStr });
       const entityKey = newContentState.getLastCreatedEntityKey();
       newEditorState = EditorState.set(newEditorState, { currentContent: newContentState });
 

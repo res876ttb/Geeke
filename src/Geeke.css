@@ -493,6 +493,22 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   position: absolute;
 }
 
+.geeke-inlineStyleMath-defaultStyle {
+  padding: 0rem 0.25rem;
+}
+
+.geeke-inlineStyleMath-editingStyle {
+  border: solid 0.125rem var(--selectionColor);
+  padding: 0.25rem 0.125rem;
+  border-radius: 0.25rem;
+  min-width: 1rem;
+}
+
+.geeke-inlineStyleMath-newEq {
+  padding-left: 0.25rem;
+  font-weight: 500;
+}
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);
