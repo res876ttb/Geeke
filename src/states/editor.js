@@ -369,45 +369,55 @@ export const createEmptyInlineMath = (
 
 // Remove inline math entity
 export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey) => {
-  dispatch({type, callback: state => {
-    let page = state.cachedPages.get(pageUuid);
-    let newEditorState = page.get('content');
-    let newContentState = newEditorState.getCurrentContent();
-    const curBlock = newContentState.getBlockForKey(blockKey);
+  dispatch({
+    type,
+    callback: (state) => {
+      let page = state.cachedPages.get(pageUuid);
+      let newEditorState = page.get('content');
+      let newContentState = newEditorState.getCurrentContent();
+      const curBlock = newContentState.getBlockForKey(blockKey);
 
-    let anchorOffset = -1;
-    let focusOffset = -1;
+      let anchorOffset = -1;
+      let focusOffset = -1;
 
-    // Find and clear target entity
-    curBlock.findEntityRanges((value) => {
-      if (value.entity === entityKey) return true;
-    }, (start, end) => {
-      anchorOffset = start;
-      focusOffset = end;
-    });
+      // Find and clear target entity
+      curBlock.findEntityRanges(
+        (value) => {
+          if (value.entity === entityKey) return true;
+        },
+        (start, end) => {
+          anchorOffset = start;
+          focusOffset = end;
+        },
+      );
 
-    // Sanity check whether we find the target entity
-    if (anchorOffset === -1) return state;
+      // Sanity check whether we find the target entity
+      if (anchorOffset === -1) return state;
 
-    // Check whether the entity string is magicMathStr. If true, it means that we have to remove this string as well.
-    let text = curBlock.getText();
-    if (text.slice(anchorOffset, focusOffset) === magicMathStr) {
-      newContentState = Modifier.removeRange(newContentState, new SelectionState({
-        anchorKey: blockKey,
-        anchorOffset: anchorOffset,
-        focusKey: blockKey,
-        focusOffset: focusOffset
-      }), 'backward');
-    }
+      // Check whether the entity string is magicMathStr. If true, it means that we have to remove this string as well.
+      let text = curBlock.getText();
+      if (text.slice(anchorOffset, focusOffset) === magicMathStr) {
+        newContentState = Modifier.removeRange(
+          newContentState,
+          new SelectionState({
+            anchorKey: blockKey,
+            anchorOffset: anchorOffset,
+            focusKey: blockKey,
+            focusOffset: focusOffset,
+          }),
+          'backward',
+        );
+      }
 
-    // Push undo stack (this operation should not be record, so we use insert-characters here)
-    newEditorState = EditorState.push(newEditorState, newContentState, 'insert-characters');
+      // Push undo stack (this operation should not be record, so we use insert-characters here)
+      newEditorState = EditorState.push(newEditorState, newContentState, 'insert-characters');
 
-    // Update reducer
-    page.set('content', newEditorState);
+      // Update reducer
+      page.set('content', newEditorState);
 
-    return state;
-  }});
+      return state;
+    },
+  });
 };
 
 export const updateInlineMathData = (dispatch, pageUuid, entityKey, math) => {
