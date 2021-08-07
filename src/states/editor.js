@@ -366,7 +366,7 @@ export const createEmptyInlineMath = (
 };
 
 // Remove inline math entity
-export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey, removeText=false) => {
+export const removeInlineMath = (dispatch, pageUuid, blockKey, entityKey, removeText = false) => {
   dispatch({
     type,
     callback: (state) => {

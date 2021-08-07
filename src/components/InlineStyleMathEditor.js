@@ -187,12 +187,15 @@ const InlineStyleMathEditor = (props) => {
       case 13: // Enter
         if (mathContent === '') {
           removeInlineMath(dispatch, pageUuid, curBlockKey, mathEntityKey, true);
-          closeEditor(e, new SelectionState({
-            anchorKey: selectionState.getStartKey(),
-            anchorOffset: selectionState.getStartOffset(),
-            focusKey: selectionState.getStartKey(),
-            focusOffset: selectionState.getStartOffset(),
-          }));
+          closeEditor(
+            e,
+            new SelectionState({
+              anchorKey: selectionState.getStartKey(),
+              anchorOffset: selectionState.getStartOffset(),
+              focusKey: selectionState.getStartKey(),
+              focusOffset: selectionState.getStartOffset(),
+            }),
+          );
         } else {
           closeEditor(e);
         }
