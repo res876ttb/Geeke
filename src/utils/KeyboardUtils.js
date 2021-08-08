@@ -51,6 +51,8 @@ const keyCommandConst = {
   triggerEditorEsc: 16,
   toggleInlineLink: 17,
   toggleInlineMath: 18,
+  toggleInlineMathLeft: 19,
+  toggleInlineMathRight: 20,
 };
 
 /**
@@ -225,9 +227,33 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
   const focusOffset = selectionState.getFocusOffset();
   const hasShift = e.shiftKey;
 
+  // console.log(focusOffset);
+  // console.log(focusBlock.getText());
+
   const checkMoveUp = (leftKey = false) => {
+    // If there are any modifier, use the default action
+    if (
+      hasShift ||
+      KeyBindingUtil.isCtrlKeyCommand(e) ||
+      KeyBindingUtil.isOptionKeyCommand(e) ||
+      KeyBindingUtil.hasCommandModifier(e)
+    ) {
+      return defaultArrowKeyFunction();
+    }
+
     // Check whether current position is at first
-    if (leftKey && focusOffset > 0) return defaultArrowKeyFunction();
+    if (leftKey && focusOffset > 0) {
+      // Check whether the left entity is inlineMath
+      let entityKey = focusBlock.getEntityAt(focusOffset - 1);
+      if (entityKey) {
+        let entity = contentState.getEntity(entityKey);
+        if (entity.type === 'MATH') {
+          return keyCommandConst.toggleInlineMathLeft;
+        }
+      }
+
+      return defaultArrowKeyFunction();
+    }
 
     // If this is the first block
     const previousBlock = contentState.getBlockBefore(focusBlockKey);
@@ -243,8 +269,29 @@ const mapKeyToEditorCommand_arrowKey = (e, editorState) => {
   };
 
   const checkMoveDown = (rightKey = false) => {
+    // If there are any modifier, use the default action
+    if (
+      hasShift ||
+      KeyBindingUtil.isCtrlKeyCommand(e) ||
+      KeyBindingUtil.isOptionKeyCommand(e) ||
+      KeyBindingUtil.hasCommandModifier(e)
+    ) {
+      return defaultArrowKeyFunction();
+    }
+
     // Check whether current position is at the end of the block
-    if (rightKey && focusOffset < focusBlock.getLength()) return defaultArrowKeyFunction();
+    if (rightKey && focusOffset < focusBlock.getLength()) {
+      // Check whether the left entity is inlineMath
+      let entityKey = focusBlock.getEntityAt(focusOffset);
+      if (entityKey) {
+        let entity = contentState.getEntity(entityKey);
+        if (entity.type === 'MATH') {
+          return keyCommandConst.toggleInlineMathRight;
+        }
+      }
+
+      return defaultArrowKeyFunction();
+    }
 
     // If this is the last block
     const nextBlock = contentState.getBlockAfter(focusBlockKey);
@@ -1367,6 +1414,40 @@ const handleKeyCommand_toggleInlineMath = (editorState, dispatcher) => {
   return 'handled';
 };
 
+const handleKeyCommand_toggleInlineMathDirection = (editorState, dispatcher, direction) => {
+  // If this function is called by mapKeyToEditorCommand, then the selection must
+  //   not at the beginning of a line and must be collapsed.
+  const selectionState = editorState.getSelection();
+  const focusKey = selectionState.getFocusKey();
+  const contentState = editorState.getCurrentContent();
+  const curBlock = contentState.getBlockForKey(focusKey);
+  const entityKey = curBlock.getEntityAt(selectionState.getFocusOffset() + (direction === 'left' ? -1 : 0));
+
+  // Find the range of the entity
+  let newSelectionState = null;
+  curBlock.findEntityRanges(
+    (value) => {
+      if (value.entity === entityKey) return true;
+    },
+    (start, end) => {
+      newSelectionState = new SelectionState({
+        anchorKey: focusKey,
+        anchorOffset: start,
+        focusKey: focusKey,
+        focusOffset: end,
+      });
+    },
+  );
+
+  if (newSelectionState) {
+    let newEditorState = EditorState.forceSelection(editorState, newSelectionState);
+    dispatcher.setEditorState(newEditorState);
+  }
+
+  dispatcher.setMathRange(newSelectionState);
+  return 'handled';
+};
+
 export const handleKeyCommand = (editorState, command, dispatcher, blockKey, restArgs = null) => {
   switch (command) {
     case keyCommandConst.moreIndent:
@@ -1410,6 +1491,12 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
 
     case keyCommandConst.toggleInlineMath:
       return handleKeyCommand_toggleInlineMath(editorState, dispatcher);
+
+    case keyCommandConst.toggleInlineMathLeft:
+      return handleKeyCommand_toggleInlineMathDirection(editorState, dispatcher, 'left');
+
+    case keyCommandConst.toggleInlineMathRight:
+      return handleKeyCommand_toggleInlineMathDirection(editorState, dispatcher, 'right');
 
     default:
       if (typeof command === typeof [] && command.length > 0 && command[0] === keyCommandConst.multiCommands) {

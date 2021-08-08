@@ -36,12 +36,11 @@ const InlineStyleMath = (props) => {
   const blockKey = props.blockKey;
   const startOffset = props.start;
   const endOffset = props.end;
-  console.log(props);
 
   // State & Reducer
   const dispatch = useDispatch();
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
-  const mathRange = useSelector((state) => state.editorMisc.pages.get(pageUuid).get(pmsc.mathRange));
+  const mathRange = useSelector((state) => state.editorMisc.pages.get(pageUuid)?.get(pmsc.mathRange));
 
   // Constants
   const editingMath =
@@ -87,7 +86,7 @@ const InlineStyleMath = (props) => {
 
   // Render the result
   return (
-    <span contentEditable={false} onClick={handleClick}>
+    <span data-offset-key={props.offsetKey} contentEditable={false} onClick={handleClick}>
       {mathDom}
     </span>
   );

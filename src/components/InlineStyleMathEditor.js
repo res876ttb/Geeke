@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectionState } from 'draft-js';
-import { Button, Grid, Menu, Snackbar, TextField } from '@material-ui/core';
+import { Button, Grid, Menu, MenuList, Snackbar, TextField } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { Alert } from '@material-ui/lab';
 
@@ -33,8 +33,17 @@ const CustonButton = withStyles({
   root: {
     position: 'relative',
     left: '-0.5rem',
+    fontWeight: 'unset',
+    marginRight: '0.5rem',
   },
 })(Button);
+const CustomMenuList = withStyles({
+  root: {
+    '&:focus': {
+      outline: 'none',
+    },
+  },
+})(MenuList);
 
 /*************************************************
  * Main components
@@ -54,6 +63,8 @@ const InlineStyleMathEditor = (props) => {
   const [mathEntityKey, setMathEntityKey] = useState(null);
   const [curBlockKey, setCurBlockKey] = useState(null);
   const [focusEditor, setFocusEditor] = useState(false);
+  const [firstSelection, setFirstSelection] = useState(true);
+  const [lastCaretPosition, setLastCaretPosition] = useState([-1, -1]);
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
   const mathRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.mathRange));
   const editorState = useSelector((state) => state.editor.cachedPages.get(pageUuid)?.get('content'));
@@ -62,14 +73,17 @@ const InlineStyleMathEditor = (props) => {
   const anchorId = `geeke-inlineStyleMathEditor-${pageUuid}`;
   const initAnchorPosition = { top: -1000, left: 0 };
 
+  // Clear editor state
   const clearState = () => {
     setAnchorPosition(initAnchorPosition);
     setMathRange(dispatch, pageUuid, null);
     setMathContent('');
     setFocusEditor(false);
     setCurBlockKey(null);
+    setFirstSelection(true);
   };
 
+  // Handle close editor
   const closeEditor = (e, curSelectionState = null) => {
     e?.stopPropagation();
     // Lock editor to prevent rendering cursor
@@ -188,14 +202,18 @@ const InlineStyleMathEditor = (props) => {
     }
   };
 
-  // Handle keypress
-  const onKeyDown = (e) => {
+  // Handle arrow key function, and close editor when caret is at the end/beginning of the editor
+  const handleKeyDown = (e) => {
     const key = e.nativeEvent.keyCode;
-    switch (key) {
-      case 13: // Enter
-        if (mathContent === '') {
-          removeInlineMath(dispatch, pageUuid, curBlockKey, mathEntityKey, true);
-          closeEditor(
+    if (key <= 40 && key >= 37) {
+      e.stopPropagation();
+
+      let selectionStart = e.target.selectionStart;
+      let selectionEnd = e.target.selectionEnd;
+      if (selectionStart === selectionEnd) {
+        if ((key === 37 || key === 38) && selectionStart === 0) {
+          // Move to left
+          return closeEditor(
             e,
             new SelectionState({
               anchorKey: selectionState.getStartKey(),
@@ -204,17 +222,47 @@ const InlineStyleMathEditor = (props) => {
               focusOffset: selectionState.getStartOffset(),
             }),
           );
-        } else {
-          closeEditor(e);
+        } else if ((key === 39 || key === 40) && selectionStart === e.target.value.length) {
+          // Move to right
+          return closeEditor(
+            e,
+            new SelectionState({
+              anchorKey: selectionState.getStartKey(),
+              anchorOffset: selectionState.getEndOffset(),
+              focusKey: selectionState.getStartKey(),
+              focusOffset: selectionState.getEndOffset(),
+            }),
+          );
         }
-        break;
-      case 27: // Esc
-        // Remove entity
-        revertEntity();
-        closeEditor(e);
-        break;
-      default:
-        break;
+      }
+
+      setLastCaretPosition([selectionStart, selectionEnd]);
+    } else {
+      switch (key) {
+        case 13: // Enter
+          if (mathContent === '') {
+            removeInlineMath(dispatch, pageUuid, curBlockKey, mathEntityKey, true);
+            closeEditor(
+              e,
+              new SelectionState({
+                anchorKey: selectionState.getStartKey(),
+                anchorOffset: selectionState.getStartOffset(),
+                focusKey: selectionState.getStartKey(),
+                focusOffset: selectionState.getStartOffset(),
+              }),
+            );
+          } else {
+            closeEditor(e);
+          }
+          break;
+        case 27: // Esc
+          // Remove entity
+          revertEntity();
+          closeEditor(e);
+          break;
+        default:
+          break;
+      }
     }
   };
 
@@ -231,7 +279,23 @@ const InlineStyleMathEditor = (props) => {
   // handleDone
   const handleDone = (e) => {
     e.nativeEvent.keyCode = 13;
-    onKeyDown(e);
+    handleKeyDown(e);
+  };
+
+  // handle Textfield Focus
+  const handleFocus = (e) => {
+    // Only select all the text in the first focus
+    if (!firstSelection) return;
+
+    e.preventDefault();
+    e.target.focus();
+    e.target.setSelectionRange(0, e.target.value.length);
+
+    // To render the Tex in the draft editor, we have to focus editor and jump back immediately.
+    // As a result, onFocus function will be invoked at this moment.
+    // To make sure that the text will not be selected, we have to create a flag called firstSelection
+    // and set it to false after handling selection.
+    setFirstSelection(false);
   };
 
   return (
@@ -254,9 +318,8 @@ const InlineStyleMathEditor = (props) => {
           vertical: 'top',
           horizontal: 'left',
         }}
-        onKeyDown={onKeyDown}
       >
-        <div>
+        <CustomMenuList>
           <Grid container>
             <label style={{ fontSize: '0px' }}>å</label>
             <TextField
@@ -267,14 +330,16 @@ const InlineStyleMathEditor = (props) => {
               style={{ margin: '0rem 1rem' }}
               value={mathContent}
               onChange={handleUpdateMathContent}
+              onKeyDown={handleKeyDown}
               inputRef={(input) => input && focusEditor && input.focus()}
+              inputProps={{ onFocus: handleFocus }}
               autoFocus
             />
             <CustonButton variant="contained" color="primary" onClick={handleDone}>
               Done
             </CustonButton>
           </Grid>
-        </div>
+        </CustomMenuList>
       </Menu>
 
       {/* Cross Line Warning */}
