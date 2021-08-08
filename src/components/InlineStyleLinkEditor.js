@@ -8,7 +8,8 @@
  *************************************************/
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Menu, Snackbar, TextField } from '@material-ui/core';
+import { Button, Grid, Menu, Snackbar, TextField } from '@material-ui/core';
+import { withStyles } from '@material-ui/styles';
 import { Alert } from '@material-ui/lab';
 
 /*************************************************
@@ -26,6 +27,13 @@ import { showEditorSelection, toggleLink } from '../states/editor';
  * Constant
  *************************************************/
 import { remToPx } from '../constant';
+
+const CustonButton = withStyles({
+  root: {
+    position: 'relative',
+    left: '-0.5rem',
+  },
+})(Button);
 
 /*************************************************
  * Main components
@@ -167,6 +175,12 @@ const InlineStyleLinkEditor = (props) => {
     }
   };
 
+  // Handle done
+  const handleDone = (e) => {
+    e.nativeEvent.keyCode = 13;
+    onKeyDown(e);
+  };
+
   return (
     <>
       <div className="geeke-inlineStyleLinkEditor-Anchor" id={anchorId} style={anchorPosition}></div>
@@ -186,17 +200,22 @@ const InlineStyleLinkEditor = (props) => {
         onKeyDown={onKeyDown}
       >
         <div>
-          <label style={{ fontSize: '0px' }}>å</label>
-          <TextField
-            label="Edit Link"
-            placeholder="Paste link here"
-            size="small"
-            variant="outlined"
-            style={{ margin: '0rem 1rem' }}
-            value={linkContent}
-            onChange={(e) => setLinkContent(e.target.value)}
-            autoFocus
-          />
+          <Grid container>
+            <label style={{ fontSize: '0px' }}>å</label>
+            <TextField
+              label="Edit Link"
+              placeholder="Paste link here"
+              size="small"
+              variant="outlined"
+              style={{ margin: '0rem 1rem' }}
+              value={linkContent}
+              onChange={(e) => setLinkContent(e.target.value)}
+              autoFocus
+            />
+            <CustonButton variant="contained" color="primary" onClick={handleDone}>
+              Done
+            </CustonButton>
+          </Grid>
         </div>
       </Menu>
 

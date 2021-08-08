@@ -9,7 +9,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectionState } from 'draft-js';
-import { Menu, Snackbar, TextField } from '@material-ui/core';
+import { Button, Grid, Menu, Snackbar, TextField } from '@material-ui/core';
+import { withStyles } from '@material-ui/styles';
 import { Alert } from '@material-ui/lab';
 
 /*************************************************
@@ -27,6 +28,13 @@ import { createEmptyInlineMath, removeInlineMath, showEditorSelection, updateInl
  * Constant
  *************************************************/
 import { remToPx } from '../constant';
+
+const CustonButton = withStyles({
+  root: {
+    position: 'relative',
+    left: '-0.5rem',
+  },
+})(Button);
 
 /*************************************************
  * Main components
@@ -220,6 +228,12 @@ const InlineStyleMathEditor = (props) => {
     if (focusEditor) handleFocusEditor();
   };
 
+  // handleDone
+  const handleDone = (e) => {
+    e.nativeEvent.keyCode = 13;
+    onKeyDown(e);
+  };
+
   return (
     <>
       <div className="geeke-inlineStyleMathEditor-Anchor" id={anchorId} style={anchorPosition}></div>
@@ -243,18 +257,23 @@ const InlineStyleMathEditor = (props) => {
         onKeyDown={onKeyDown}
       >
         <div>
-          <label style={{ fontSize: '0px' }}>å</label>
-          <TextField
-            label="Edit Math Equation"
-            placeholder={'1+e^{i\\pi}=0'}
-            size="small"
-            variant="outlined"
-            style={{ margin: '0rem 1rem' }}
-            value={mathContent}
-            onChange={handleUpdateMathContent}
-            inputRef={(input) => input && focusEditor && input.focus()}
-            autoFocus
-          />
+          <Grid container>
+            <label style={{ fontSize: '0px' }}>å</label>
+            <TextField
+              label="Edit Math Equation"
+              placeholder={'1+e^{i\\pi}=0'}
+              size="small"
+              variant="outlined"
+              style={{ margin: '0rem 1rem' }}
+              value={mathContent}
+              onChange={handleUpdateMathContent}
+              inputRef={(input) => input && focusEditor && input.focus()}
+              autoFocus
+            />
+            <CustonButton variant="contained" color="primary" onClick={handleDone}>
+              Done
+            </CustonButton>
+          </Grid>
         </div>
       </Menu>
 
