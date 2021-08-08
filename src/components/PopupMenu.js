@@ -17,6 +17,7 @@ import FormatColorTextIcon from '@material-ui/icons/FormatColorText';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import FontDownloadOutlinedIcon from '@material-ui/icons/FontDownloadOutlined';
 import FontDownloadIcon from '@material-ui/icons/FontDownload';
+import FunctionsIcon from '@material-ui/icons/Functions';
 import CodeIcon from '@material-ui/icons/Code';
 import LinkIcon from '@material-ui/icons/Link';
 import throttle from 'lodash/throttle';
@@ -34,7 +35,7 @@ import {
   setTextColor as _setTextColor,
   setBackgroundColor as _setBackgroundColor,
 } from '../states/editor';
-import { pmsc, setLinkRange } from '../states/editorMisc';
+import { pmsc, setLinkRange, setMathRange } from '../states/editorMisc';
 import { remToPx } from '../constant';
 
 /*************************************************
@@ -68,6 +69,7 @@ const menuDescription = {
   Strikethrough: isOSX ? '⌘ + Shift + S' : 'Ctrl + Shift + S',
   Code: isOSX ? '⌘ + E' : 'Ctrl + E',
   Link: isOSX ? '⌘ + K' : 'Ctrl + K',
+  Math: isOSX ? '⌘ + Shift + E' : 'Ctrl + Shift + E',
 };
 
 /*************************************************
@@ -161,6 +163,7 @@ const PopupMenu = (props) => {
   const toggleStrikethrough = (e) => toggleStyle(_toggleStrikethrough);
   const toggleCode = (e) => toggleStyle(_toggleCode);
   const toggleLink = (e) => toggleStyle(() => setLinkRange(dispatch, pageUuid, editorState.getSelection()));
+  const toggleMath = (e) => toggleStyle(() => setMathRange(dispatch, pageUuid, editorState.getSelection()));
 
   const toggleFontColorMenu = (e) => {
     // Hide other menus
@@ -261,6 +264,7 @@ const PopupMenu = (props) => {
   const buttonDescription_Strikethrough = <ButtonDescription style="Strikethrough" />; // eslint-disable-line
   const buttonDescription_Code = <ButtonDescription style="Code" />; // eslint-disable-line
   const buttonDescription_Link = <ButtonDescription style="Link" />; // eslint-disable-line
+  const buttonDescription_Math = <ButtonDescription style="Math" />; // eslint-disable-line
 
   return (
     <>
@@ -289,6 +293,9 @@ const PopupMenu = (props) => {
                   <StrikethroughSIcon fontSize="small" />
                 </Button>
               </Tooltip>
+
+              {seperator}
+
               <Tooltip title={buttonDescription_Code} placement="top" arrow>
                 <Button className="geeke-popupMenuButton" onMouseDown={keepFocusOnEditor} onClick={toggleCode}>
                   <CodeIcon fontSize="small" />
@@ -297,6 +304,11 @@ const PopupMenu = (props) => {
               <Tooltip title={buttonDescription_Link} placement="top" arrow>
                 <Button className="geeke-popupMenuButton" onMouseDown={keepFocusOnEditor} onClick={toggleLink}>
                   <LinkIcon fontSize="small" />
+                </Button>
+              </Tooltip>
+              <Tooltip title={buttonDescription_Math} placement="top" arrow>
+                <Button className="geeke-popupMenuButton" onMouseDown={keepFocusOnEditor} onClick={toggleMath}>
+                  <FunctionsIcon fontSize="small" />
                 </Button>
               </Tooltip>
 
