@@ -36,6 +36,7 @@ const InlineStyleMath = (props) => {
   const blockKey = props.blockKey;
   const startOffset = props.start;
   const endOffset = props.end;
+  console.log(props);
 
   // State & Reducer
   const dispatch = useDispatch();
@@ -70,7 +71,7 @@ const InlineStyleMath = (props) => {
       throwOnError: false,
     });
     mathDom = (
-      <span className={styleClass} style={{ color: 'gray' }} contentEditable={false}>
+      <span className={styleClass} style={{ color: 'gray' }}>
         <span dangerouslySetInnerHTML={{ __html: html }}></span>
         <span className="geeke-inlineStyleMath-newEq">New Equation</span>
       </span>
@@ -81,11 +82,15 @@ const InlineStyleMath = (props) => {
       throwOnError: false,
     });
 
-    mathDom = <span className={styleClass} contentEditable={false} dangerouslySetInnerHTML={{ __html: html }}></span>;
+    mathDom = <span className={styleClass} dangerouslySetInnerHTML={{ __html: html }}></span>;
   }
 
   // Render the result
-  return <span onClick={handleClick}>{mathDom}</span>;
+  return (
+    <span contentEditable={false} onClick={handleClick}>
+      {mathDom}
+    </span>
+  );
 };
 
 export default InlineStyleMath;
