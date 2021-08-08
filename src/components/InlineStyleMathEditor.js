@@ -64,7 +64,6 @@ const InlineStyleMathEditor = (props) => {
   const [curBlockKey, setCurBlockKey] = useState(null);
   const [focusEditor, setFocusEditor] = useState(false);
   const [firstSelection, setFirstSelection] = useState(true);
-  const [lastCaretPosition, setLastCaretPosition] = useState([-1, -1]);
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
   const mathRange = useSelector((state) => state.editorMisc.pages?.get(pageUuid)?.get(pmsc.mathRange));
   const editorState = useSelector((state) => state.editor.cachedPages.get(pageUuid)?.get('content'));
@@ -235,8 +234,6 @@ const InlineStyleMathEditor = (props) => {
           );
         }
       }
-
-      setLastCaretPosition([selectionStart, selectionEnd]);
     } else {
       switch (key) {
         case 13: // Enter
