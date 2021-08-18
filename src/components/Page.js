@@ -60,6 +60,7 @@ import {
   setMoveDirection,
   setPopupMenuRange,
   setSelectedBlocks,
+  setSelectionState,
   triggerEsc,
 } from '../states/editorMisc';
 
@@ -118,7 +119,10 @@ const Page = (props) => {
     }
 
     // If not readonly, update editorState
-    if (!readOnly) setEditorState(dispatch, uuid, editorState);
+    if (!readOnly) {
+      setEditorState(dispatch, uuid, editorState);
+      setSelectionState(dispatch, selectionState);
+    }
   };
   const updateEditorButIgnoreReadOnly = (editorState) => setEditorState(dispatch, uuid, editorState);
 

@@ -17,7 +17,12 @@ import { Alert } from '@material-ui/lab';
  * Utils & States
  *************************************************/
 import { checkOverlap, getCaretRange } from '../utils/Misc';
-import { pmsc, setEditingMath, setMathRange } from '../states/editorMisc';
+import {
+  pmsc,
+  setEditingMath,
+  setMathRange,
+  setSelectionState as setEditorMiscSelectionState,
+} from '../states/editorMisc';
 import { createEmptyInlineMath, removeInlineMath, showEditorSelection, updateInlineMathData } from '../states/editor';
 
 /*************************************************
@@ -91,6 +96,7 @@ const InlineStyleMathEditor = (props) => {
       clearState();
       // Unlock editor to enable editing
       setEditingMath(dispatch, pageUuid, false);
+      setEditorMiscSelectionState(dispatch, curSelectionState ? curSelectionState : selectionState);
       setTimeout(
         () => showEditorSelection(dispatch, pageUuid, curSelectionState ? curSelectionState : selectionState),
         0,

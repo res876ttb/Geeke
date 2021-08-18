@@ -54,6 +54,7 @@ const initPageMiscState = [
 const initEditorMiscState = {
   pages: new Map(),
   focusEditor: null,
+  selectionState: null,
 };
 
 /*************************************************
@@ -179,6 +180,16 @@ export const triggerEsc = (dispatch, pageUuid) => {
       let page = state.pages.get(pageUuid);
       let escNum = page.get(pmsc.triggerEsc);
       page.set(pmsc.triggerEsc, (escNum + 1) % 87);
+      return state;
+    },
+  });
+};
+
+export const setSelectionState = (dispatch, selectionState) => {
+  dispatch({
+    type,
+    callback: (state) => {
+      state.selectionState = selectionState;
       return state;
     },
   });
