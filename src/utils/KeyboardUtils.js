@@ -20,7 +20,14 @@ import { GeekeMap, updateBlockData } from './Misc';
 /*************************************************
  * CONST
  *************************************************/
-import { blockDataKeys, constAceEditorAction, constBlockType, constMoveDirection, headingType } from '../constant';
+import {
+  blockDataKeys,
+  constAceEditorAction,
+  constBlockType,
+  constMoveDirection,
+  headingType,
+  isOSX,
+} from '../constant';
 
 export const defaultKeyboardHandlingConfig = {
   indentBlock: true,
@@ -28,8 +35,6 @@ export const defaultKeyboardHandlingConfig = {
   numberList: true,
   bulletList: true,
 };
-
-const isOSX = navigator.userAgent.indexOf('Mac') !== -1;
 
 const keyCommandConst = {
   doNothing: 0,

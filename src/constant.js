@@ -3,6 +3,8 @@
  * @description All global constant will be located in this file for configuration convenience.
  */
 
+export const isOSX = navigator.userAgent.indexOf('Mac') !== -1;
+
 const getRem = () => {
   let getRemEle = document.getElementById('geeke-getRem');
   if (getRemEle) return parseFloat(getComputedStyle(getRemEle).fontSize);

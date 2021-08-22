@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Grid, Snackbar, Tooltip } from '@material-ui/core';
-import { SelectionState } from 'draft-js';
+import { KeyBindingUtil, SelectionState } from 'draft-js';
 import { withStyles } from '@material-ui/styles';
 import { Alert } from '@material-ui/lab';
 import LinkIcon from '@material-ui/icons/Link';
@@ -31,6 +31,7 @@ import { removeEntity } from '../states/editor';
 /*************************************************
  * Constant
  *************************************************/
+import { isOSX } from '../constant';
 const CustomTooltip = withStyles({
   tooltip: {
     maxWidth: 'none',
@@ -68,6 +69,9 @@ const InlineStyleLink = (props) => {
   const [open, setOpen] = useState(false);
   const [keepClose, setKeepClose] = useState(false);
   const [showCopyMessage, setShowCopyMessage] = useState(false);
+
+  // Parse url
+  const purl = new URL(url);
 
   // Hide tooltip when esc is pressed
   useEffect(() => {
@@ -113,8 +117,13 @@ const InlineStyleLink = (props) => {
     setTimeout(() => setKeepClose(false), 300);
   };
 
-  // Parse url
-  const purl = new URL(url);
+  // Handle click link
+  const handleClickLink = (e) => {
+    if ((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) {
+      e.preventDefault();
+      window.open(purl.href);
+    }
+  };
 
   // Title
   // Reference: https://www.freecodecamp.org/news/how-to-use-html-to-open-link-in-new-tab/
@@ -158,7 +167,7 @@ const InlineStyleLink = (props) => {
         onOpen={() => (keepClose ? null : setOpen(true))}
         onClose={() => setOpen(false)}
       >
-        <a className="geeke-outlink" href={purl.href}>
+        <a className="geeke-outlink" href={purl.href} onClick={handleClickLink}>
           {props.children}
         </a>
       </CustomTooltip>
