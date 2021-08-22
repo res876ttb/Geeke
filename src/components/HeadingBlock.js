@@ -6,7 +6,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React from 'react';
+import React, { useState } from 'react';
 import { EditorBlock } from 'draft-js';
 import { useDispatch } from 'react-redux';
 
@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
  *************************************************/
 import { onMouseOver as _onMouseOver, onMouseLeave as _onMouseLeave } from '../utils/DraggableBlockUtils';
 import { isShowBlock } from '../utils/NumberListUtils';
-import { getFirstBlockKey } from '../utils/Misc';
+import { getFirstBlockKey, newBlockId } from '../utils/Misc';
 
 /*************************************************
  * Import Components
@@ -41,6 +41,7 @@ const HeadingBlock = (props) => {
 
   // Reducers
   const dispatch = useDispatch();
+  const [headingId, setHeadingId] = useState(newBlockId()); // eslint-disable-line
 
   // Check whether to show this block
   if (!isShowBlock(contentState, blockKey)) {
@@ -123,7 +124,7 @@ const HeadingBlock = (props) => {
         paddingLeft={paddingLeft}
         topOffset={topOffset}
       />
-      <div className={'geeke-headingEditor ' + style} headingtype={blockHeadingType}>
+      <div id={headingId} className={'geeke-headingEditor ' + style} headingtype={blockHeadingType}>
         <EditorBlock {...props} />
       </div>
     </div>

@@ -9,7 +9,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectionState } from 'draft-js';
-import Popper from '@material-ui/core/Popper';
 import katex from 'katex';
 
 /*************************************************
@@ -57,7 +56,7 @@ const InlineStyleMath = (props) => {
       checkOverlap(startOffset, endOffset, mathRange.getStartOffset(), mathRange.getEndOffset())) ||
     (selectionState &&
       !selectionState.isCollapsed() &&
-      (selectionState.getAnchorKey() === blockKey || selectionState.getFocusKey()) &&
+      (selectionState.getAnchorKey() === blockKey || selectionState.getFocusKey() === blockKey) &&
       selectionState.getStartOffset() <= startOffset &&
       selectionState.getEndOffset() >= endOffset);
   const styleClass = editingMath ? 'geeke-inlineStyleMath-editingStyle' : 'geeke-inlineStyleMath-defaultStyle';
@@ -87,7 +86,7 @@ const InlineStyleMath = (props) => {
     let middle = (endOffset + startOffset) / 2;
     if (selectionState.getStartOffset() >= middle) {
       caretPos = 'right';
-    } else if (startOffset === 0 && selectionState.getStartOffset() < middle) {
+    } else if (selectionState.getStartOffset() < middle) {
       caretPos = 'left';
     }
   }
@@ -146,20 +145,17 @@ const InlineStyleMath = (props) => {
 
   // Render the result
   return (
-    <span id={anchorElId} onClick={handleClick}>
+    <span id={anchorElId}>
       {anchorEl ? (
-        <Popper anchorEl={anchorEl} open={true} placement="bottom-start">
-          <span className="geeke-inlineStyleMath-editingWrapper">
-            {leftCaret}
-            {mathDom}
-            {rightCaret}
-          </span>
-        </Popper>
+        <span className="geeke-inlineStyleMath-editingWrapper" contentEditable={false} onClick={handleClick}>
+          {leftCaret}
+          {mathDom}
+          {rightCaret}
+        </span>
       ) : null}
       <span className={'geeke-inlineStyleMath-text' + (mathWidth ? ' geeke-inlineStyleMath-transparent' : '')}>
         {props.children}
       </span>
-      <div className="geeke-inlineStyleMath-space" style={{ width: `${mathWidth ? mathWidth : 0}px` }}></div>
     </span>
   );
 };
