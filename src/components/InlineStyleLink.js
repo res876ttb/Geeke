@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Grid, Snackbar, Tooltip } from '@material-ui/core';
-import { KeyBindingUtil, SelectionState } from 'draft-js';
+import { SelectionState } from 'draft-js';
 import { withStyles } from '@material-ui/styles';
 import { Alert } from '@material-ui/lab';
 import LinkIcon from '@material-ui/icons/Link';
@@ -31,7 +31,6 @@ import { removeEntity } from '../states/editor';
 /*************************************************
  * Constant
  *************************************************/
-import { isOSX } from '../constant';
 const CustomTooltip = withStyles({
   tooltip: {
     maxWidth: 'none',
@@ -119,8 +118,7 @@ const InlineStyleLink = (props) => {
 
   // Handle click link
   const handleClickLink = (e) => {
-    if ((!isOSX && KeyBindingUtil.isCtrlKeyCommand(e)) || KeyBindingUtil.hasCommandModifier(e)) {
-      e.preventDefault();
+    if (e.altKey) {
       window.open(purl.href);
     }
   };
