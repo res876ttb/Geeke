@@ -6,7 +6,7 @@
 /*************************************************
  * React Components
  *************************************************/
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectionState } from 'draft-js';
 import katex from 'katex';
@@ -41,8 +41,6 @@ const InlineStyleMath = (props) => {
   const dispatch = useDispatch();
   const pageUuid = useSelector((state) => state.editorMisc.focusEditor);
   const mathRange = useSelector((state) => state.editorMisc.pages.get(pageUuid)?.get(pmsc.mathRange));
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [mathWidth, setMathWidth] = useState(0);
 
   // TODO: improve performance when there are lots of math equations...
   const selectionState = useSelector((state) => state.editorMisc.selectionState);
@@ -60,7 +58,6 @@ const InlineStyleMath = (props) => {
       selectionState.getStartOffset() <= startOffset &&
       selectionState.getEndOffset() >= endOffset);
   const styleClass = editingMath ? 'geeke-inlineStyleMath-editingStyle' : 'geeke-inlineStyleMath-defaultStyle';
-  const anchorElId = `geeke-inlineStyleMath-${props.offsetKey}`;
   const katexId = `geeke-inlineStyleMath-katex-${props.offsetKey}`;
 
   // Functions
@@ -124,38 +121,15 @@ const InlineStyleMath = (props) => {
     mathDom = <span id={katexId} className={styleClass} dangerouslySetInnerHTML={{ __html: html }}></span>;
   }
 
-  // Get AnchorEl
-  useEffect(() => {
-    setAnchorEl(document.getElementById(anchorElId));
-
-    // TODO: this delay timing is different on different devices, especially the devices with low-end CPUs...
-    setTimeout(() => {
-      let newWidth = document.getElementById(katexId)?.getBoundingClientRect()?.width;
-      setMathWidth(newWidth ? newWidth : 0);
-    }, 1);
-  }, []); // eslint-disable-line
-
-  // Update text editor
-  useEffect(() => {
-    setTimeout(() => {
-      let newWidth = document.getElementById(katexId)?.getBoundingClientRect()?.width;
-      setMathWidth(newWidth ? newWidth : 0);
-    });
-  }, [mathDom]); // eslint-disable-line
-
   // Render the result
   return (
-    <span id={anchorElId}>
-      {anchorEl ? (
-        <span className="geeke-inlineStyleMath-editingWrapper" contentEditable={false} onClick={handleClick}>
-          {leftCaret}
-          {mathDom}
-          {rightCaret}
-        </span>
-      ) : null}
-      <span className={'geeke-inlineStyleMath-text' + (mathWidth ? ' geeke-inlineStyleMath-transparent' : '')}>
-        {props.children}
+    <span>
+      <span className="geeke-inlineStyleMath-editingWrapper" contentEditable={false} onClick={handleClick}>
+        {leftCaret}
+        {mathDom}
+        {rightCaret}
       </span>
+      <span className="geeke-inlineStyleMath-transparent">{props.children}</span>
     </span>
   );
 };

@@ -508,13 +508,6 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   position: relative;
 }
 
-.geeke-inlineStyleMath-text {
-  overflow: hidden;
-  height: 1rem;
-  caret-color: unset;
-  line-height: 1rem;
-}
-
 .geeke-inlineStyleMath-transparent {
   color: rgba(0, 0, 0, 0);
   font-size: 0px;
