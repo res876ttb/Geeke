@@ -63,6 +63,7 @@ import {
   setSelectionState,
   triggerEsc,
 } from '../states/editorMisc';
+import PageOutline from './PageOutline';
 
 /*************************************************
  * Main components
@@ -257,6 +258,8 @@ const Page = (props) => {
         <PopupMenu pageUuid={uuid} handleFocusEditor={handleFocusEditor} />
         <InlineStyleLinkEditor handleFocusEditor={handleFocusEditor} />
         <InlineStyleMathEditor handleFocusEditor={handleFocusEditor} />
+
+        <PageOutline pageUuid={uuid} />
       </div>
 
       <PageDragShadow

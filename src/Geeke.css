@@ -13,6 +13,8 @@
 
   --specialBlockSelectionWidth: 0.3rem;
   --selectionColor: rgba(42, 165, 245, 0.5);
+
+  --outlineFontSize: 0.8rem;
 }
 
 /* General Geeke styles */
@@ -533,6 +535,27 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   50% {
     opacity: 0;
   }
+}
+
+/* Page Outline */
+.geeke-pageOutline-wrapper {
+  position: fixed;
+  top: 20%;
+  bottom: 20%;
+  max-width: 150px;
+}
+
+.geeke-pageOutline-item {
+  line-height: calc(2 * var(--outlineFontSize));
+  font-size: var(--outlineFontSize);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.geeke-pageOutline-item a {
+  text-decoration: none;
+  color: unset;
 }
 
 /* PageTitle */
