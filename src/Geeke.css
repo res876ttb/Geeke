@@ -551,6 +551,11 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+
+.geeke-pageOutline-item:hover {
+  color: rgb(0, 110, 255) !important;
 }
 
 .geeke-pageOutline-item a {
