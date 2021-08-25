@@ -211,7 +211,11 @@ const PageOutlineList = (props) => {
     <>
       <div
         className={'geeke-pageOutline-item' + (props.hovering ? '' : ' geeke-pageOutline-itemHidden')}
-        style={{ marginLeft: `${(props.level - 1) * 0.8}rem`, color: props.focus ? 'blue' : 'unset' }}
+        style={{
+          marginLeft: `${(props.level - 1) * 0.8}rem`,
+          color: props.focus ? '#1976d2' : 'unset',
+          fontWeight: props.focus ? 'bold' : 'inherit',
+        }}
       >
         {props.showToc ? tocItem : 'i'}
       </div>
@@ -219,7 +223,7 @@ const PageOutlineList = (props) => {
         className={'geeke-pageOutline-line' + (props.hovering ? ' geeke-pageOutline-lineHidden' : '')}
         style={{
           width: remToPx(0.5) + remToPx(2) * Math.pow(0.6, props.level - 1),
-          background: props.focus ? 'rgb(0, 110, 255)' : 'rgba(65, 65, 65, 0.5)',
+          background: props.focus ? '#1976d2' : 'rgba(65, 65, 65, 0.5)',
         }}
       ></div>
     </>

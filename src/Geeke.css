@@ -557,7 +557,7 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
 }
 
 .geeke-pageOutline-item:hover {
-  color: rgb(0, 110, 255) !important;
+  color: #1976d2 !important;
 }
 
 .geeke-pageOutline-itemHidden {
