@@ -100,7 +100,6 @@ const InlineStyleLink = (props) => {
 
   // Handle edit link
   const handleEditLink = (e) => {
-    console.log(props);
     setOpen(false);
     setKeepClose(true);
     setPreLinkRange(

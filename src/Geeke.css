@@ -551,11 +551,18 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  transition: color 0.2s;
+  transition: 0.2s;
+  position: relative;
+  left: 8px;
 }
 
 .geeke-pageOutline-item:hover {
   color: rgb(0, 110, 255) !important;
+}
+
+.geeke-pageOutline-itemHidden {
+  left: -1rem;
+  opacity: 0;
 }
 
 .geeke-pageOutline-item a {
@@ -563,19 +570,27 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   color: unset;
 }
 
-.geeke-pageOutline-lineWrapper {
-  height: calc(2 * var(--outlineFontSize));
-  overflow: unset;
-}
-
 .geeke-pageOutline-line {
   border-radius: 100px;
-  height: 0.15rem;
-  left: -8px;
+  height: 3px;
+  left: 0px;
   margin: auto 0px;
   position: relative;
-  top: calc(calc(2 * var(--outlineFontSize)) / 2 - 0.075rem);
-  transition: background 0.2s;
+  top: calc(-1 * var(--outlineFontSize) - 1px);
+  transition: 0.2s;
+}
+
+.geeke-pageOutline-lineHidden {
+  left: -1rem;
+  opacity: 0;
+}
+
+.geeke-pageOutline-inbox {
+  position: absolute;
+  top: -1rem;
+  bottom: -1rem;
+  right: 0px;
+  left: 0px;
 }
 
 /* PageTitle */

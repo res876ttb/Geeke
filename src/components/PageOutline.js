@@ -31,6 +31,7 @@ const topOffset = 2 * remToPx(2);
 const PageOutlineBox = withStyles({
   root: {
     marginLeft: '0px',
+    paddingLeft: '0px',
   },
 })(Box);
 const PageOutlineTooltip = withStyles({
@@ -53,6 +54,7 @@ const PageOutline = (props) => {
   const editorState = useSelector((state) => state.editor.cachedPages.get(pageUuid)?.get('content'));
   const [focusHeading, setFocusHeading] = useState(null);
   const [hovering, setHovering] = useState(false);
+  const [showToc, setShowToc] = useState(false);
 
   // Register function to onscroll
   const handleScrollEnd = debounce(() => {
@@ -141,9 +143,13 @@ const PageOutline = (props) => {
   // Handle cursor movement
   const handleMouseEnter = () => {
     setHovering(true);
+    setShowToc(true);
   };
   const handleMouseLeave = () => {
     setHovering(false);
+    setTimeout(() => {
+      setShowToc(false);
+    }, 100);
   };
 
   // Find all heading block
@@ -153,7 +159,6 @@ const PageOutline = (props) => {
 
   // Compose TOC
   let toc = [];
-  let tocLine = [];
   let previousHeadingLevel = 0;
   for (let i = 0; i < headings.length; i++) {
     let heading = headings[i];
@@ -168,9 +173,16 @@ const PageOutline = (props) => {
 
     previousHeadingLevel = headingLevel;
     toc.push(
-      <PageOutlineList key={i} content={headingContent} level={headingLevel} headingId={headingId} focus={focus} />,
+      <PageOutlineList
+        key={i}
+        content={headingContent}
+        level={headingLevel}
+        headingId={headingId}
+        focus={focus}
+        hovering={hovering}
+        showToc={showToc}
+      />,
     );
-    tocLine.push(<PageOutlineListLine key={i} level={headingLevel} focus={focus} />);
   }
 
   // Render the result
@@ -178,8 +190,9 @@ const PageOutline = (props) => {
     <div className="geeke-pageOutline-wrapper" style={{ left: 0 }}>
       <PageOutlineBox display="flex" alignItems="center" p={1} m={1} sx={{ height: '100%' }}>
         <Box>
-          <div style={{ maxWidth: 150 }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            {hovering ? toc : tocLine}
+          <div style={{ maxWidth: 150, position: 'relative' }} onMouseLeave={handleMouseLeave}>
+            <div className="geeke-pageOutline-inbox" onMouseEnter={handleMouseEnter}></div>
+            {toc}
           </div>
         </Box>
       </PageOutlineBox>
@@ -188,29 +201,28 @@ const PageOutline = (props) => {
 };
 
 const PageOutlineList = (props) => {
-  return (
-    <div
-      className="geeke-pageOutline-item"
-      style={{ marginLeft: `${(props.level - 1) * 0.8}rem`, color: props.focus ? 'blue' : 'unset' }}
-    >
-      <PageOutlineTooltip title={props.content} enterDelay={500} placement="top-start">
-        <a href={`#${props.headingId}`}>{props.content}</a>
-      </PageOutlineTooltip>
-    </div>
+  const tocItem = (
+    <PageOutlineTooltip title={props.content} enterDelay={500} placement="top-start">
+      <a href={`#${props.headingId}`}>{props.content}</a>
+    </PageOutlineTooltip>
   );
-};
 
-const PageOutlineListLine = (props) => {
   return (
-    <div className="geeke-pageOutline-item geeke-pageOutline-lineWrapper">
+    <>
       <div
-        className="geeke-pageOutline-line"
+        className={'geeke-pageOutline-item' + (props.hovering ? '' : ' geeke-pageOutline-itemHidden')}
+        style={{ marginLeft: `${(props.level - 1) * 0.8}rem`, color: props.focus ? 'blue' : 'unset' }}
+      >
+        {props.showToc ? tocItem : 'i'}
+      </div>
+      <div
+        className={'geeke-pageOutline-line' + (props.hovering ? ' geeke-pageOutline-lineHidden' : '')}
         style={{
           width: remToPx(0.5) + remToPx(2) * Math.pow(0.6, props.level - 1),
           background: props.focus ? 'rgb(0, 110, 255)' : 'rgba(65, 65, 65, 0.5)',
         }}
       ></div>
-    </div>
+    </>
   );
 };
 
