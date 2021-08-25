@@ -563,6 +563,21 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
   color: unset;
 }
 
+.geeke-pageOutline-lineWrapper {
+  height: calc(2 * var(--outlineFontSize));
+  overflow: unset;
+}
+
+.geeke-pageOutline-line {
+  border-radius: 100px;
+  height: 0.15rem;
+  left: -8px;
+  margin: auto 0px;
+  position: relative;
+  top: calc(calc(2 * var(--outlineFontSize)) / 2 - 0.075rem);
+  transition: background 0.2s;
+}
+
 /* PageTitle */
 .Geeke-Page-Title {
   font-size: var(--fontSizePageTitle);

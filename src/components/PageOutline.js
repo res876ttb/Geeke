@@ -12,7 +12,7 @@ import { withStyles } from '@material-ui/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import debounce from 'lodash/debounce';
 import { useSelector } from 'react-redux';
-import { constBlockType } from '../constant';
+import { constBlockType, remToPx } from '../constant';
 
 /*************************************************
  * Utils & States
@@ -26,7 +26,7 @@ import { constBlockType } from '../constant';
  * Constant
  *************************************************/
 // NOTE: adjust **topOffset** when the top padding is adjusted...
-const topOffset = 164;
+const topOffset = 2 * remToPx(2);
 
 const PageOutlineBox = withStyles({
   root: {
@@ -52,6 +52,7 @@ const PageOutline = (props) => {
   // States & Reducers
   const editorState = useSelector((state) => state.editor.cachedPages.get(pageUuid)?.get('content'));
   const [focusHeading, setFocusHeading] = useState(null);
+  const [hovering, setHovering] = useState(false);
 
   // Register function to onscroll
   const handleScrollEnd = debounce(() => {
@@ -127,7 +128,8 @@ const PageOutline = (props) => {
     const blockId = blocks[curIdx]?.children[0]?.children[1]?.id;
     if (!blockId) console.error('Unable to find ID of the heading block!');
     setFocusHeading(blockId);
-  }, 500);
+  }, 200);
+
   useEffect(() => {
     // For hot reloading
     // But if function handleScrollEnd is changed, this method does not work...
@@ -136,6 +138,14 @@ const PageOutline = (props) => {
     window.addEventListener('scroll', handleScrollEnd);
   }, []); // eslint-disable-line
 
+  // Handle cursor movement
+  const handleMouseEnter = () => {
+    setHovering(true);
+  };
+  const handleMouseLeave = () => {
+    setHovering(false);
+  };
+
   // Find all heading block
   const editorDom = document.getElementById(editorId);
   const headings = editorDom?.querySelectorAll('.geeke-headingEditor');
@@ -143,6 +153,7 @@ const PageOutline = (props) => {
 
   // Compose TOC
   let toc = [];
+  let tocLine = [];
   let previousHeadingLevel = 0;
   for (let i = 0; i < headings.length; i++) {
     let heading = headings[i];
@@ -159,6 +170,7 @@ const PageOutline = (props) => {
     toc.push(
       <PageOutlineList key={i} content={headingContent} level={headingLevel} headingId={headingId} focus={focus} />,
     );
+    tocLine.push(<PageOutlineListLine key={i} level={headingLevel} focus={focus} />);
   }
 
   // Render the result
@@ -166,7 +178,9 @@ const PageOutline = (props) => {
     <div className="geeke-pageOutline-wrapper" style={{ left: 0 }}>
       <PageOutlineBox display="flex" alignItems="center" p={1} m={1} sx={{ height: '100%' }}>
         <Box>
-          <div style={{ width: 150 }}>{toc}</div>
+          <div style={{ maxWidth: 150 }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            {hovering ? toc : tocLine}
+          </div>
         </Box>
       </PageOutlineBox>
     </div>
@@ -182,6 +196,20 @@ const PageOutlineList = (props) => {
       <PageOutlineTooltip title={props.content} enterDelay={500} placement="top-start">
         <a href={`#${props.headingId}`}>{props.content}</a>
       </PageOutlineTooltip>
+    </div>
+  );
+};
+
+const PageOutlineListLine = (props) => {
+  return (
+    <div className="geeke-pageOutline-item geeke-pageOutline-lineWrapper">
+      <div
+        className="geeke-pageOutline-line"
+        style={{
+          width: remToPx(0.5) + remToPx(2) * Math.pow(0.6, props.level - 1),
+          background: props.focus ? 'rgb(0, 110, 255)' : 'rgba(65, 65, 65, 0.5)',
+        }}
+      ></div>
     </div>
   );
 };
