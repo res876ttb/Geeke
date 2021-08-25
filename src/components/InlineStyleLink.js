@@ -164,6 +164,7 @@ const InlineStyleLink = (props) => {
         open={open && !keepClose}
         onOpen={() => (keepClose ? null : setOpen(true))}
         onClose={() => setOpen(false)}
+        enterDelay={500}
       >
         <a className="geeke-outlink" href={purl.href} onClick={handleClickLink}>
           {props.children}

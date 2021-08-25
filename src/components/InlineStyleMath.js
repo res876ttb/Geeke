@@ -26,6 +26,7 @@ import { showEditorSelection } from '../states/editor';
  * Constant
  *************************************************/
 import { magicMathStr } from '../constant';
+import { Tooltip } from '@material-ui/core';
 
 /*************************************************
  * Main components
@@ -107,10 +108,12 @@ const InlineStyleMath = (props) => {
       throwOnError: false,
     });
     mathDom = (
-      <span id={katexId} className={styleClass} style={{ color: 'gray' }}>
-        <span dangerouslySetInnerHTML={{ __html: html }}></span>
-        <span className="geeke-inlineStyleMath-newEq">New Equation</span>
-      </span>
+      <Tooltip title={'(none)'} enterDelay={500}>
+        <span id={katexId} className={styleClass} style={{ color: 'gray' }}>
+          <span dangerouslySetInnerHTML={{ __html: html }}></span>
+          <span className="geeke-inlineStyleMath-newEq">New Equation</span>
+        </span>
+      </Tooltip>
     );
   } else {
     // Render math to Tex
@@ -118,7 +121,11 @@ const InlineStyleMath = (props) => {
       throwOnError: false,
     });
 
-    mathDom = <span id={katexId} className={styleClass} dangerouslySetInnerHTML={{ __html: html }}></span>;
+    mathDom = (
+      <Tooltip title={math} enterDelay={500}>
+        <span id={katexId} className={styleClass} dangerouslySetInnerHTML={{ __html: html }}></span>
+      </Tooltip>
+    );
   }
 
   // Render the result
