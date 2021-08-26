@@ -571,8 +571,6 @@ div.ace_editor:not(.ace_focus) div.ace_gutter div .ace_gutter-active-line {
 }
 
 .geeke-pageOutline-line {
-  border-radius: 100px;
-  height: 3px;
   left: 0px;
   margin: auto 0px;
   position: relative;

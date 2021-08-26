@@ -223,7 +223,7 @@ const PageOutlineList = (props) => {
         className={'geeke-pageOutline-line' + (props.hovering ? ' geeke-pageOutline-lineHidden' : '')}
         style={{
           width: remToPx(0.5) + remToPx(2) * Math.pow(0.6, props.level - 1),
-          background: props.focus ? '#1976d2' : 'rgba(65, 65, 65, 0.5)',
+          borderBottom: '3px solid ' + (props.focus ? '#1976d2' : 'rgba(65, 65, 65, 0.5)'),
         }}
       ></div>
     </>
