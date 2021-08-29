@@ -31,6 +31,7 @@ export const pmsc = {
   preLinkRange: 13,
   mathRange: 14,
   editingMath: 15,
+  slashCommandInfo: 16,
 };
 
 const initPageMiscState = [
@@ -49,6 +50,7 @@ const initPageMiscState = [
   [pmsc.preLinkRange, null], // Set selectionState and focus editor before editing the link
   [pmsc.mathRange, null],
   [pmsc.editingMath, false],
+  [pmsc.slashCommandInfo, {blockKey: '', offset: -1, textfield: 0}],
 ];
 
 const initEditorMiscState = {
@@ -161,6 +163,8 @@ export const setMoveDirection = (dispatch, pageUuid, moveDirection) =>
   setPageValue(dispatch, pageUuid, pmsc.moveDirection, moveDirection);
 export const setEditingMath = (dispatch, pageUuid, editingMath) =>
   setPageValue(dispatch, pageUuid, pmsc.editingMath, editingMath);
+export const setSlashCommandInfo = (dispatch, pageUuid, blockKey, offset, textfield) =>
+  setPageValue(dispatch, pageUuid, pmsc.slashCommandInfo, {blockKey, offset, textfield});
 
 const setPageValue = (dispatch, pageUuid, pmscKey, value) => {
   dispatch({

@@ -58,6 +58,7 @@ const keyCommandConst = {
   toggleInlineMath: 18,
   toggleInlineMathLeft: 19,
   toggleInlineMathRight: 20,
+  toggleSlashMenu: 21,
 };
 
 /**
@@ -362,6 +363,20 @@ const mapKeyToEditorCommand_k = (e, config) => {
   }
 };
 
+const mapKeyToEditorCommand_slash = (e, config) => {
+  // If there are any modifier key, just return
+  if (
+    e.shiftKey ||
+    KeyBindingUtil.isCtrlKeyCommand(e) ||
+    KeyBindingUtil.isOptionKeyCommand(e) ||
+    KeyBindingUtil.hasCommandModifier(e)
+  ) {
+    return null;
+  }
+
+  return keyCommandConst.toggleSlashMenu;
+};
+
 export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid) => {
   setMouseOverBlockKey(dispatch, pageUuid, null);
 
@@ -395,6 +410,9 @@ export const mapKeyToEditorCommand = (e, config, dispatch, editorState, pageUuid
 
     case 75: // K
       return mapKeyToEditorCommand_k(e, config);
+
+    case 191: // Slash
+      return mapKeyToEditorCommand_slash(e, config);
 
     default:
       return getDefaultKeyBinding(e);
@@ -1453,6 +1471,36 @@ const handleKeyCommand_toggleInlineMathDirection = (editorState, dispatcher, dir
   return 'handled';
 };
 
+export const handleKeyCommand_toggleSlashMenu = (editorState, dispatcher) => {
+  // Check whether current selectionState is collapsed. If true, insert slash symbol first
+  // Else, set editorMisc so that it will show slash command menu with textfield
+  const selectionState = editorState.getSelection();
+
+  if (selectionState.isCollapsed()) {
+    // Insert symbol first
+    const contentState = editorState.getCurrentContent();
+    const focusBlock = contentState.getBlockForKey(selectionState.getFocusKey());
+    const caretPosition = selectionState.getFocusOffset();
+    let newContentState = contentState;
+    let newEditorState = editorState;
+
+    // Get entity by key and offset
+    let focusInlineStyle = focusBlock.getInlineStyleAt(caretPosition - 1);
+    let focusEntity = focusBlock.getEntityAt(caretPosition - 1);
+
+    // Insert slash with style
+    newContentState = Modifier.insertText(contentState, selectionState, '/', focusInlineStyle, focusEntity);
+    newEditorState = EditorState.push(editorState, newContentState, 'insert-characters');
+
+    // Set editorMisc, such that it can monitor user input until user press space
+    // The monitor need the blockKey and slash position to grab the user input
+
+    dispatcher.setEditorState(newEditorState);
+  } else {
+
+  }
+};
+
 export const handleKeyCommand = (editorState, command, dispatcher, blockKey, restArgs = null) => {
   switch (command) {
     case keyCommandConst.moreIndent:
@@ -1502,6 +1550,9 @@ export const handleKeyCommand = (editorState, command, dispatcher, blockKey, res
 
     case keyCommandConst.toggleInlineMathRight:
       return handleKeyCommand_toggleInlineMathDirection(editorState, dispatcher, 'right');
+
+    case keyCommandConst.toggleSlashMenu:
+      return handleKeyCommand_toggleSlashMenu(editorState, dispatcher);
 
     default:
       if (typeof command === typeof [] && command.length > 0 && command[0] === keyCommandConst.multiCommands) {
