@@ -9,6 +9,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { convertFromRaw, EditorState } from 'draft-js';
+import { Container } from '@material-ui/core';
 
 /*************************************************
  * Utils & States
@@ -62,11 +63,9 @@ const Geeke = () => {
 
   return (
     <div>
-      {/* For debug convenience */}
-      <div style={{ display: 'inline-block', width: '123px' }}></div>
-      <div style={{ display: 'inline-block', width: '789px', outline: 'solid 1px black' }}>
+      <Container>
         {editorMiscPages.has(fakePageUuid) ? <Page dataId={fakePageUuid} /> : null}
-      </div>
+      </Container>
     </div>
   );
 };

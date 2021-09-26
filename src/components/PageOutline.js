@@ -215,6 +215,8 @@ const PageOutlineList = (props) => {
           marginLeft: `${(props.level - 1) * 0.8}rem`,
           color: props.focus ? '#1976d2' : 'unset',
           fontWeight: props.focus ? 'bold' : 'inherit',
+          background: 'white',
+          boxShadow: '0px 0px 0.5rem 0.5rem white'
         }}
       >
         {props.showToc ? tocItem : 'i'}

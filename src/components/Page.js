@@ -238,7 +238,6 @@ const Page = (props) => {
 
   return (
     <div>
-      <div style={{ height: '100px', color: 'white' }}>debugOnly</div>
       <PageTitle uuid={uuid} />
       <div id={`geeke-editor-${uuid}`}>
         <Editor

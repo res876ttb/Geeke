@@ -28,7 +28,7 @@ const PageTitle = (props) => {
   // States & Reducers
   // const dispatch = useDispatch();
   // const state = useSelector(state => state.editor);
-  const [title, setTitle] = useState(EditorState.createWithContent(ContentState.createFromText('Untitled'))); // Create ContentState wit pure text: https://stackoverflow.com/a/35885589/6868122
+  const [title, setTitle] = useState(EditorState.createWithContent(ContentState.createFromText('Readme'))); // Create ContentState wit pure text: https://stackoverflow.com/a/35885589/6868122
 
   // Constants
   // const draggedBlockInfo = state.draggedBlock[uuid];
@@ -59,6 +59,9 @@ const PageTitle = (props) => {
       geeke-id={uuid}
       geeke-type="Title"
       depth={-1}
+      style={{
+        padding: '1.2rem 3rem 1.6rem',
+      }}
 
       // onDragEnter={e => draggableOnDragEnter(e, dispatch, uuid, uuid, draggedBlockInfo, false)}
       // onDrop={e => draggableOnDrop(e, dispatch, uuid, draggedBlockInfo, state)}
